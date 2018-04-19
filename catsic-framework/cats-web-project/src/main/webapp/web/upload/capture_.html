@@ -1,0 +1,423 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>SDK 演示</title>
+	</head>
+	<body onload ="AddDevice();AddDevice2();">
+		<p>
+			<OBJECT id="CmCaptureOcx" style="MARGIN-LEFT:5px; WIDTH: 42.4%; HEIGHT:60%" 
+			classid="clsid:3CA842C5-9B56-4329-A7CA-35CA77C7128D" > 		
+			</OBJECT>
+			<OBJECT id="CmCaptureOcx2" style="MARGIN-LEFT:5px; WIDTH: 42.4%; HEIGHT:60%" 
+			classid="clsid:3CA842C5-9B56-4329-A7CA-35CA77C7128D" > 		
+			</OBJECT>
+		</p>
+			<form name = "Reso">
+			主设备:
+				<select name="DeviceName" id = "DeviceName" onchange = "ChangeDevice()">
+					<option value="0"></option>
+					<option value="1"></option>
+					<option value="2"></option>
+					<option value="3"></option>
+					<option value="4"></option>
+				</select>
+			分辨率:
+				<select name="Resolution" id = "Resolution" onchange = "SetResolution()">
+					<option value="0">开启视频后获取分辨率</option>
+					<option value="1"></option>
+					<option value="2"></option>
+					<option value="3"></option>
+					<option value="4"></option>
+					<option value="5"></option>
+					<option value="6"></option>
+					<option value="7"></option>
+					<option value="8"></option>
+					<option value="9"></option>
+				</select>
+
+			图片格式:
+				<select name="FileType" id = "FileType" onchange = "SetFileType()">
+					<option value="0">bmp</option>
+					<option value="1">jpg</option>
+					<option value="2">tif</option>
+					<option value="3">png</option>
+				</select>
+			图片颜色:
+				<select name="ColourMode" id = "ColourMode" onchange = "SetImageColorMode()">
+					<option value="0">彩色</option>
+					<option value="1">灰度</option>
+					<option value="2">黑白</option>
+				</select>
+			<Span style="margin-left:50;">副设备:</Span>
+				<select name="DeviceName2" id = "DeviceName2" onchange = "ChangeDevice2()">
+					<option value="0"></option>
+					<option value="1"></option>
+					<option value="2"></option>
+					<option value="3"></option>
+					<option value="4"></option>
+				</select>
+			</form>			
+			<input id="SetState" type="checkbox" value="" onClick="SetState(this)" />单图裁切
+			<input id="SetMulState" type="checkbox" value="" onClick="SetMulState(this)" />多图裁切
+			<input id="SetCusState" type="checkbox" value="" onClick="SetCusState(this)" />手动裁切
+			<input id="SetDocument" type="checkbox" value="" onClick="SetDocument(this)" />文档优化
+			<input id="SetTextRotate" type="checkbox" value="" onClick="SetTextRotate(this)" />文字方向
+	<p>
+			<input type = "hidden" name = "URL" id = "URL" value = "http://172.16.168.58:8080/catsic/uploadFile">
+			条码/二维码识别结果:<textarea name="BarcodeMsg" id="BarcodeMsg" cols="40" rows="2" ></textarea>
+			<Span style="margin-left:30;">图片存储路径:</Span>
+			<input type="hidden" id = "SavePath" value ="C:\\test"/>
+			<p>
+			Base64编码:<textarea name="Base64Msg" id="Base64Msg" cols="80" rows="2" ></textarea>
+			<p>
+			<input type = "button" value = " 刷新视频 " onClick = "StartVideo();" name = "start">
+			<input type = "button" value = " 左转90度 " onClick = "LeftRotate();" name = "LeftRotate">
+			<input type = "button" value = " 右转90度 " onClick = "RightRotate();" name = "RightRotate">
+			<input type = "button" value = " 主头拍照 " onClick = "Capture();" name = "Capture">
+			<input type = "button" value = " 副头拍照 " onClick = "subCapture();" name = "subCapture">
+			<input type = "button" value = " 照片预览 " onClick = "Preview();" name = "Preview">
+			<input type = "button" value = "获取Base64码" onClick = "CaptureBase64();" name = "Capture64">
+			<p>
+			<input type = "button" value = "将所拍图片转为PDF" onClick = "ConvertToPDF();" name = "ConvertToPDF">
+			<input type = "button" value = " 条码/二维码识别 " onClick = "ReadBarCode();" name = "ReadBarCode">
+			<input type = "button" value = " 自动连拍 " onClick = "SeriesCapture();" name = "SeriesCapture">
+			<input type = "button" value = " 开始录像 " onClick = "StartVideoRecord();" name = "StartVideo">
+			<input type = "button" value = " 关闭录像 " onClick = "CmCaptureOcx.EndVideo();" name = "EndVideo">
+			<input type = "button" value = " 上传 " onClick = "UpdataFile();" name = "Updata">
+		</body>		
+			
+</html>
+<script type="text/javascript">
+var RotateIndex = 0;
+var nFileCount = 0;
+var bAdjustMode = 1;
+var bCropArea = 0;
+var bSeriesCapture = 0;
+var bReadBarCode=0;
+var Width = 0;
+var Height = 0;
+var strFile;
+var mainIndex = 0;
+var index = 0;
+var strCardFile;
+var cardIndex = 0;
+var index2 = 0;
+var subindex = 0;
+var lastImage="c:\\test\\Image0.bmp";
+var PrevoewfileName="c:\\test\\Image0.bmp";
+function Capture()
+{
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	obj=SavePath.value;
+	strFile = obj + "\\Image" + nFileCount;
+	if(index == 0)
+	{
+		strFile += ".bmp";
+	}
+	if(index == 1)
+	{
+		strFile += ".jpg";
+	}
+	if(index == 2)
+	{
+		strFile += ".tif";
+	}
+	if(index == 3)
+	{
+		strFile += ".png";
+	}
+	lastImage = strFile;
+	CmCaptureOcx.CaptureImage(strFile);
+	nFileCount ++;
+}
+
+function subCapture()
+{
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	obj=SavePath.value;
+	strFile = obj + "\\SubImage" + nFileCount;
+	if(index == 0)
+	{
+		strFile += ".bmp";
+	}
+	if(index == 1)
+	{
+		strFile += ".jpg";
+	}
+	if(index == 2)
+	{
+		strFile += ".tif";
+	}
+	if(index == 3)
+	{
+		strFile += ".png";
+	}
+	CmCaptureOcx2.CaptureImage(strFile);
+	nFileCount ++;
+}
+
+function CaptureBase64()
+{
+	document.getElementById("Base64Msg").value = "";
+	var baseMsg = CmCaptureOcx.CaptureToBase64();
+	document.getElementById("Base64Msg").value=baseMsg;
+}
+
+function UpdataFile()
+{
+	var Url = document.getElementById("URL").value;
+	//var result =CmCaptureOcx.UpdataFile(Url+"?fid="+fid+"&note="+encodeURI(encodeURI(note))+"&fileName="+strFile,strFile,true);
+	var result = CmCaptureOcx.UpdataFile(Url+"?fid=1&fileName="+strFile,strFile,0);
+	if(result=="1"){
+		alert("上传成功！");
+	}else{
+		alert("上传失败！");
+	}
+}
+
+function LeftRotate()
+{
+	RotateIndex++;
+	if (RotateIndex == 4)
+	{
+		RotateIndex = 0;
+	}
+	CmCaptureOcx.RotateVideo(RotateIndex);
+}
+
+function RightRotate()
+{
+	RotateIndex--;
+	if (RotateIndex == -1)
+	{
+		RotateIndex = 3;
+	}
+	CmCaptureOcx.RotateVideo(RotateIndex);
+}
+
+function Preview()
+{
+	CmCaptureOcx.PreviewFile(PrevoewfileName);
+}
+
+function SetResolution()
+{
+	var obj=document.getElementById("Resolution") ;
+	var index=obj.selectedIndex;
+	CmCaptureOcx.SetResolution(index);
+}
+
+function StartVideoRecord()
+{
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	obj=SavePath.value;
+	strFile = obj + "\\Video" + nFileCount +".wmv";
+	var path = strFile;
+	nFileCount ++;
+	CmCaptureOcx.StartVideo(path,1);
+}
+
+function SeriesCapture()
+{
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	obj=SavePath.value;
+	strFile = obj + "\\自动连拍\\";
+	CmCaptureOcx.SeriesCapture(1,strFile);
+}
+
+function ReadBarCode()
+{
+	var codeCount = CmCaptureOcx.GetCodeCount();
+	BarcodeMsg.value = "";
+	var str="识别结果:";
+	var i = 0;
+	for(i=0; i < codeCount; i++)
+	{
+		BarcodeMsg.value = BarcodeMsg.value + CmCaptureOcx.GetCodeString();
+		BarcodeMsg.value += " ";
+	}
+	
+}
+
+function SetFileType()
+{
+	var obj=document.getElementById("FileType") ;
+	var index=obj.selectedIndex;
+	CmCaptureOcx.SetFileType(index);
+}
+
+function SetImageColorMode()
+{
+	var obj=document.getElementById("ColourMode") ;
+	var index=obj.selectedIndex;
+	CmCaptureOcx.SetImageColorMode(index);
+}
+
+function StartVideo()
+{
+	mainIndex = CmCaptureOcx.Initial();
+	CmCaptureOcx.StartRun(mainIndex);
+	AddResolution2Comb(Reso);
+	SetResolution();
+	SetFileType();
+}
+
+function StartVideo2()
+{
+	var mainIndex = CmCaptureOcx2.Initial();
+	if(CmCaptureOcx2.GetDevCount() >= 2)
+	{
+		if(mainIndex == 0)
+		{
+			index2 = 1;
+		}
+		else if(mainIndex == 1)
+		{
+			index2 = 0;
+		}
+		else
+		{
+			index2 = CmCaptureOcx2.GetDevCount()-1-mainIndex;
+		}
+	}
+	CmCaptureOcx2.StartRun(index2);
+}
+
+function AddResolution2Comb(f)
+{
+	var total = CmCaptureOcx.GetResolutionCount();
+	for( i = 0 ; i < total ; i++ )
+	{
+		var resolution = CmCaptureOcx.GetResolution(i);
+		f.Resolution.options[i].text=resolution;
+	}
+}
+
+function ChangeDevice()
+{
+	var obj=document.getElementById("DeviceName") ;
+	index=obj.selectedIndex;
+	CmCaptureOcx.StartRun(index);
+	AddResolution2Comb(Reso);
+	SetResolution();
+}
+
+function ChangeDevice2()
+{
+	var obj=document.getElementById("DeviceName2") ;
+	index=obj.selectedIndex;
+	index = index + index2;
+	CmCaptureOcx2.StartRun(index);
+}
+
+function AddDevice()
+{
+	mainIndex = CmCaptureOcx.Initial();
+	var total = CmCaptureOcx.GetDevCount();
+	for( i = 0 ; i < total ; i++ )
+	{
+		var DevEle = CmCaptureOcx.GetDevFriendName(i);
+		Reso.DeviceName.options[i].text=DevEle;
+		if(i == mainIndex)
+		{
+			Reso.DeviceName.options[i].selected = true;
+		}
+	}
+}
+
+function AddDevice2()
+{
+	var mainCamera = CmCaptureOcx2.Initial();
+	var total = CmCaptureOcx2.GetDevCount();
+	for( i = 0 ; i < total ; i++ )
+	{
+		if(i == mainCamera)
+		{
+			continue;
+		}
+		var DevEle = CmCaptureOcx2.GetDevFriendName(i);
+		Reso.DeviceName2.options[index2].text=DevEle;
+		index2 = i;
+	}
+}
+
+function ConvertToPDF()
+{
+	CmCaptureOcx.AddPDFImageFile(lastImage);
+	var obj=SavePath.value;
+	strFile = obj + "\\PDF" + nFileCount +".pdf";
+	nFileCount ++;
+	CmCaptureOcx.Convert2PDF(strFile,0);
+}
+
+function SetState(obj)
+{
+	var statcrop = obj.checked;
+	CmCaptureOcx.AutoCrop(statcrop);
+}
+
+function SetMulState(obj)
+{
+	var statmulcrop = obj.checked;
+	if(statmulcrop)
+		CmCaptureOcx.SetCropMode(1);
+	else
+		CmCaptureOcx.SetCropMode(0);
+}
+
+function SetCusState(obj)
+{
+	var statcuscrop = obj.checked;
+	CmCaptureOcx.CusCrop(statcuscrop);
+}
+
+function SetDocument(obj)
+{
+	var statdocument = obj.checked;
+	CmCaptureOcx.DocumentEnhance(statdocument);
+}
+
+function SetTextRotate(obj)
+{
+	var stattextrotate = obj.checked;
+	CmCaptureOcx.TextRotate(stattextrotate);
+}
+
+/**
+*
+*解决 资源不足
+/
+function close_xx(){
+	CmCaptureOcx.Destory();
+}
+
+
+
+
+
+
+
+/**
+ * 二维码识别按钮
+ */
+
+setInterval("ReadBarCode()",1500);   //二维码扫描事件 1.5秒 自动执行一次
+
+function ReadBarCode(){
+	CmCaptureOcx.GetCodeString();
+	BarcodeMsg.value = "";
+	BarcodeMsg.value = BarcodeMsg.value + data.content;
+}
+</SCRIPT>
+<SCRIPT>
+setTimeout("StartVideo()",100);
+setTimeout("StartVideo2()",100);
+SetState.checked = true;
+</SCRIPT>
+<SCRIPT type="text/javascript" for="CmCaptureOcx" event="GetImageFileName(fileName);">
+PrevoewfileName = fileName;
+</SCRIPT>

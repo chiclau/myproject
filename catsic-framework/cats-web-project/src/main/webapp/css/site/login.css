@@ -1,0 +1,33 @@
+ *{font-family:"Microsoft YaHei","Î¢ÈíÑÅºÚ";word-spacing:8px; letter-spacing: 1px;}
+body,ul,li,.page,div{margin:0;padding:0;}
+a{text-decoration:none;}
+.f_l{float:left;}
+.f_r{float:right;}
+body{background-color:#1b56bd;overflow:hidden;}
+.footer{width:100%;height:52px;text-align:center;line-height:52px;color:white;font-size:14px;position:fixed;bottom:0px;}
+.content{width:1000px;height:580px;background-image:url(../../images/web/login_bg.png);background-repeat:no-repeat;position:absolute;left:50%;margin-left:-500px;top:60%;margin-top:-230px;}
+
+.header .h-content{position:absolute;left:50%;margin-left:-600px;top:60%;margin-top:-490px;z-index:100;overflow:hidden;width:1100px;}
+.header .logo{margin-left:150px;float:left;width:120px;height:124px;background-image:url(../../images/web/login-logo.png) ;background-repeat:no-repeat;margin-top:150px;} 
+.header .title{float:left;background-image:url(../../images/web/title.png);background-repeat:no-repeat;width:740px;height:95px;margin-top:190px;}
+
+.content .content-bg{margin: 0 auto;position:relative}
+.content .con-tit{width:100%;text-align:center;color:#fff;font-size:25px;font-weight:bolder;line-height:145px;height:70px;margin-left:-200px;}
+.content .con-form{width:470px;margin:0 auto;padding:40px;padding-top:50px;}
+
+.content .con-form label{display:block;float:left;width:70px;}
+.content .con-form .easyui-textbox{display:block;float:left;}
+.content .con-form .div_tr .textbox{margin-top:5px;}
+.content .div_tr{line-height:50px;overflow:hidden;margin-right:40px;}
+.content .sub{width:100%;margin-top:10px;position:relative;height:50px;}
+.content .login{background-image:url(../../images/web/submit.png);background-repeat:no-repeat;width:117px;height:50px;display:block;position:absolute;left:50%;margin-left:-80px;}
+.content .reset{height:30px;border:none;background:none;position:absolute;right:120px;margin-top:20px;}
+.content .reset:hover{color:red;text-decoration:underline;cursor:pointer;}
+.content .div_tr .f_r,.content .div_tr .f_l{margin:0 10px;}
+.required{height:35px;padding-left:10px;line-height:35px;width:90px;margin-top:5px;border-radius:5px;border:1px solid #95B8E7;box-shadow:none;float:left;}
+.imageF{height:35px;width:80px;float:left;margin-top:5px;margin-left:5px;}
+.div_code label{height:35px;line-height:35px;float:left;margin-top:5px;}
+.flashImage{float:left;margin-top:20px;margin-left:5px;}
+.div_code{overflow:hidden;}
+.remember-me{margin-top:22px;float:left;line-height:35px;margin-left:40px;}
+.remember-text{float:left;margin-top:20px;}

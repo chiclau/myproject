@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="cats-web-project"
+  id="myeclipse.1499062813512"
+  context-root="/cats-web-project"
+  j2ee-spec="1.7"
+  archive="cats-web-project.war">
+  <attributes>
+    <attribute name="webrootdir" value="src/main/webapp" />
+  </attributes>
+</project-module>
+

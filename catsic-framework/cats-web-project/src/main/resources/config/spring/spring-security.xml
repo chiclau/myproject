@@ -1,0 +1,487 @@
+<!-- 单个登录入口 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd
+          http://www.springframework.org/schema/security/oauth2
+          http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd" default-autowire="byName">
+    <security:http pattern="/login.jsp" security="none"/>
+    <security:http pattern="/imageCode.jsp" security="none" />
+    <security:http pattern="/mobile/login.html" security="none" />
+    <security:http pattern="/site/login.html" security="none" />
+    <security:http pattern="/common/**" security="none" />
+    <security:http pattern="/css/**" security="none" />
+    <security:http pattern="/images/**" security="none" />
+    <security:http pattern="/scripts/**" security="none" />
+    <security:http pattern="/web/cron/**" security="none" />
+    <security:http pattern="/services/**" security="none" />
+    <security:http pattern="/getCertificate" security="none" />
+    <security:http pattern="/cxf/test" security="none" />
+    <security:http pattern="/loginFailure" security="none" />
+    <security:http pattern="/logoutSuccess" security="none" />
+    	
+	<security:http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager"  
+      entry-point-ref="oauth2AuthenticationEntryPoint">  
+	    <security:intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>  
+	    <security:anonymous enabled="false"/>  
+	    <security:http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>  
+	  
+	    <security:custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>  
+	    <security:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	    <security:csrf disabled="true"/> 
+	</security:http>
+    
+   	<bean id="clientCredentialsTokenEndpointFilter"  
+            class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">  
+    	<property name="authenticationManager" ref="oauth2AuthenticationManager"/>  
+	</bean>
+    
+	<security:http use-expressions="false" pattern="/unity/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint"  
+	      access-decision-manager-ref="accessDecisionManager">  
+	    <security:anonymous enabled="false"/>  
+	  
+	    <security:intercept-url pattern="/unity/**" access="超级管理员,SCOPE_READ"/>  
+	    <security:custom-filter ref="unityResourceServer" before="PRE_AUTH_FILTER"/>  
+	    <security:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	    <security:csrf disabled="true"/> 
+	</security:http>  
+  
+	<security:http use-expressions="false" pattern="/m/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint"  
+	      access-decision-manager-ref="accessDecisionManager">  
+	    <security:anonymous enabled="false"/>  
+	  
+	    <security:intercept-url pattern="/m/**" access="超级管理员,SCOPE_READ"/>  
+	 
+	    <security:custom-filter ref="mobileResourceServer" before="PRE_AUTH_FILTER"/>  
+	    <security:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	    <security:csrf disabled="true"/>   
+	</security:http>
+	
+	<oauth2:resource-server id="unityResourceServer" resource-id="unity-resource" token-services-ref="tokenServices"/>  
+	  
+	<oauth2:resource-server id="mobileResourceServer" resource-id="mobile-resource" token-services-ref="tokenServices"/>
+    
+   	<bean id="clientDetailsService" class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">  
+    	<constructor-arg index="0" ref="dataSource"/>  
+	</bean>
+    
+	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">  
+    	<constructor-arg index="0" ref="dataSource"/>  
+	</bean>
+	
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">  
+    	<property name="tokenStore" ref="tokenStore"/>  
+    	<property name="supportRefreshToken" value="true"/>  
+	</bean>
+	
+    <bean class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory"
+                id="oAuth2RequestFactory">
+        <constructor-arg name="clientDetailsService" ref="clientDetailsService"/>
+    </bean>
+	
+	<bean id="oauthUserApprovalHandler" class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler"/>
+	<!--
+	<beans:bean id="oauthUserApprovalHandler" class="com.monkeyk.sos.web.oauth.OauthUserApprovalHandler">
+        <beans:property name="tokenStore" ref="tokenStore"/>
+        <beans:property name="clientDetailsService" ref="clientDetailsService"/>
+        <beans:property name="requestFactory" ref="oAuth2RequestFactory"/>
+        <beans:property name="oauthService" ref="oauthService"/>
+    </beans:bean> 
+    -->
+    <bean id="jdbcAuthorizationCodeServices"
+                class="org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+    
+    <oauth2:authorization-server client-details-service-ref="clientDetailsService" token-services-ref="tokenServices"  
+                             user-approval-handler-ref="oauthUserApprovalHandler">  
+    <oauth2:authorization-code authorization-code-services-ref="jdbcAuthorizationCodeServices"/>  
+    <oauth2:implicit/>  
+    <oauth2:refresh-token/>  
+    <oauth2:client-credentials/>  
+    <oauth2:password/>  
+	</oauth2:authorization-server>  
+	
+	<bean id="oauth2AuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/>
+	
+	<bean id="oauth2ClientDetailsUserService"  
+            class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">  
+    	<constructor-arg ref="clientDetailsService"/>  
+	</bean> 
+	
+	<security:authentication-manager id="oauth2AuthenticationManager" >  
+    	<security:authentication-provider user-service-ref="oauth2ClientDetailsUserService"/>  
+	</security:authentication-manager>
+	
+	<!-- <beans:bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+        <beans:constructor-arg>
+            <beans:list>
+                <beans:bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>
+                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>
+                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+            </beans:list>
+        </beans:constructor-arg>
+    </beans:bean> -->
+	
+	<bean id="oauth2AccessDeniedHandler"  
+            class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler"/>
+    <!--oauth2--> 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <!-- 摘要认证 开始-->
+    <security:http pattern="/services/rest/**" use-expressions="true" entry-point-ref="digestEntryPoint">
+        <security:custom-filter ref="digestFilter" position="BASIC_AUTH_FILTER" />
+    </security:http>
+    
+	<bean id="digestFilter"
+      class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+        <property name="userDetailsService" ref="userDigestService"/>
+        <property name="authenticationEntryPoint" ref="digestEntryPoint" />
+    </bean>
+    <security:user-service id="userDigestService">
+        <security:user name="catsicuser" password="catsicpassword" authorities="ROLE_USER" />
+    </security:user-service>
+    
+    <bean id="digestEntryPoint" 
+      class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+        <property name="realmName" value="www.jkj.catsic.com" />
+        <property name="key" value="acegi" />
+    </bean>
+    <!-- 摘要认证 结束-->
+    
+	<security:http use-expressions="false" disable-url-rewriting="true" entry-point-ref="loginUrlFilterEntryPoint" authentication-manager-ref="authenticationManager">
+		<security:headers disabled="true"/>
+		<security:csrf disabled="true"/>
+		<security:access-denied-handler error-page="/denied"/>
+		<!-- 管理端(后台) -->
+   	    <security:custom-filter before="FORM_LOGIN_FILTER" ref="adminUsernamePasswordAuthenticationFilter" />
+	    <security:custom-filter before="LOGOUT_FILTER"   ref="adminLogoutFilter"/>
+	    <!-- 网站端(前台) -->
+   	    <security:custom-filter after="FORM_LOGIN_FILTER" ref="siteUsernamePasswordAuthenticationFilter" />
+	    <security:custom-filter after="LOGOUT_FILTER"   ref="siteLogoutFilter"/>
+   	    <!-- 手机端nativeapp -->
+   	    <security:custom-filter before="BASIC_AUTH_FILTER" ref="nativeMobileUsernamePasswordAuthenticationFilter"/>
+	    <security:custom-filter after="BASIC_AUTH_FILTER" ref="nativeMobileLogoutFilter"/>
+	    <!-- 手机端webapp -->
+		<security:custom-filter before="CAS_FILTER"   ref="webMobileLogoutFilter"/>
+   	    <security:custom-filter after="CAS_FILTER"  ref="webMobileUsernamePasswordAuthenticationFilter"/>
+   	    <!-- 微信端 -->
+   	    <security:custom-filter before="SERVLET_API_SUPPORT_FILTER" ref="wechatUsernamePasswordAuthenticationFilter" />
+	    <security:custom-filter after="SERVLET_API_SUPPORT_FILTER"   ref="wechatLogoutFilter"/>
+		<!-- ipad -->
+    	<security:custom-filter before="OPENID_FILTER" ref="ipadUsernamePasswordAuthenticationFilter" />
+	    <security:custom-filter after="OPENID_FILTER"   ref="ipadLogoutFilter"/>
+		
+		<security:custom-filter ref="rememberMeFilter" position="REMEMBER_ME_FILTER"/>
+		<security:custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />  
+   		<!-- 证书登录：暂未实现证书登录错误的跳转页面，已实现取消（退出功能，修改密码）功能 -->
+		<security:custom-filter before="X509_FILTER" ref="x509Filter"/>  
+	    <!-- <security:custom-filter before="ANONYMOUS_FILTER" ref="anonymousAuthFilter"/> -->
+	    <security:custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
+	    <security:session-management session-authentication-strategy-ref="sessionAuthenticationStrategy"/>  
+		<security:intercept-url pattern="/web/certificate.jsp" requires-channel="https"/>
+		  
+        <!-- 双向认证已测试通过，单向认证未测试 -->
+        <security:port-mappings>
+        	<!-- http="8081" 8081为tomcat端口，根据实际需要修改 -->
+            <security:port-mapping http="8081" https="8443"/>  
+        </security:port-mappings>
+	</security:http>
+	
+	<bean name="loginUrlFilterEntryPoint" class="com.catsic.security.config.support.CatsicLoginUrlAuthenticationEntryPoint">
+	      <constructor-arg name="loginFormUrl" value="/login.jsp"></constructor-arg>
+	</bean>
+
+	<security:authentication-manager id="authenticationManager" >
+		<!-- <security:authentication-provider ref="anonymousAuthenticationProvider"/> -->
+		<security:authentication-provider ref="rememberMeAuthenticationProvider"/>
+		<security:authentication-provider ref="daoAuthenticationProvider" />
+		<security:authentication-provider ref="x509provider"/>
+	</security:authentication-manager>
+
+	<bean id="daoAuthenticationProvider"
+		class="com.catsic.security.authority.UserAuthenticationProvider">
+		<property name="hideUserNotFoundExceptions" value="false" />
+		<property name="userDetailsService" ref="userService" />
+	</bean>
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<property name="allowIfAllAbstainDecisions" value="false" />
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter"><property name="rolePrefix" value=""/></bean>
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+				<bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="userSecurityMetadataSource" />
+	</bean>
+	
+	<bean id="concurrencyFilter"  
+	    class="com.catsic.security.filter.CatsicConcurrentSessionFilter">  
+   	    <constructor-arg name="sessionRegistry" ref="sessionRegistry" /> 
+        <constructor-arg name="expiredUrl" value="/common/error.jsp"/>
+	</bean>
+	
+	<bean id="sessionAuthenticationStrategy"  
+	    class="com.catsic.security.session.CatsicConcurrentSessionControlStrategy">  
+	    <constructor-arg name="sessionRegistry" ref="sessionRegistry" />  
+	    <property name="maximumSessions" value="1" />  
+	    <property name="exceptionIfMaximumExceeded" value="false" />
+	</bean>  
+	<bean id="sessionRegistry" class="com.catsic.security.session.CatsicSessionRegistryImpl" />
+	
+	<bean id="rememberMeFilter" class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+		<constructor-arg name="rememberMeServices" ref="rememberMeServices"/>
+		<constructor-arg name="authenticationManager" ref="authenticationManager" />
+	</bean>
+	
+    <bean id="rememberMeServices" class="org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices">
+      <constructor-arg name="userDetailsService" ref="userService" />
+      <constructor-arg name="key" value="catsic" />
+      <property name="parameter" value="remember-me"/>
+      <constructor-arg name="tokenRepository">
+         <bean class="org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl">
+            <property name="dataSource" ref="dataSource"/>
+            <property name="createTableOnStartup" value="false"/>
+         </bean>
+      </constructor-arg>
+   </bean>
+	
+	<bean id="rememberMeAuthenticationProvider" class="org.springframework.security.authentication.RememberMeAuthenticationProvider">
+		<constructor-arg name="key" value="catsic" /> 
+	</bean>
+	
+   	<bean id="adminUsernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/web/index.jsp"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/login.jsp?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+        <!-- 获取所有登录用户信息 -->
+        <property name="sessionAuthenticationStrategy" ref="sessionAuthenticationStrategy"/>
+	</bean>
+	
+	<bean id="adminLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/login.jsp"/>
+	    <constructor-arg index="1">
+	        <list>
+	            <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        	<ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	</bean>
+	
+	<bean id="siteUsernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/site/index.html"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/site/login.html?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/site/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+	
+	<bean id="siteLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/site/login.html"/>
+	    <constructor-arg index="1">
+	        <list>
+	            <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        	<ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/site/logout"/>
+	</bean>
+	
+	<bean id="nativeMobileUsernamePasswordAuthenticationFilter"
+	      class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+	    <property name="authenticationManager" ref="authenticationManager"/>
+	    <property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler">
+				<constructor-arg name="forwardUrl" value="/loginSuccess"></constructor-arg>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/loginFailure"></property>
+				<property name="useForward" value="true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/nativemobile/login"/>
+	    <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+	
+	<bean id="nativeMobileLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/logoutSuccess"/><!-- 退出成功后，转向的URl -->
+	    <constructor-arg index="1">
+	        <list>
+	            <bean
+	                    class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	                    <ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/nativemobile/logout"/>
+	</bean>
+	
+	<bean id="webMobileUsernamePasswordAuthenticationFilter" class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/mobile/index.html"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/mobile/login.html?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/webmobile/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+	
+	<bean id="webMobileLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/mobile/login.html"/>
+	    <constructor-arg index="1">
+	        <list>
+	            <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        	<ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/webmobile/logout"/>
+	</bean>
+	
+	<bean id="wechatUsernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/wechat/index.html"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/wechat/login.html?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/wechat/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+	
+	<bean id="wechatLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/wechat/login.html"/>
+	    <constructor-arg index="1">
+	        <list>
+	            <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        	<ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/wechat/logout"/>
+	</bean>
+	
+	<bean id="ipadUsernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/ipad/index.html"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/ipad/login.html?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/ipad/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+	
+	<bean id="ipadLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/ipad/login.html"/>
+	    <constructor-arg index="1">
+	        <list>
+	            <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        	<ref bean="rememberMeServices" />
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/ipad/logout"/>
+	</bean>
+	
+	<bean id="x509Filter" class="org.springframework.security.web.authentication.preauth.x509.X509AuthenticationFilter">  
+        <property name="authenticationManager" ref="authenticationManager"></property>  
+        <property name="principalExtractor">  
+            <bean class="com.catsic.security.x509.SecurityX509PrincipalExtractor"></bean>  
+        </property>
+<!--         <property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/ipad/index.html"></property>
+				<property name="alwaysUseDefaultTargetUrl" value="true"></property>
+			</bean>
+		</property> -->
+		<!-- <property name="continueFilterChainOnUnsuccessfulAuthentication" value="false"></property> -->
+<!-- 		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/common/timeout.jsp"></property>
+			</bean>
+		</property> -->
+    </bean>
+    
+    <bean id="x509provider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">  
+        <property name="preAuthenticatedUserDetailsService" ref="securityAuthenticationUserDetailsService">  
+        </property>  
+        <property name="throwExceptionWhenTokenRejected" value="true"></property>  
+    </bean>
+
+	<bean id="anonymousAuthFilter"
+		class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+		<constructor-arg index="0" value="foobar" />
+		<constructor-arg index="1" value="anonymousUser" />
+		<constructor-arg index="2">
+			<list>
+				<bean
+					class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ANONYMOUS" />
+				</bean>
+			</list>
+		</constructor-arg>
+
+	</bean>
+
+	<bean id="anonymousAuthenticationProvider"
+		class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+		<constructor-arg name="key" value="foobar" />
+	</bean>
+</beans>

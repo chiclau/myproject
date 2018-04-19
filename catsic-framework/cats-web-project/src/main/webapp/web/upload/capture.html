@@ -1,0 +1,34 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>高拍仪上传</title>
+<style type="text/css">
+  #toolbar {
+			width:300px;
+			height: 80px;
+			margin-top:15px;
+			left:20%;
+			position:absolute;
+  }
+  
+</style>
+	<script type="text/javascript" src="../scripts/web/upload/capture.js"></script>
+	<script type="text/javascript"  src="../scripts/common/common.js"></script>	
+</head>
+
+<body>
+<div id="camera">
+    <object classid="clsid:49CBC347-34CD-4687-9D5C-C45E3D3314F0" id="CaptureOcx1" width="500" height="400">
+    </object>
+</div>
+<div id="toolbar">
+<input type="button" value="启用" name="B3" onclick="CaptureOcx1.Initialize();CaptureOcx1.Run(0);">
+<input type="button" value="拍照" name="B1" onclick="Capture()">
+<input type="button" value="上传" name="Upload"  Onclick="OcxUpdateImage();">
+<!-- <input type="button" value="合成PDF" name="PDF"  Onclick="ToPDF();"> -->
+<input type="button" value="禁用" name="B2" onclick="CaptureOcx1.Stop();">
+</div>
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<head>
+		<title>全国交通运输行政执法综合管理信息系统</title>
+		<script type="text/javascript" src="../scripts/common/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="../scripts/web/easyui/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="../scripts/web/easyui/locale/easyui-lang-zh_CN.js"></script>
+		<link type="text/css" rel="stylesheet" href="../scripts/web/easyui/themes/default/easyui.css" >
+		<link type="text/css" rel="stylesheet" href="../scripts/web/easyui/themes/icon.css">
+		<link type="text/css" rel="stylesheet" href="../css/site/catsic.css">
+		<link type="text/css" rel="stylesheet" href="../css/site/login.css">
+		<script type="text/javascript" src="../scripts/common/easyui.common.js" ></script>
+		<script type="text/javascript" src="../scripts/common/common.js"></script>
+		<script type="text/javascript" src="../scripts/site/login.js"></script>
+	</head>
+	<body>
+		<div class="page">
+			<div class="header">
+				<div class="h-content">
+					<div class="logo"></div>
+					<div class="title"></div>
+				</div>
+			</div>
+			<div class="content">
+				<div class="content-bg">
+				<div class="con-tit">用户登录</div>
+					<div class="con-form">
+						<form action="login" method = "post" id="loginform">
+							<div class="div_tr">
+								<label>用户名：</label><input id="username" name="username" value=""  class="easyui-textbox" style="width:350px;height:40px;padding:12px" data-options="prompt:'Username',iconCls:'icon-man',iconWidth:38"/>
+							</div>
+							<div class="div_tr">
+								<label> 密&nbsp;码：</label><input id="password" name="password" class="easyui-textbox" type="password" style="width:350px;height:40px;padding:12px" data-options="prompt:'Password',iconCls:'icon-lock',iconWidth:38"/>
+							</div>
+                            <div class="div_code"> <label>验证码: </label>
+		                        <input type='text' id="captcha" name='captcha' class="required"  size='5' />  
+		                        <img id="imageF" class="imageF" src="../imageCode.jsp" />  
+		                        <a href="#" id="flashImage" class="flashImage">换一张</a>  
+		                        <input type="checkbox" class="remember-me" name="remember-me">
+		                      	<span class="remember-text">记住用户名</span>
+		                    </div>   
+							<div class="sub div_tr">
+								<a id="login" class="login" href="javascript:void(0)"></a>
+								<input class="reset" type="reset" value="重置" >
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="footer">Copyright&copy;版权所有</div>
+		</div>
+	</body>
+	<!-- <c:if test="${param.error == true && !empty sessionScope.SPRING_SECURITY_LAST_EXCEPTION.message}">
+		 <script>
+		 	message("${sessionScope.SPRING_SECURITY_LAST_EXCEPTION.message}");
+		 </script>
+	</c:if> -->
+</html>

@@ -1,0 +1,162 @@
+数据库服务器：
+	安装oracle11g
+	增加oracle的连接数为1000，执行语句
+	alter system set processes = 1000 scope = spfile;--修改最大连接数
+	重启oracle所有服务，
+	用sys管理员账户（plsql）登录，查询是否配置成功
+	select value from v$parameter where name = 'processes'
+	select value from v$parameter where name = 'sessions'
+应用服务器：
+	FTP说明：
+	配置FTP参考：FTP安装.docx ，FTP用户名，密码要与操作系统一致
+	部署说明：
+	安装jdk、tomcat；配置tomcat内存、
+	tomcat内存修改，windows环境将bin\configtest.bat第一行修改为，一般为系统内存的1/3多
+	云南测试环境：
+	set JAVA_OPTS=-server -Xms5120m -Xmx20480m -XX:PermSize=512M -XX:MaxPermSize=5120m -Xss256K -XX:ParallelGCThreads=16 -XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=0 -XX:+CMSClassUnloadingEnabled -XX:LargePageSizeInBytes=128M -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=73 -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+PrintClassHistogram -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:logs/gc.log
+	云南正式环境：
+	set JAVA_OPTS=-server -Xms5120m -Xmx20480m -XX:PermSize=512M -XX:MaxPermSize=5120m -Xss256K -XX:ParallelGCThreads=64 -XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=0 -XX:+CMSClassUnloadingEnabled -XX:LargePageSizeInBytes=128M -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=50 -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+PrintClassHistogram -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:logs/gc.log
+
+	tomcat配置修改，server.xml
+	<Executor name="tomcatThreadPool" namePrefix="catsic" maxThreads="3000" minSpareThreads="50" maxIdleTime="60000"/>
+	<Connector executor="tomcatThreadPool" port="8080" enableLookups="false"  acceptCount="2000" connectionTimeout="60000" 
+		protocol="HTTP/1.1" redirectPort="8443"  maxKeepAliveRequests="200"/>
+
+执行脚本：创建表空间（共有三个表空间，用户需要创建，分别是创建表空间、案件接入表空间、户车人表空间）
+
+dmp与sql方式只需要选择一种凡是就可以了
+dmp导入方式：
+导入： imp system/密码@orcl file=d:\catsic.dmp ignore=y fromuser=catsic touser=catsic
+执行个性化sql语句
+
+
+
+
+
+脚本执行方式：
+用catsic账户登录plsql，执行定时器oracle版本脚本。
+构建项目，项目打包，拷贝到tomcat目录下，启动tomcat（自动创建表），无需手动创建表
+
+脚本执行顺序：抽屉表、init20150417、机构环节；如果需要使用案件子系统则还需要执行部省两级的法规、法条、违法行为、自由裁量权脚本
+
+使用admin登录系统初始密码是12345678，配置机构环节文书（选中交通运输部，点击全部复制），启动运行定时器（立即运行一次按钮）
+
+创建catsic省管理员角色，账号，点击
+
+使用law/law登录plsql，查看select * from per_imp_organ t order by jb desc ，jb是否正确，一般不会超过7级 交通部0，省级1、市级2，县级3，一次类推
+配置定时器：获取机构人员（必配），案件接入（前置机需要）
+
+
+现已部署省份：江苏（需要评议考核子系统）、云南（所有）、广东（需要评议考核子系统）
+
+部署项目，启动tomcat后，打开jdk安装目录的jconsle.exe文件，监控tomcat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+导出：exp system/orcl@orcl file=catsic.dmp owner=catsic
+现在系统有多少连接数
+select count(*) from v$process 
+查看连接数参数的设置情况
+select value from v$parameter where name = 'processes'
+Select count(*) from v$session where status='ACTIVE'　#并发连接数
+
+alter system set processes = 2000 scope = spfile;--修改最大连接数:
+
+alter system set sessions=335 scope=spfile; --修改session数
+
+改processes和sessions值必须重启oracle服务器才能生效
+
+　　ORACLE的连接数(sessions)与其参数文件中的进程数(process)有关，它们的关系如下：
+
+　　sessions=(1.1*process+5)
+
+
+
+查询数据库当前进程的连接数：
+
+　　select count(*) from v$process;
+
+　　查看数据库当前会话的连接数：
+
+　　select count(*) from v$session;
+
+　　查看数据库的并发连接数：
+
+　　select count(*) from v$session where status='ACTIVE';
+
+　　查看当前数据库建立的会话情况：
+
+　　select sid,serial#,username,program,machine,status from v$session;
+
+　  查询数据库允许的最大连接数：
+
+　　select value from v$parameter where name = 'processes';
+
+　　或者：show parameter processes;
+
+　　修改数据库允许的最大连接数：
+
+　　alter system set processes = 300 scope = spfile;
+
+　　(需要重启数据库才能实现连接数的修改)
+
+查看当前数据库建立的会话情况
+select sid,serial#,username,program,machine,status from v$session; 
+
+update s_user set failure_count =0 ,last_login=to_date('2015-09-20 20:20:20','yyyy-mm-dd hh24:mi:ss') where id='1'
+
+-Xmx的值和-XX:MaxPermSize的总和不得超过超过JVM内存的最大限制，必须小于系统物理内存
+-XX:CMSInitiatingOccupancyFraction=73 值的计算公式CMSInitiatingOccupancyFraction <=((Xmx-Xmn)-(Xmn-Xmn/(SurvivorRatior+2)))/(Xmx-Xmn)*100，CMSInitiatingOccupancyFraction低于70% 需要调整xmn或SurvivorRatior值，一般都是调整xmn
+
+-server:一定要作为第一个参数，在多个CPU时性能佳 
+-Xms：java Heap初始大小。 默认是物理内存的1/64。
+-Xmx：java heap最大值。建议均设为物理内存的一半。不可超过物理内存。
+ 
+
+-XX:PermSize:设定内存的永久保存区初始大小，缺省值为64M。（我用visualvm.exe查看的）
+-XX:MaxPermSize:设定内存的永久保存区最大 大小，缺省值为64M。（我用visualvm.exe查看的）
+ 
+-XX:SurvivorRatio=2  :生还者池的大小,默认是2，如果垃圾回收变成了瓶颈，您可以尝试定制生成池设置
+ 
+-XX:NewSize: 新生成的池的初始大小。 缺省值为2M。
+-XX:MaxNewSize: 新生成的池的最大大小。   缺省值为32M。
+如果 JVM 的堆大小大于 1GB，则应该使用值：-XX:newSize=640m -XX:MaxNewSize=640m -XX:SurvivorRatio=16，或者将堆的总大小的 50% 到 60% 分配给新生成的池。调大新对象区，减少Full GC次数。
+
+-XX:+UseParallelGC：选择垃圾收集器为并行收集器。此配置仅对年轻代有效。即上述配置下，年轻代使用并发收集，而年老代仍旧使用串行收集。 
+-XX:ParallelGCThreads=20：配置并行收集器的线程数，即：同时多少个线程一起进行垃圾回收。此值最好配置与处理器数目相等。 
+-XX:+UseParallelOldGC：配置年老代垃圾收集方式为并行收集。JDK6.0支持对年老代并行收集 
+-XX:MaxGCPauseMillis=100:设置每次年轻代垃圾回收的最长时间，如果无法满足此时间，JVM会自动调整年轻代大小，以满足此值。 
+-XX:+UseAdaptiveSizePolicy
+
+以下为系统内存64G，tomcat配置了40G内存
+set JAVA_OPTS=-server -Xms10g -Xmx40g -XX:PermSize=512M -Xss256K -XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=0 -XX:+CMSClassUnloadingEnabled -XX:LargePageSizeInBytes=128M -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=73 -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+PrintClassHistogram -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:log/gc.log
+--set JAVA_OPTS=-server -Xms10g -Xmx40g -Xmn10g -XX:PermSize=512M -XX:MaxPermSize=10g -Xss256K -XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=0 -XX:+CMSClassUnloadingEnabled -XX:LargePageSizeInBytes=128M -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=73 -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+PrintClassHistogram -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintHeapAtGC -Xloggc:log/gc.log
+
+<Executor name="tomcatThreadPool" namePrefix="catsic" maxThreads="1000" minSpareThreads="1" maxIdleTime="10000"/>
+<Connector executor="tomcatThreadPool" port="8080" enableLookups="false"  acceptCount="100" connectionTimeout="10000" 
+	protocol="HTTP/1.1" redirectPort="8443"  maxKeepAliveRequests="1"/>
+
+重要参数说明：
+acceptCount：指定当所有可以使用的处理请求的线程数都被使用时，可以放到处理队列中的请求数，超过这个数的请求将不予处理。
+executor：表示使用该参数值对应的线程池；
+name：共享线程池的名字。这是Connector为了共享线程池要引用的名字，该名字必须唯一。默认值：None；
+namePrefix:在JVM上，每个运行线程都可以有一个name 字符串。这一属性为线程池中每个线程的name字符串设置了一个前缀，Tomcat将把线程号追加到这一前缀的后面。默认值：tomcat-exec-；
+maxThreads：该线程池可以容纳的最大线程数。默认值：200；
+maxIdleTime：在Tomcat关闭一个空闲线程之前，允许空闲线程持续的时间(以毫秒为单位)。只有当前活跃的线程数大于minSpareThread的值，才会关闭空闲线程。默认值：60000(一分钟)。
+minSpareThreads：Tomcat应该始终打开的最小不活跃线程数。默认值：25。
+threadPriority：线程的等级。默认是Thread.NORM_PRIORITY
+maxKeepAliveRequests="1"禁用长连接
+	

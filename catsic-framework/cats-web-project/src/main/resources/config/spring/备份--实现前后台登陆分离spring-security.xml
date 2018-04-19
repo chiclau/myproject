@@ -1,0 +1,163 @@
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security-4.0.xsd" default-autowire="byName">
+    <security:http pattern="/services/**" security="none" />
+	<security:http pattern="/login.jsp" security="none" />
+	<security:http pattern="/imageCode.jsp" security="none" />
+    <security:http pattern="/common/**" security="none" />
+    <security:http pattern="/css/**" security="none" />
+    <security:http pattern="/images/**" security="none" />
+    <security:http pattern="/scripts/**" security="none" />
+    <security:http pattern="/mobile/**" security="none" />
+    <security:http pattern="/cron/**" security="none" />
+    <security:http pattern="/wechat/**" security="none" />
+	<security:http auto-config="false" use-expressions="true" entry-point-ref="loginUrlFilterEntryPoint" disable-url-rewriting="true" >
+		<security:headers disabled="true"/>
+		<security:csrf disabled="true"/>
+		<security:access-denied-handler error-page="/denied"/>
+	    <!-- **表示可以跨越目录，*不可以跨越
+		<security:intercept-url pattern="/**" access="ROLE_USER" />  此定义表示所有资源需要ROLE_USRER角色才可访问-->
+		
+		<!-- 允许匿名用户访问 -->
+		<!-- <security:intercept-url pattern="/demo/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/> -->
+		
+		<!-- 超级管理员可以访问所有资源 -->
+		<!-- <security:intercept-url pattern="/**"   access="hasRole('超级管理员')" />   -->
+		
+		<!--login-page:默认指定的登录页面 authentication-failure-url:登陆出错后转向的URL default-target-url:登陆成功后跳转向的URL -->
+		<!-- <security:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp" default-target-url="/loginSuccess"/> -->
+		
+		<!--invalidate-session：退出系统时是否要销毁session logout-success-url：退出系统后转向的URL 
+			logout-url：指定了用于响应退出系统请求的URL，其默认值为：/j_spring_security_logout -->
+		<!-- <security:logout invalidate-session="true" logout-success-url="/login.jsp" logout-url="/j_spring_security_logout" /> -->
+	    <!-- 登录过滤器 -->
+   	    <security:custom-filter before="FORM_LOGIN_FILTER" ref="frontLoginFilter"/>
+	    <security:custom-filter position="FORM_LOGIN_FILTER" ref="adminLoginFilter" />
+	    <!-- 注销过滤器 -->
+	    <security:custom-filter before="LOGOUT_FILTER" ref="frontLogoutFilter"/>
+	    <security:custom-filter position="LOGOUT_FILTER" ref="adminLogoutFilter"/>
+   		<!--max-sessions:允许用户帐号登录的次数,用户只能登录一次 expired-url:session失效后转向的URL exception-if-maximum-exceeded:默认为false，此值表示：用户第二次登录时，前一次的登录信息都被清空,为true时系统会拒绝第二次登录 -->
+		<security:session-management invalid-session-url="/login.jsp">
+			<security:concurrency-control max-sessions="1" error-if-maximum-exceeded="false" />
+		</security:session-management>
+		<!-- <security:custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" /> -->
+		<security:custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" /> 
+	</security:http>
+	
+	<!-- 用户登陆 -->
+	<bean id="adminLoginFilter"
+	      class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+	    <property name="authenticationManager" ref="authenticationManager"/>
+	    <property name="filterProcessesUrl" value="/login"/>
+	    <property name="authenticationFailureHandler" ref="adminFailureHandler"/>
+	    <property name="authenticationSuccessHandler" ref="adminSuccessHandler"/>
+	</bean>
+	
+	<!-- 登录成功处理 -->
+	<bean id="adminSuccessHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+	    <property name="alwaysUseDefaultTargetUrl" value="true"/>
+	    <property name="defaultTargetUrl" value="/web/index.jsp"/>
+	</bean>
+	
+	<!--登录失败处理-->
+	<bean id="adminFailureHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+	    <property name="defaultFailureUrl" value="/login.jsp?error=true"/>
+	</bean>
+	
+	<!-- 用户注销 -->
+	<bean id="adminLogoutFilter"  class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/login.jsp"/><!-- 退出成功后，转向的URl -->
+	    <constructor-arg index="1">
+	        <list>
+	            <bean
+	                    class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/logout"/>
+	</bean>
+	
+	<bean name="loginUrlFilterEntryPoint"
+	      class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+	      <constructor-arg><value>/login.jsp</value></constructor-arg>
+	</bean>
+	
+	
+	
+	<!-- 管理系统 用户登陆 -->
+	<bean id="frontLoginFilter"
+	      class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+	    <property name="authenticationManager" ref="authenticationManager"/>
+	    <property name="filterProcessesUrl" value="/admin/login"/>
+	    <property name="authenticationFailureHandler" ref="frontFailureHandler"/>
+	    <property name="authenticationSuccessHandler" ref="frontSuccessHandler"/>
+	</bean>
+	  
+	<!-- 管理系统 登录成功处理 -->
+	<bean id="frontSuccessHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+	    <property name="alwaysUseDefaultTargetUrl" value="true"/>
+	    <property name="defaultTargetUrl" value="/web/admin/index.jsp"/>
+	</bean>
+	
+	<!--管理系统 登录失败处理-->
+	<bean id="frontFailureHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+	    <property name="defaultFailureUrl" value="/admin.jsp"/>
+	</bean>
+	
+	<!-- 管理系统 用户注销 -->
+	<bean id="frontLogoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+	    <constructor-arg index="0" value="/admin.jsp"/><!-- 退出成功后，转向的URl -->
+	    <constructor-arg index="1">
+	        <list>
+	            <bean
+	                    class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+	        </list>
+	    </constructor-arg>
+	    <property name="filterProcessesUrl" value="/admin/logout"/>
+	</bean>
+
+	<!-- 验证配置: ， 认证管理器，实现用户认证的入口，主要实现UserDetailsService接口即可 查询用户 -->
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider ref="daoAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<!-- 认证用户: 为了注入加密盐 -->
+	<bean id="daoAuthenticationProvider"
+		class="com.catsic.web.authority.UserAuthenticationProvider">
+		<property name="hideUserNotFoundExceptions" value="false" />
+		<property name="userDetailsService" ref="userService" /> 		<!-- 主要实现UserDetailsService接口即可，查询用户和权限 -->
+		<!-- <property name="passwordEncoder" ref="passwordEncoder" /> -->       <!-- 密码加密方式 -->
+		<!-- <property name="saltSource" ref="saltSource" /> -->                 <!-- 注入加密盐 -->
+	</bean>
+
+	<!-- AffirmativeBased表示只要有一个Voter通过权限要求，就可以访问 -->
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<!-- 是否允许所有的投票者弃权,如果为false，表示如果所有的投票者弃权，就禁止访问 -->
+		<property name="allowIfAllAbstainDecisions" value="false" />
+		<constructor-arg>
+			<list>
+				<!-- RoleVoter用来验证角色 ,默认角色名称都要以ROLE_开头，否则不会被计入权限控制，如果要修改前缀，可以通过对rolePrefix属性进行修改 -->
+				<bean class="org.springframework.security.access.vote.RoleVoter"><property name="rolePrefix" value=""/></bean>
+				<!-- <bean class="org.springframework.security.web.access.expression.WebExpressionVoter"></bean>-->
+				<!-- 与RoleVoter属于同级,AuthenticatedVoter用于判断ConfigAttribute上是否拥有IS_AUTHENTICATED_FULLY，IS_AUTHENTICATED_REMEMBERED或IS_AUTHENTICATED_ANONYMOUSLY之类的配置 -->
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<!--使用Spring security3提供的过滤器,并将过滤器默认的认证和授权组件替换为我们已经定义的认证和授权组件 -->
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="userSecurityMetadataSource" />
+	</bean>
+	
+</beans>

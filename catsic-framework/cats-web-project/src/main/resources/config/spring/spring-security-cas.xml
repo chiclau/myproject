@@ -1,0 +1,142 @@
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd" default-autowire="byName">
+    <security:http pattern="/services/**" security="none" />
+	<security:http pattern="/login.jsp" security="none" />
+	<security:http pattern="/imageCode.jsp" security="none" />
+    <security:http pattern="/common/**" security="none" />
+    <security:http pattern="/css/**" security="none" />
+    <security:http pattern="/images/**" security="none" />
+    <security:http pattern="/scripts/**" security="none" />
+    <security:http pattern="/cron/**" security="none" />
+	<security:http auto-config="false" use-expressions="true" disable-url-rewriting="true" entry-point-ref="casEntryPoint">
+		<security:headers disabled="true"/>
+		<security:csrf disabled="true"/>
+		<security:access-denied-handler error-page="/denied"/>
+		<security:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp" default-target-url="/loginSuccess"/>
+		<security:logout invalidate-session="true" logout-success-url="http://localhost:8081/cas/logout" logout-url="/logout" />
+		<security:custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" /> 
+		<security:custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />  
+	    <security:session-management session-authentication-strategy-ref="sessionAuthenticationStrategy" invalid-session-url="/common/error.jsp"/>  
+		<!-- 单点登录 -->
+		<security:custom-filter position="CAS_FILTER" ref="casFilter" />
+		<security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>
+		<security:custom-filter ref="singleLogoutFilter" before="CAS_FILTER"/>
+	</security:http>
+	
+	<security:authentication-manager id="daoAuthenticationProviderManager">
+		<security:authentication-provider ref="daoAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="daoAuthenticationProvider"
+		class="com.catsic.web.authority.UserAuthenticationProvider" >
+		<property name="hideUserNotFoundExceptions" value="false" />
+		<property name="userDetailsService" ref="userService" />
+		<!-- <property name="passwordEncoder" ref="passwordEncoder" /> -->
+	</bean>
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<property name="allowIfAllAbstainDecisions" value="false" />
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter"><property name="rolePrefix" value=""/></bean>
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="userSecurityMetadataSource" />
+	</bean>
+	
+	<bean id="concurrencyFilter" class="org.springframework.security.web.session.ConcurrentSessionFilter"> 
+	    <constructor-arg name="sessionRegistry" ref="sessionRegistry" /> 
+        <constructor-arg name="expiredUrl" value="/common/error.jsp"/>
+	</bean>  
+	<bean id="sessionAuthenticationStrategy"  
+	    class="com.catsic.web.session.CatsicConcurrentSessionControlStrategy">  
+	    <constructor-arg name="sessionRegistry"  
+	        ref="sessionRegistry" />  
+	    <property name="maximumSessions" value="1" />  
+	    <property name="exceptionIfMaximumExceeded" value="false" />
+	</bean>  
+	<bean id="sessionRegistry" class="com.catsic.web.session.CatsicSessionRegistryImpl" />
+	
+	<bean id="serviceProperties" class="org.springframework.security.cas.ServiceProperties">
+		<property name="service" value="http://localhost:8082/catsic/login/cas"/>
+		<property name="sendRenew" value="false"/>
+	</bean>
+
+	<bean id="casFilter"
+		class="org.springframework.security.cas.web.CasAuthenticationFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<!-- <property name="filterProcessesUrl" value="/web/login/cas"/> -->
+	    <property name="authenticationFailureHandler" ref="failureHandler"/>
+	    <property name="authenticationSuccessHandler" ref="successHandler"/>
+	</bean>
+
+	<bean id="casEntryPoint"
+		class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+		<property name="loginUrl" value="http://localhost:8081/cas/login" />
+		<property name="serviceProperties" ref="serviceProperties" />
+	</bean>
+
+	<security:authentication-manager id="casAuthenticationProviderManager">
+		<security:authentication-provider ref="casAuthenticationProvider"/>
+	</security:authentication-manager>
+	
+	<bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager" >  
+	    <constructor-arg>
+			<list>
+				<ref bean="casAuthenticationProvider"/>
+				<ref bean="daoAuthenticationProvider"/>
+			</list>
+		</constructor-arg>
+	</bean>  
+	<bean id="casAuthenticationProvider"
+		class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
+		<property name="authenticationUserDetailsService">
+			<bean
+				class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+				<constructor-arg ref="userService" />
+			</bean>
+		</property>
+		<property name="serviceProperties" ref="serviceProperties" />
+		<property name="ticketValidator">
+			<bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+				<constructor-arg index="0" value="http://localhost:8081/cas" />
+			</bean>
+		</property>
+		<property name="key" value="an_id_for_this_auth_provider_only" />
+	</bean>
+	
+	<bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>
+	
+	<bean id="requestSingleLogoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
+		<constructor-arg value="http://localhost:8081/cas/logout"/>
+		<constructor-arg>
+			<bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+		</constructor-arg>
+		<property name="filterProcessesUrl" value="/logout/cas"/>
+	</bean>
+	
+	<!-- 登录成功处理 -->
+	<bean id="successHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+	    <property name="alwaysUseDefaultTargetUrl" value="true"/>
+	    <property name="defaultTargetUrl" value="/web/index.jsp"/>
+	</bean>
+	
+	<!--登录失败处理-->
+	<bean id="failureHandler"
+	      class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+	    <property name="defaultFailureUrl" value="/login.jsp?error=true"/>
+	</bean>
+</beans>

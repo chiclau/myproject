@@ -1,0 +1,129 @@
+<!-- 单个登录入口 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd" default-autowire="byName">
+    <security:http pattern="/login.jsp" security="none" />
+    <security:http pattern="/common/**" security="none" />
+    <security:http pattern="/css/**" security="none" />
+    <security:http pattern="/images/**" security="none" />
+    <security:http pattern="/scripts/**" security="none" />
+    <security:http pattern="/web/cron/**" security="none" />
+    <security:http pattern="/services/**" security="none" />
+    <security:http pattern="/web/ftp/add.html" security="none" />
+    
+	<security:http auto-config="false" use-expressions="true" disable-url-rewriting="true" entry-point-ref="loginUrlFilterEntryPoint">
+		<security:headers disabled="true"/>
+		<security:csrf disabled="true"/>
+		<security:access-denied-handler error-page="/denied"/>
+		<security:remember-me  data-source-ref="dataSource" token-validity-seconds="1209600" remember-me-parameter="remember-me" />
+		<!-- <security:form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?error=true" default-target-url="/web/index.jsp"/> -->
+		<security:logout invalidate-session="true" logout-success-url="/login.jsp" logout-url="/logout" delete-cookies="JSESSIONID"/>
+		<security:custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
+		<security:custom-filter ref="rememberMeFilter" before="REMEMBER_ME_FILTER"/>
+		<security:custom-filter ref="usernamePasswordAuthenticationFilter" before="FORM_LOGIN_FILTER"/>
+		<security:custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrencyFilter" />  
+	    <security:session-management session-authentication-strategy-ref="sessionAuthenticationStrategy" invalid-session-url="/common/error.jsp"/>  
+	</security:http>
+	
+	<!-- 代替login-page="/login.jsp" 定义登录界面 -->
+	<bean name="loginUrlFilterEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg name="loginFormUrl" value="/login.jsp"></constructor-arg>
+	</bean>
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider ref="rememberMeAuthenticationProvider"/>
+		<security:authentication-provider ref="daoAuthenticationProvider" />
+	</security:authentication-manager>
+
+	<bean id="daoAuthenticationProvider"
+		class="com.catsic.security.authority.UserAuthenticationProvider">
+		<property name="hideUserNotFoundExceptions" value="false" />
+		<property name="userDetailsService" ref="userService" />
+	</bean>
+
+	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+		<property name="allowIfAllAbstainDecisions" value="false" />
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter"><property name="rolePrefix" value=""/></bean>
+				<bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<property name="securityMetadataSource" ref="userSecurityMetadataSource" />
+	</bean>
+	
+	<bean id="concurrencyFilter"  
+	    class="com.catsic.security.filter.CatsicConcurrentSessionFilter">  
+   	    <constructor-arg name="sessionRegistry" ref="sessionRegistry" /> 
+        <constructor-arg name="expiredUrl" value="/common/error.jsp"/>
+	</bean>
+	
+	<bean id="sessionAuthenticationStrategy"  
+	    class="com.catsic.security.session.CatsicConcurrentSessionControlStrategy">  
+	    <constructor-arg name="sessionRegistry" ref="sessionRegistry" />  
+	    <property name="maximumSessions" value="1" />  
+	    <property name="exceptionIfMaximumExceeded" value="false" />
+	</bean>  
+	<bean id="sessionRegistry" class="com.catsic.security.session.CatsicSessionRegistryImpl" />
+	
+	<bean id="rememberMeFilter" class="org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter">
+		<constructor-arg name="rememberMeServices" ref="rememberMeServices"/>
+		<constructor-arg name="authenticationManager" ref="authenticationManager" />
+	</bean>
+	
+	<!-- <bean id="rememberMeServices" class="org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices">
+		<constructor-arg name="userDetailsService" ref="userService"/>
+		<constructor-arg name="key" value="catsic" /> 
+	</bean> -->
+	
+    <bean id="rememberMeServices" class="org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices">
+      <constructor-arg name="userDetailsService" ref="userService" />
+      <constructor-arg name="key" value="catsic" />
+      <!-- 指定request中包含的用户是否选择了记住我的参数名 -->
+      <property name="parameter" value="remember-me"/>
+      <!-- 指定PersistentTokenRepository -->
+      <constructor-arg name="tokenRepository">
+         <bean class="org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl">
+            <!-- 数据源 -->
+            <property name="dataSource" ref="dataSource"/>
+            <!-- 是否在系统启动时创建持久化token的数据库表 -->
+            <property name="createTableOnStartup" value="false"/>
+         </bean>
+      </constructor-arg>
+   </bean>
+	
+	<bean id="rememberMeAuthenticationProvider" class="org.springframework.security.authentication.RememberMeAuthenticationProvider">
+		<constructor-arg name="key" value="catsic" /> 
+	</bean>
+	
+	<!-- <bean id="usernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+      <property name="authenticationManager" ref="authenticationManager"/>
+      <property name="filterProcessesUrl" value="/login"/>
+      <property name="rememberMeServices" ref="rememberMeServices"/>
+    </bean> -->
+    <!-- 代替authentication-failure-url="/login.jsp?error=true" default-target-url="/web/index.jsp" -->
+   	<bean id="usernamePasswordAuthenticationFilter" class="com.catsic.security.filter.CatsicUsernamePasswordAuthenticationFilter">
+		<property name="authenticationManager"  ref="authenticationManager"></property>
+		<property name="authenticationSuccessHandler">
+			<bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+				<property name="defaultTargetUrl" value="/web/index.jsp"></property>
+			</bean>
+		</property>
+		<property name="authenticationFailureHandler">
+			<bean class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<property name="defaultFailureUrl" value="/login.jsp?error=true"></property>
+			</bean>
+		</property>
+		<property name="filterProcessesUrl" value="/login"/>
+        <property name="rememberMeServices" ref="rememberMeServices"/>
+	</bean>
+</beans>

@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!-- This configuration file was written by the eclipse-cs plugin configuration 
+	editor -->
+<!-- Checkstyle-Configuration: JENKIS Description: none -->
+
+<module name="Checker">
+	<property name="severity" value="warning" />
+
+	<!-- 文件长度不超过2000行,default2000行 -->
+	<module name="FileLength">
+		<property name="max" value="2000" />
+		<message key="maxLen.file" value="文件 {0,number,integer} 行 （最多：{1,number,integer} 行）。"/>
+	</module>
+
+	<module name="RegexpMultiline">
+		<property name="format" value="System\.(out)|(err)\.print(ln)?\(" />
+	</module>
+
+	<module name="TreeWalker">
+		<!-- javadoc的检查 -->
+		<!-- 检查所有的interface和class,允许未知的标签 -->
+		<module name="JavadocType">
+			<property name="allowUnknownTags" value="true" />
+			<message key="javadoc.missing" value="类注释：缺少Javadoc注释。" />
+		</module>
+
+		<!-- 检查所有方法的javadoc，可以不声明RuntimeException -->
+		<module name="JavadocMethod">
+			<property name="allowUndeclaredRTE" value="true" />
+			<!--允许get set 方法没有注释 -->
+			<property name="allowMissingPropertyJavadoc" value="true" />
+			<message key="javadoc.missing" value="方法注释：缺少Javadoc注释。" />
+		</module>
+
+		<!-- 检查某个变量的javadoc -->
+		<module name="JavadocVariable">
+			<message key="javadoc.missing" value="变量注释：缺少Javadoc注释。" />
+		</module>
+
+		<!--注解设置 -->
+		<module name="AnnotationUseStyle">
+			<!--注解的参数样式 忽略 -->
+			<property name="elementStyle" value="ignore" />
+			<!--是否在数组元素后尾随逗号 忽略 -->
+			<property name="trailingArrayComma" value="ignore" />
+			<!--检查是否保留结束括号 忽略 -->
+			<property name="closingParens" value="ignore" />
+		</module>
+
+		<!-- 命名规范 -->
+		<!-- 类的命名,匹配规则默认:(^[A-Z][a-zA-Z0-9]*$),必须以大写字母开始 -->
+		<module name="TypeName">
+			<property name="tokens" value="CLASS_DEF" />
+			<message key="name.invalidPattern" value="类命名必须大写，名称 ''{0}'' 必须匹配表达式： ''{1}'' 。" />
+		</module>
+
+		<!-- 变量的检查 匹配规则默认^[a-z][a-zA-Z0-9]*$ 范围： 非static型变量 命名为小写 -->
+		<module name="MemberName">
+			<message key="name.invalidPattern" value="以小写字母开头，只接收大小写字母和数字的字符串" />
+		</module>
+
+		<!-- 方法名的检查 匹配规则默认^[a-z][a-zA-Z0-9]*$ 范围：方法名 命名为小写 -->
+		<module name="MethodName">
+			<message key="name.invalidPattern" value="以小写字母开头，只接收大小写字母和数字的字符串" />
+		</module>
+
+		<!-- 方法的参数名 匹配规则默认^[a-z][a-zA-Z0-9]*$ 范围：方法中的参数名 命名为小写 -->
+		<module name="ParameterName ">
+			<message key="name.invalidPattern" value="以小写字母开头，只接收大小写字母和数字的字符串" />
+		</module>
+		<!-- 常量名的检查 匹配规则默认^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$ 范围：常量(static , final 字段) 
+			命名为大写 -->
+		<module name="ConstantName">
+			<message key="name.invalidPattern" value="以下划线或大写字母开头，后面只接收大写字母和数字的字符串" />
+		</module>
+
+		<!-- 没用的import检查，比如：1.没有被用到2.重复的3.import java.lang的4.import 与该类在同一个package的 -->
+		<module name="UnusedImports">
+			<message key="import.unused" value="无用导入 - {0}" />
+		</module>
+
+		<!-- 包名的检测,必须以com.catsic.工程名命名,且必须全小写,$\{projectname\} -->
+		<module name="PackageName">
+			<property name="format" value="com\.catsic\.[a-z]+(\.[a-z][a-z0-9]+)*$" />
+			<message key="name.invalidPattern" value="以com.catsic开头，后面只接收小写字母和数字的字符串" />
+		</module>
+
+		<!-- 限制导入.*包的检查,允许导入java.io.*,java.net.*,java.lang.Math.*,其它不允许 -->
+		<module name="AvoidStarImport">
+			<property name="excludes" value="java.io,java.net,java.lang.Math" />
+			<!-- 实例；import java.util.*;. -->
+			<property name="allowClassImports" value="false" />
+			<!-- 实例 ；import static org.junit.Assert.*; -->
+			<property name="allowStaticMemberImports" value="true" />
+			<message key="name.invalidPattern" value="不应使用 ''.*'' 形式的导入 - {0} 。" />
+		</module>
+
+		<!-- 限制导入多余的包,例如java.lang.String -->
+		<module name="RedundantImport">
+			<message key="import.duplicate" value="第{0,number,integer}行重复导入：{1} 。" />
+			<message key="import.illegal" value="非法导入包： {0} 。" />
+			<message key="import.lang" value="不需要从 java.lang 包导入： {0} 。" />
+		</module>
+
+		<!--代码规范 -->
+		<!-- 每行不超过150个字,默认80 -->
+		<module name="LineLength">
+			<property name="max" value="150" />
+			<message key="maxLineLen"
+				value="本行字符数 {1,number,integer}个，最多：{0,number,integer}个。" />
+		</module>
+
+		<!-- 即制方法和构造函数行数不超过多少行,默认160行(不包括空行) -->
+		<module name="MethodLength">
+			<property name="countEmpty" value="false" />
+			<property name="tokens" value="METHOD_DEF,CTOR_DEF" />
+			<property name="max" value="160" />
+			<message key="maxLen.method" value="方法行数不可以超过160行。" />
+		</module>
+
+		<!-- 不能出现大块空白区域 -->
+		<module name="GenericWhitespace">
+			<message key="ws.notFollowed" value="''{0}'' 后应有空格" />
+			<message key="ws.notPreceded" value="''{0}'' 前应有空格" />
+			<message key="ws.preceded" value="''{0}'' 前不应有空格" />
+			<message key="ws.illegalFollow" value="''{0}'' 后字符不合法" />
+		</module>
+
+		<!-- 检查是否有未初始化的循环变量 -->
+		<module name="EmptyForInitializerPad" />
+
+		<!-- 不许出现空语句 int a = 0; //正常 ; // 这里就是一个空的语句 -->
+		<module name="EmptyStatement" />
+
+		<!-- 不能容忍魔法数 -->
+		<module name="MagicNumber">
+			<property name="tokens" value="NUM_DOUBLE, NUM_FLOAT" />
+		</module>
+
+		<!-- String的比较不能用!= 和 == -->
+		<module name="StringLiteralEquality">
+			<message key="string.literal.equality" value="字符串应使用equals()方法进行比较，而非''{0}''。" />
+		</module>
+
+		<!-- 限制for循环最多嵌套3层 -->
+		<module name="NestedForDepth">
+			<property name="max" value="3" />
+			<message key="nested.for.depth"
+				value="最多{1,number,integer}层 for循环，目前{0,number,integer}层。" />
+		</module>
+
+		<!-- if最多嵌套5层 -->
+		<module name="NestedIfDepth">
+			<property name="max" value="3" />
+			<message key="nested.if.depth"
+				value="最多{1,number,integer}层 if，目前{0,number,integer}层。" />
+		</module>
+
+		<!-- 确保声明被初始化,例：对象是null,数字和字符是0 <module name="ExplicitInitialization"/> -->
+
+		<!-- 同一行不能有多个声明 -->
+		<module name="MultipleVariableDeclarations">
+			<message key="multiple.variable.declarations" value="每一行只能定义一个变量。" />
+			<message key="multiple.variable.declarations.comma" value="每一个变量的定义必须在它的声明处，且在同一行。" />
+		</module>
+
+		<!-- TODO的检查,表示不要出现todo未办事项目 -->
+		<module name="TodoComment">
+			<property name="format" value="TODO\W+" />
+			<message key="todo.match" value="TODO块： ''{0}'' 。" />
+		</module>
+
+		<!-- 检查未被注释的main方法,排除以Main结尾命名的类 -->
+		<module name="UncommentedMain">
+			<property name="excludedClasses" value=".*Main$" />
+			<message key="uncommented.main" value="未注释的Main方法。" />
+		</module>
+
+		<!-- 检查数组声明风格 只能为java 例如: String[] args -->
+		<module name="ArrayTypeStyle">
+			<message key="array.type.style" value="数组大括号位置错误。" />
+		</module>
+
+		<!-- 检查左侧大括号 左侧大括号必须放在前一行代码的行尾 -->
+		<module name="LeftCurly">
+			<!-- <property name="severity" value="warning" /> -->
+			<message key="line.new" value="第 {1} 个字符 ''{0}'' 应位于新行。" />
+			<message key="line.previous" value="第 {1} 个字符 ''{0}'' 应位于前一行。" />
+			<message key="line.break.after" value="第 {1} 个字符 ''{0}'' 后应换行。" />
+		</module>
+
+		<!-- 对关键字else、try和catch的右侧大括号放置位置进行检查 -->
+		<module name="RightCurly">
+			<property name="severity" value="warning" />
+			<!--与下一语句放在同一行 -->
+			<property name="option" value="same" />
+			<message key="line.break.before" value="第 {1} 个字符 ''{0}'' 前应换行。" />
+			<message key="line.alone" value="第 {1} 个字符 ''{0}'' 应独占一行。" />
+			<message key="line.new" value="第 {1} 个字符 ''{0}'' 应位于新行。" />
+			<message key="line.same"
+				value="第 {1} 个字符 ''{0}''应该与当前多代码块的下一部分 \
+         （if/else-if/else, do/while 或 try/catch/finally）位于同一行" />
+		</module>
+
+		<!-- 禁止使用System.out.println -->
+		<!-- <module name="Regexp">
+			<property name="format" value="System\.out\.println" />
+			<property name="illegalPattern" value="true" />
+		</module> -->
+
+
+		<!--避免 null.equals("sss")情况 -->
+		<module name="EqualsAvoidNull">
+			<message key="equals.avoid.null" value="避免 null.equals(sss)情况,字符串常量应出现在 equals 比较的左侧。" />
+		</module>
+
+		<!-- 异常抛出数量定义 -->
+		<module name="ThrowsCount">
+			<metadata name="net.sf.eclipsecs.core.comment" value="最大异常抛出个数" />
+			<property name="max" value="3" />
+			<message key="throws.count"
+				value="Throws 总数： {0,number,integer} 个（最多： {1,number,integer} 个）。" />
+		</module>
+
+		<!-- 方法的参数个数不超过5个。 并且不对构造方法进行检查 -->
+		<module name="ParameterNumber">
+			<property name="max" value="7" />
+			<property name="tokens" value="METHOD_DEF" />
+			<message key="maxParam"
+				value="参数共： {1,number,integer}个，最多：{0,number,integer}个。" />
+		</module>
+
+
+		<!-- 命名方面的检查 -->
+		<!-- 局部的final变量，包括catch中的参数的检查 -->
+		<module name="LocalFinalVariableName">
+			<message key="name.invalidPattern"
+				value="名称 ''{0}'' 必须匹配表达式： ''{1}'' ，局部Final变量，必须以小写字母开头，后面只接受字母或数字。" />
+		</module>
+		<!-- 局部的非final型的变量，包括catch中的参数的检查 -->
+		<module name="LocalVariableName">
+			<message key="name.invalidPattern"
+				value="名称 ''{0}'' 必须匹配表达式： ''{1}'' ，局部非Final变量，必须以小写字母开头，后面只接受字母或数字。" />
+		</module>
+		<!-- 仅仅是static型的变量（不包括static final型）的检查 -->
+		<module name="StaticVariableName">
+			<message key="name.invalidPattern"
+				value="名称 ''{0}'' 必须匹配表达式： ''{1}'' ，Statci变量（不包括static final型），必须以小写字母开头，后面只接受字母或数字。" />
+		</module>
+
+		<!-- 空格检查 -->
+		<!-- 允许方法名后紧跟左边圆括号"(" -->
+		<module name="MethodParamPad">
+			<message key="line.previous" value="''{0}'' 应在前一行。" />
+			<message key="ws.notPreceded" value="''{0}'' 前应有空格。" />
+			<message key="ws.preceded" value="''{0}'' 前不应有空格。" />
+		</module>
+		<!-- 在类型转换时，不允许左圆括号右边有空格，也不允许与右圆括号左边有空格 -->
+		<module name="TypecastParenPad">
+			<message key="ws.followed" value="''{0}'' 后不应有空格。" />
+			<message key="ws.notFollowed" value="''{0}'' 后应有空格。" />
+			<message key="ws.notPreceded" value="''{0}'' 前应有空格。" />
+			<message key="ws.preceded" value="''{0}'' 前不应有空格。" />
+		</module>
+
+		<!-- 关键字 -->
+		<!-- 每个关键字都有正确的出现顺序。比如 public static final XXX 是对一个常量的声明。如果使用 static public 
+			final 就是错误的 -->
+		<module name="ModifierOrder">
+			<message key="annotation.order" value="注解 ''{0}'' 前不应有非注解修饰符。" />
+			<message key="mod.order" value="''{0}'' 修饰符顺序违反 JLS 建议." />
+		</module>
+		<!-- 多余的关键字 -->
+		<module name="RedundantModifier">
+			<message key="redundantModifier" value="多余修饰符： ''{0}''。" />
+		</module>
+
+		<!-- 编码方面的检查 -->
+		<!-- try最多被嵌套3层 -->
+		<module name="NestedTryDepth">
+			<property name="max" value="3" />
+			<message key="nested.try.depth"
+				value="至多{1,number,integer}层 try，目前{0,number,integer}层。" />
+		</module>
+
+		<!-- 确保一个类有package声明 -->
+		<module name="PackageDeclaration">
+			<message key="missing.package.declaration" value="缺少包声明。"/>
+		</module>
+		<!-- 一个方法中最多有3个return -->
+		<module name="ReturnCount">
+			<property name="max" value="3" />
+			<property name="format" value="^$" />
+			<message key="return.count" value="Return 次数 {0,number,integer} 次（最多： {1,number,integer} 次）。"/>
+		</module>
+
+		<!-- clone方法必须调用了super.clone() -->
+		<!-- <module name="SuperClone" /> -->
+		<!-- finalize 必须调用了super.finalize() -->
+		<!-- <module name="SuperFinalize" /> -->
+		<!-- 不能catch java.lang.Exception -->
+		<!-- <module name="IllegalCatch"> <property name="illegalClassNames" value="java.lang.Exception" 
+			/> </module> -->
+
+		<!-- 根据 Sun 编码规范， class 或 interface 中的顺序如下： 1.class 声明。首先是 public, 然后是protected 
+			, 然后是 package level （不包括access modifier ） 最后是private . (多个class放在一个java文件中的情况） 
+			2.变量声明。 首先是 public, 然后是protected然后是 package level （不包括access modifier ） 最后是private 
+			. (多个class放在一个java文件中的情况） 3.构造函数 4.方法 -->
+		<!-- <module name="DeclarationOrder" /> -->
+		<!-- 不必要的圆括号 -->
+		<!-- <module name="UnnecessaryParentheses" /> -->
+
+		<!-- 检查并确保所有的常量中的L都是大写的。因为小写的字母l跟数字1太象了 -->
+		<!-- <module name="UpperEll" /> -->
+		<!-- 检查java代码的缩进 默认配置：基本缩进 4个空格，新行的大括号：0。新行的case 4个空格 -->
+		<!-- <module name="Indentation"> <message key="indentation.error.multi" 
+			value="''{0}'' 缩进了{1}个缩进符，应为以下缩进之一：{2}"/> <message key="indentation.child.error.multi" 
+			value="''{0}'' 子元素进了{1}个缩进符，应为以下缩进之一：{2}"/> <message key="indentation.error" 
+			value="{0} 缩进了{1}个缩进符，应为{2}个"/> <message key="indentation.child.error" value="''{0}'' 
+			子元素缩进了{1}个缩进符，应为{2}个。"/> </module> -->
+	</module>
+
+</module>    

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 尽量别用绝对路径，如果带参数不同容器路径解释可能不同 -->  
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%logger{16}] %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- 按照每天生成日志文件 -->  
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">  
+        <encoder>   
+	        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>   
+	    </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
+            <FileNamePattern>${catalina.base}/logs/%d{yyyy-MM-dd}.log</FileNamePattern>  
+            <MaxHistory>30</MaxHistory>  
+        </rollingPolicy>  
+    </appender>   
+
+    <!-- 用来设置某一个包或者具体的某一个类的日志打印级别，包名要与实际项目一致 -->
+    <!-- 将级别为“DEBUG”及大于“DEBUG”的日志信息传递给root处理，本身并不打印 -->
+    <logger name="com.catsic" level="ERROR"/> 
+	<!--  root将级别为“INFO”及大于“INFO”的日志信息交给已经配置好的名为“Console”的appender处理，“Console”appender将信息打印到Console； 标识这个appender将会添加到这个logger-->
+    <root level="ERROR">
+        <appender-ref ref="Console" /> 
+        <appender-ref ref="FILE" />
+    </root>
+    <logger name="org.springframework" level="debug,info,console" />  
+<!-- 	<logger name="org.hibernate" level="off" />  
+    <logger name="org.springframework" level="off" />  
+    <logger name="com.opensymphony" level="off" />  
+    <logger name="org.apache" level="off" />
+    <logger name="o.s" level="OFF"/> -->
+</configuration>
