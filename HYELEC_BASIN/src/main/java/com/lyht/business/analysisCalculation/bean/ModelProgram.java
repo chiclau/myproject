@@ -1,0 +1,121 @@
+package com.lyht.business.analysisCalculation.bean;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.sun.org.glassfish.gmbal.Description;
+
+/**
+ *作者： 刘魁
+ *脚本日期:2018年5月11日 21:41:11
+ *说明:  模型方案表
+*/
+@Entity
+@Table(name = "MODEL_PROGRAM")
+public class ModelProgram  implements Serializable {
+
+	
+	private static final long serialVersionUID = 1L;
+	@Description(key="primary",value="方案编码")
+	private String progCode;
+	
+	@Description(key="display",value="关联模型")
+	private String modelCode;
+	
+	@Description(key="primary",value="方案名称")
+	private String progName;
+	
+	@Description(key="primary",value="创建人")
+	private String createStaff;
+	
+	@Description(key="primary",value="创建时间")
+	private String createTime;
+	
+	@Description(key="primary",value="备注描述")
+	private String remark;
+	
+	public ModelProgram(){
+		this.progCode="";
+		this.modelCode="";
+		this.progName="";
+		this.createStaff="";
+		this.createTime="";
+		this.remark="";
+		
+	}
+	
+	public ModelProgram(String progCode,
+			String modelCode,
+			String progName,
+			String createStaff,
+			String createTime,
+			String remark
+			){
+		this.progCode=progCode;
+		this.modelCode=modelCode;
+		this.progName=progName;
+		this.createStaff=createStaff;
+		this.createTime=createTime;
+		this.remark=remark;
+	}
+	@Id
+	@Column(name = "PROG_CODE",length=50 )
+	public String getProgCode() {
+		return progCode;
+	}
+
+	public void setProgCode(String progCode) {
+		this.progCode = progCode;
+	}
+	
+	@Column(name = "MODEL_CODE",length=50 )
+	public String getModelCode() {
+		return modelCode;
+	}
+
+	public void setModelCode(String modelCode) {
+		this.modelCode = modelCode;
+	}
+	
+	@Column(name = "PROG_NAME",length=50 )
+	public String getProgName() {
+		return progName;
+	}
+
+	public void setProgName(String progName) {
+		this.progName = progName;
+	}
+	
+	@Column(name = "CREATE_STAFF",length=50 )
+	public String getCreateStaff() {
+		return createStaff;
+	}
+
+	public void setCreateStaff(String createStaff) {
+		this.createStaff = createStaff;
+	}
+	
+	@Column(name = "CREATE_TIME",length=50 )
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	
+	@Column(name = "REMARK",length=50 )
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
+	
+}
