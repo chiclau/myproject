@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<title>资料管理</title>
+<link rel="stylesheet" type="text/css" href="demo.css">
+<style type="text/css">
+.clgl-13{ width:100%; margin:0 auto;}
+.clgl-14{ float:left; width:20%;  padding-top:20px; line-height:35px; text-align:center; }
+.clgl-16{ float:left; width:80%;  padding-top:20px; line-height:35px; text-align:center; }
+
+  #div_main {  
+            margin: 0 auto;  
+           /* width: 300px;  
+            height: 400px;  */
+            border: 1px solid black;  
+            margin-top: 50px;  
+        }  
+  
+        #div_txt {  
+            position: relative;  
+            width: 200px;  
+            margin: 0 auto;  
+           /* margin-top: 40px;  */
+        }  
+  /*
+        #txt1 {  
+            width: 99%;  
+        }  */
+  
+        #div_items {  
+            position: relative;  
+            width: 100%;  
+            height: 200px;  
+            border: 1px solid #66afe9;  
+            border-top: 0px;  
+            overflow: auto;  
+            display: none;  
+        }  
+  
+        .div_item {  
+            width: 100%;  
+            height: 20px;  
+            margin-top: 1px;  
+            font-size: 13px;  
+            line-height: 20px;  
+        }  
+</style>
+
+<link href="bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="bootstrap-datetimepicker.min.js"></script>
+
+
+</head>
+<body style="background-color: #FCFCFC;">
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<h3 class="text-primary">
+				<ol class="breadcrumb">
+					<li>分析计算</li>
+                    <li style="color:black;">产流计算</li>
+				</ol>
+			</h3>
+		</div>
+		<hr style="margin-top: -5px;">			
+	 <form id="info_form_cjfa" name="" method="post" autocomplete="off">
+	     	请输入站名:<input type="text" id="stnm" name="mStbprpFormBean.mStbprpInfoBean.stnm" value="江永站">
+	     		<input type="button" name="" value="查询" onclick="getStp()">
+	    	<input type="button" name="" value="保存计算结果" onclick="save()">
+	    <div class="row-fluid">
+		    <div class="col-md-3"> 
+		   		雨量站:<input type="text" name="" value=""   id="cols"><input type="button" value="确定" onclick="autocreate()">
+		   		<input type="button" value="计算" onclick="jisuan()">
+		   		</div>
+		   	<div class="col-md-3 "> 
+		   				<div class="input-append date form_datetime">
+									时间区间:<input id="start" size="16" type="text"  readonly>
+									    <span class="add-on"><i class="icon-th"></i></span>
+						</div>
+						</div>
+						<div class="col-md-2 ">
+							<div class="input-append date form_datetime">
+									    	--  <input id="end" size="16" type="text"  readonly>
+									    <span class="add-on"><i class="icon-th"></i></span>
+						</div>
+			</div>
+		   	<div class="col-md-4">
+		   		时间间隔:<input id="jiange" type="text" name="" onclick="on(this)" value="60">(时间精确到分钟)
+		   	</div>
+		    </div>
+    
+   <br> <br> <br>
+    	<table border="1" id="table1">
+    		<tr id="tr1">
+    			<td rowspan="2" align="center" >序号</td> 
+    			<td rowspan="2" align="center" >日期</td> 
+    			<td colspan="2" align="center" id="td1" class="addTd"><input id="txt" name="cezhan" type="text"  placeholder="请输入测站名">
+    		<div id="div_txt">			
+ 				<div id="div_items">  
+                    <div class="div_item">测站A</div>  
+                    <div class="div_item">双江口</div>  
+                    <div class="div_item">张家院子</div>  
+                    <div class="div_item">双江测站A</div>  
+                    <div class="div_item">洞庭湖测站A</div>  
+                    <div class="div_item">洞庭湖测站B</div>  
+                    <div class="div_item">芭螺</div>  
+                    <div class="div_item">永江</div>  
+                </div> 
+        	</div>
+    			</td>   
+                <td rowspan="2" align="center">雨面量</td> 
+    		</tr >
+    		<tr align="center" id="tr2">
+    			<td>权重</td>
+    			<td id="td2" class="addTd2" align="center"><input type="text" align="center" name="quanzhong" id="quanzhong"></td>     
+    		</tr>
+    		<tr align="center" id="tr3" >
+    			<td id="xuhao1">1</td>
+    			<td><input type="text" name="time"></td>
+    			<td colspan="2" id="td4" class="addTd4" align="center"><input type="text" name="yu" id="yu0"  align="center"></td>   	
+                <td colspan="2" align="center"><input type="text" name="result"   align="center"></td>               
+    		</tr> 
+    	</table>
+    	
+</div>
+	  </div> <!-- maincontent -->
+
+	  </form>
+</body>
+</html>
+<script type="text/javascript">
+    function on(i){
+        alert(i.value)
+    }
+	$(function(){
+		//alert("hello world!")
+		//console.log( 1 - 0.8 );
+	})
+function save(){
+
+	if(confirm("保存计算结果?")){
+		var url = basePath + "chanliu/chanliu!save.action"
+	common_ajax(json, url, function(response) {
+		
+	});
+	}else{
+		return false;
+	}
+	
+
+}
+
+$.fn.serializeJson = function(n) {
+    var array = this.serializeArray();
+    var arr = new Array(array.length/n);
+    for(var i = 0 ; i < arr.length ;i++){
+        arr[i]={};
+        for(var y = n ; y > 0 ;y--){
+            arr[i][array[(i+1)*n-y].name]=array[(i+1)*n-y].value;
+        }
+    }
+    return arr;
+};
+
+
+	//计算
+	function jisuan(){
+		  var arr =[] ; //声明一个数组用来存储雨面量
+ 		  arr=yumianliang();
+		  var res=document.getElementsByName("result");
+		  for(var i=0;i<=res.length;i++){
+		  	$("#removeTr"+i+" td:last input:first").val(arr[i]);
+		  }
+		 
+	}
+	//计算雨面量 返回结果数组	
+ function yumianliang(){
+ 	//**校验权重----START------
+ 	 var qz=document.getElementsByName("quanzhong");//获取所有权重的Input，
+	 var yu=document.getElementsByName("yu");//获取所有降雨量的Input，
+	 var y=0;//权重的和
+	 var yuliang=0;//降雨量的和，累加
+	 var arr1=[];//定义一个数组来接收雨量值,这个值可以是输入的也可以是查询的
+	 	  for(var i=0;i<qz.length;i++){
+	 	  	if(isNaN(qz[i].value)){
+	 	  		confirm("权重:请输入数字")
+		  		return false;
+	 	  	}
+
+		  	if(qz[i].value==''){
+		  		confirm("权重：不能为空")
+		  		return false;
+		  	}
+		  	y+=Number(qz[i].value);
+		  } 	//yuliang+=Number(qz[i].value)*Number(yu[i].value); //乘积之后求和
+		  if(y>1){ //值超过1判断
+		  		confirm("权重：值不能超过1")
+		  		return false;
+		  	}
+		  	if(y<1){ //值小于1判断
+		  		confirm("权重：值不能小于1")
+		  		return false;
+		  	}
+		  	for(var j=0;j<yu.length;j++){
+		  		var he=Number(yu[j].value);
+		  		arr1.push(he);
+		  	}
+		  	var yuliang2=[];
+		  	var result = [];
+		  	var num=Number($("#cols").val());
+		  	if(arr1.length>1){
+		  		for(var i=0,len=arr1.length;i<len;i+=num){
+		   		 result.push(arr1.slice(i,i+num));
+				}
+		  	}
+		
+		var zonghe=[];
+		//var re=0;//
+		for(var i=0;i<result.length;i++){
+			var re=0;
+			for(var j=0;j<result[i].length;j++){
+					re=result[i][j]*Number(qz[j].value);//量*权重  求和
+				zonghe.push(re);
+			}
+		}
+		//将求和过后的数组在分割
+		var q=[];
+		for(var i=0,len=zonghe.length;i<len;i+=num){
+		    q.push(zonghe.slice(i,i+num));
+		}
+		var p=[];
+		for(var i=0;i<q.length;i++){
+			p.push(sum(q[i]));
+		}
+		return   p;
+  }
+		
+//数组求和
+function sum(arr) {
+    var len = arr.length;
+    if(len == 0){
+        return 0;
+    } else if (len == 1){
+        return arr[0];
+    } else {
+        return arr[0] + sum(arr.slice(1));
+    }
+}
+ 	
+
+
+
+$(".form_datetime").datetimepicker({
+    format: " yyyy/mm/dd hh:ii",
+    autoclose: true,//选择好自动关闭  
+	language: 'zh-CN', //汉化  
+});
+//确定
+function autocreate() {  
+    $(".add").remove();//先把添加的移除，避免重复添加
+    var num=$("#cols").val();//列数
+      // var tr="<tr align='center'><td class='add'></td>"+td+td+"</tr> "
+    var list=  cha();
+        //动态添加列
+    for(var i=1;i<num;i++){
+     var td="<td colspan='2' class='add' align='center'><input id='txt"+i+"' name='cezhan' "+
+     "type='text'id='yu"+i+"' placeholder='请输入测站名' > 	<div id='div_txt'>"+			
+ 				"<div id='div_items'> " +
+                  "  <div class='div_item'>测站A</div>"  +
+                   " <div class='div_item'>测站B</div> " +
+                  "  <div class='div_item'>双江测站A</div>"+  
+                    "<div class='div_item'>洞庭湖测站A</div> " +
+                    "<div class='div_item'>洞庭湖测站B</div>"  +
+                    "<div class='div_item'>测试1</div>"  +
+                   " <div class='div_item'>测试2</div>"  +
+                "</div>" +
+        	"</div></td>  ";
+     var td2="<td  class='add'>权重</td><td  class='add'><input type='text' name='quanzhong' id='quanzhong"+i+"' ></td>";
+     var td3="<td colspan='2' class='add' align='center'><input  type='text'id='yu"+i+"' name='yu'  ></td>";
+       	 //$(".addTd").after(td);
+     $(".addTd").after(td);
+     $(".addTd2").after(td2);
+     $(".addTd4").after(td3);
+    }
+       //先删除
+    $(".removeTr").remove();
+       
+     var list1=$("#tr3").children();
+ 	if(list>0){ //移除第一个序号td
+		$("#xuhao1").remove();
+       	for(var i=0;i<list;i++){
+    	  var tdXuhao="<td>"+i+"</td>";
+    	  var tra="<tr class='removeTr' align='center' id='removeTr"+i+"'>";
+       	  var trb="</tr>"
+       	  var addTr=$("#tr3").html()  ;
+    	 $("#tr3").before(tra+tdXuhao+addTr+trb);
+    	 $("#tr3 tr td:nth-child(1)").attr("id","shijian"+i+"");
+
+   		}
+ 	}
+ 	var shijian=document.getElementsByName("time");//获取所有时间input，往里面添加时间
+ 	var date1=new Date($("#start").val());  //开始时间 
+ 	var date2= date1.getTime();//将时间转换时间戳
+ 	var curTime = formatDateTime(date1)//转化时间格式
+ 	var shu=Number($("#jiange").val())*60;//分钟*秒
+ 	var haomiao=shu*1000;//毫秒，增加时间的时候用毫秒
+ 	var addTime=0;
+ 	var t3=formatDateTime(new Date(date2+7200000));
+ 	for(var i=0;i<shijian.length;i++){
+		 	switch (i)
+			{
+		    case 0:shijian[i].value=curTime;//当第一个就是开始时间
+		    break;
+		    case 1:
+		   var t1= formatDateTime(new Date(date2+haomiao));
+		    shijian[i].value=t1;
+		    break;
+		    //alert()
+		    default:
+			var tadd= formatDateTime(new Date(date2+addTime));
+		    shijian[i].value=tadd;
+		   ;
+			}
+ 		addTime+=haomiao;
+ 	}
+ 	
+ 	console.log(shu);
+}
+ var formatDateTime = function (date) {  
+                var y = date.getFullYear();  
+                var m = date.getMonth() + 1;  
+                m = m < 10 ? ('0' + m) : m;  
+                var d = date.getDate();  
+                d = d < 10 ? ('0' + d) : d;  
+                var h = date.getHours();  
+                h=h < 10 ? ('0' + h) : h;  
+                var minute = date.getMinutes();  
+                minute = minute < 10 ? ('0' + minute) : minute;  
+                var second=date.getSeconds();  
+                second=second < 10 ? ('0' + second) : second;  
+                return y + '/' + m + '/' + d+' '+h+':'+minute+':'+second;  
+ };            
+
+//计算时间差
+function cha(){
+	var date1=new Date($("#start").val()).getTime() ;  //开始时间  
+    var date2 = new Date($("#end").val()).getTime();    //结束时间  
+    var date3 = date2 - date1;   //时间差的毫秒数        
+    //------------------------------  
+    //计算出相差天数  
+    var days=Math.floor(date3/(24*3600*1000))  
+    //计算出小时数  
+    var leave1=date3%(24*3600*1000)    //计算天数后剩余的毫秒数  
+    var hours=Math.floor(leave1/(3600*1000))  
+    //计算相差分钟数  
+    var leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数  
+    var minutes=Math.floor(leave2/(60*1000))  
+    //计算相差秒数  
+    var leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数  
+    var seconds=Math.round(leave3/1000)  
+    var fen=days*24*60+hours*60+minutes
+    var shu=$("#jiange").val();
+    var n=Number(shu)
+   var tr=fen/n
+    //alert(" 相差 "+days+"天 "+hours+"小时 "+minutes+" 分钟")  
+    //alert("总行数:"+tr)
+    return tr;
+}
+ 
+</script>
+<script type="text/javascript" src="demo.js"></script>

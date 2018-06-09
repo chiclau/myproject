@@ -1,0 +1,55 @@
+#div_EmpNo  
+        {  
+            position: absolute;  
+            border: 1px solid #abcee4;  
+            width: 175px;  
+            height: 200px;  
+            overflow: auto;  
+        overflow-x:hidden;  
+            display: none;  
+            background: #f7f7f7;  
+        line-height: 1.5em;  
+            font-size: 11px;  
+            clear: both;  
+            z-index: 9999;  
+        }  
+/*模糊查询弹层table中title 行 一列 两列等*/  
+        .dialogTitle  
+        {  
+            background-color: #E6E6FA;  
+            float: left;  
+            display: block;  
+            height: 20px;  
+            width: 50%;  
+            cursor: default;  
+            font-size: 110%;  
+        }  
+        .dialogTitle1  
+        {  
+            background-color: #E6E6FA;  
+            height: 20px;  
+            width: 100%;  
+            float: left;  
+            display: block;  
+            cursor: default;  
+            font-size: 110%;  
+        }  
+/*模糊查询弹层table简单样式*/  
+.gridtable  
+        {  
+            font-family: verdana,arial,sans-serif;  
+            font-size: 11px;  
+            border-collapse: collapse;  
+            width: 200px;  
+            cursor: pointer;  
+        cellspacing:0;  
+        }  
+/*未查询到数据提示*/  
+.dialogHint  
+        {  
+            background-color: #E6E6FA;  
+            height: 20px;  
+            width: 200px;  
+            float: left;  
+            display: block;  
+        }  
