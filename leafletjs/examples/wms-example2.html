@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="../js/leaflet/leaflet.css"/>
+    <script src="../js/leaflet/leaflet-src.js"></script>
+    <script src="../js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    //参考demo  http://leafletjs.com/examples/wms/wms.html
+    var map = L.map('map', {
+        center: [-17, -67],
+        zoom: 3
+    });
+
+    var wmsLayer = L.tileLayer.wms('https://demo.boundlessgeo.com/geoserver/ows?', {
+        layers: 'nasa:bluemarble'
+    }).addTo(map)
+</script>
+</html>

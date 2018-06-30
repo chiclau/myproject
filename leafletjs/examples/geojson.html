@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="../js/leaflet/leaflet.css"/>
+    <script src="../js/leaflet/leaflet-src.js"></script>
+    <script src="../js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+
+    <script src="../data/sample-geojson.js"></script>
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    //参考demo   http://leafletjs.com/examples/geojson/
+//    var map = L.map('map').setView([46.80006, -108.36914], 5);
+    var map = L.map('map').setView([39.74739, -105], 15);
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution : '测试',
+        maxZoom : 18,
+        id : 'mapbox.streets',
+        accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    }).addTo(map);
+
+    //添加标记
+    var geojsonFeature = {
+        "type": "Feature",
+        "properties": {
+            "name": "Coors Field",
+            "amenity": "Baseball Stadium",
+            "popupContent": "This is where the Rockies play!"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-104.99904, 39.75621]
+        }
+    };
+    function onEachFeature(feature, layer) {
+        if (feature.properties && feature.properties.popupContent) {
+            layer.bindPopup(feature.properties.popupContent);
+        }
+    }
+
+    //    L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(map);
+    var myLayer = L.geoJSON().addTo(map);
+    L.extend(myLayer.options,{onEachFeature: onEachFeature});
+    myLayer.addData(geojsonFeature);
+
+    //添加线
+    var myLines = [{
+        "type": "LineString",
+        "coordinates": [[-100, 40], [-105, 45], [-110, 55]]
+    }, {
+        "type": "LineString",
+        "coordinates": [[-105, 40], [-110, 45], [-115, 55]]
+    }];
+    var myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+    };
+    L.geoJSON(myLines, {style: myStyle }).addTo(map);
+
+    //添加多边形
+    var states = [{
+        "type": "Feature",
+        "properties": {"party": "Republican"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [-104.05, 48.99],
+                [-97.22,  48.98],
+                [-96.58,  45.94],
+                [-104.03, 45.94],
+                [-104.05, 48.99]
+            ]]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {"party": "Democrat"},
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [-109.05, 41.00],
+                [-102.06, 40.99],
+                [-102.03, 36.99],
+                [-109.04, 36.99],
+                [-109.05, 41.00]
+            ]]
+        }
+    }];
+    L.geoJSON(states, {
+        style: function(feature) {
+            switch (feature.properties.party) {
+                case 'Republican': return {color: "#ff0000"};
+                case 'Democrat':   return {color: "#0000ff"};
+            }
+        }
+    }).addTo(map);
+
+
+    //过滤显示
+    var someFeatures = [{
+        "type": "Feature",
+        "properties": {
+            "name": "Coors Field",
+            "show_on_map": true
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-110.98504, 39.75621]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {
+            "name": "Busch Field",
+            "show_on_map": false
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-112.98604, 39.74621]
+        }
+    }];
+    L.geoJSON(someFeatures, {
+        filter: function(feature, layer) {
+            return feature.properties.show_on_map;
+        }
+    }).addTo(map);
+
+
+    function onEachFeature(feature, layer) {
+        var popupContent = "<p>I started out as a GeoJSON " +
+            feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+
+        if (feature.properties && feature.properties.popupContent) {
+            popupContent += feature.properties.popupContent;
+        }
+        layer.bindPopup(popupContent);
+    }
+
+    //自定义图标
+    var baseballIcon = L.icon({
+        iconUrl: '../images/baseball-marker.png',
+        iconSize: [32, 37],
+        iconAnchor: [16, 37],
+        popupAnchor: [0, -28]
+    });
+    var coorsLayer = L.geoJSON(coorsField, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+            return L.marker(latlng, {icon: baseballIcon});
+        },
+    }).addTo(map);
+
+    //添加多边形
+    L.geoJSON([bicycleRental, campus], {
+        style: function (feature) {
+            return feature.properties && feature.properties.style;
+        },
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: "#ff7800",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+        }
+    }).addTo(map);
+</script>
+</html>

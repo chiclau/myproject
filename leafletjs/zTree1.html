@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/plugins/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script src="js/plugins/jquery.min.js"></script>
+    <script src="js/plugins/zTree/js/jquery.ztree.core.js"></script>
+    <script src="js/plugins/zTree/js/jquery.ztree.excheck.js"></script>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js"></script>
+</head>
+<body>
+<table style="height: 100%;width: 100%;"  border="1">
+    <tr>
+        <td align="left" valign="top" width="300px">
+            <div class="zTreeDemoBackground left" style="position:absolute; overflow:auto;height: 750px;">
+                <ul id="tree" class="ztree"></ul>
+            </div></td>
+        <td><div id="map" style="height:750px;"></div></td>
+    </tr>
+
+</table>
+</body>
+<script type="text/javascript">
+    var me = this,treepanel = null;
+    var setting = {
+        check: {
+            enable: true
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onCheck: function (event, treeId, treeNode) {
+                if(treeNode.database){
+                    var config = treeNode.config;
+                    if(treeNode.checked){
+                        var cities =  treeNode.layerGroup,
+                            old_onEachFeature = config.onEachFeature;
+                        config.onEachFeature = function(feature, layer){;
+                            onEachFeature(feature, layer,old_onEachFeature);
+                        }
+
+                        L.geoJSON(treeNode.geojson, config).addTo(cities);
+                    }else{
+                        treeNode.layerGroup.clearLayers();
+                    }
+                }else{
+                    var parentNode  = treeNode.getParentNode(),
+                        config = parentNode.config,
+                        layerGroup = parentNode.layerGroup,
+                        old_onEachFeature = config.onEachFeature;
+                    config.onEachFeature = function(feature, layer){;
+                        me.onEachFeature(feature, layer,old_onEachFeature);
+                    }
+
+
+                    var layer = treeNode.layer || (treeNode.layer =  new L.GeoJSON(null,config).addData(treeNode.feature));
+                    if(treeNode.checked){
+                        layerGroup.addLayer(layer);
+                    }else{
+                        map.removeLayer(layer);
+                    }
+                }
+            },
+            onExpand : function (event, treeId, treeNode) {
+                if(treeNode.layerGroup)return;
+                treeNode.GeoJSON = new L.GeoJSON(null,treeNode.config);
+                treeNode.GeoJSON.addTo(map);
+                // map.addLayer(treeNode.layerGroup =  L.layerGroup());
+                loadData(treeNode,function (jsondata) {
+                    treeNode.geojson = jsondata;
+                    var features = jsondata.features;
+                    for(var i=0;i<features.length;i++){
+                        var feature = features[i];
+                        var id = feature["_id"]["$oid"];
+                        var name = feature.properties[treeNode.config.namefield];
+                        var node = treepanel.addNodes(treeNode,-1,{id:id,pId:treeNode.id,name:name})[0];
+                        feature.treeNode = node;
+                        node.feature = feature;
+                    }
+                });
+            },
+            onClick : function(event, treeId, treeNode, clickFlag){
+                debugger;
+                 treepanel.checkNode(treeNode,true,false,true);
+                 var layer = treeNode.layer;
+                 if(layer){
+                     var x = treeNode.feature.properties.MAPX;
+                     var y = treeNode.feature.properties.MAPY;
+                     map.setView([y,x],15);
+                     layer.openPopup();
+                 }
+            }
+        }
+    };
+
+    function onEachFeature(feature, layer,callback){
+        layer.treeNode = feature.treeNode;
+        feature.treeNode.layer = layer;
+        if(callback)callback(feature, layer);
+    }
+
+    var diy = "js/plugins/zTree/css/zTreeStyle/img/diy/";
+    var config = {
+        namefield:'NAME',
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(feature.properties.NAME+"【<font color='red'>"+feature.properties.DWMC+"</font>】").addTo(map);
+        }
+    };
+    var config1 = {
+        namefield:'CDZNAME',
+        onEachFeature: function (feature, layer) {
+            var properties = feature.properties;
+            var pic = properties.pic;
+            var sylx = properties.SYLX;
+            var zhzj = properties.ZHZJ;
+            var popupContent = "<div style='width:290px;height:140px;' id='wincontent'>"
+                + "<div style='width:100%;margin-left:10px;margin-top:20px;margin-bottom:10px;line-height:20px;font-size:13px'><div style=''>运营商："
+                + properties["OPNAME"]
+                + "</div><div style=''>电话："
+                + properties["TEL"]
+                + "</div><div><div style='width:40px;float: left;' >地址：</div>"
+                + properties["ADDRESS"]
+                + "</div><div><div style='padding-top:3px !important;font-size:13px;float:left;'>运营时间："
+                + properties["YYSJ"]
+                + "</div><div style='float: right;padding: 3px 10px 0px 0px;'>使用类型："+sylx+"</div></div><div class='cdz' style='padding-top:3px !important;font-size:13px'><div class='count' style='width:140px !important;float:left;font-size:13px'>直流桩(空闲)：<font id='zlkx' style='color:#7fbf37'>"
+                + properties["ZL_KX"]
+                + "</font>/<font>"
+                + properties["ZLCNT"]
+                + "</font></div><div class='count' style='width:150px !important;float:left;font-size:13px'>交流(空闲)：<font id='jlkx'  style='color:#7fbf37'>"
+                + properties["JL_KX"]
+                + "</font>/<font>"
+                + properties["JLCNT"]
+                + "</font></div></div>"
+                + "<div style='padding-top:3px !important;font-size:13px'><div style='width:280px !important;float:left;font-size:13px'>综合单价(度)："
+                + zhzj
+                + "</div></div></div>"
+                + " </div>";
+            layer.bindPopup(popupContent).addTo(map);
+        },
+        pointToLayer: function (feature, latlng) {
+            var logo = 'images/logo_simple.png';
+            if(feature.properties.KXZZB<20){
+                logo="images/logo_busy.png";
+            }else if(feature.properties.KXZZB>80){
+                logo = "images/logo_free.png";
+            }
+           return L.marker(latlng, {icon: L.icon({
+               iconUrl: logo,
+               iconSize: [32, 32]
+           })});
+        }
+    };
+    var zNodes =[
+        { id:10, pId:0, name:"油气", open:true, icon:diy+"7.png"},
+        { id:1001, pId:10, name:"站点信息",isParent:true, icon:diy+"2.png",database:'oilgas',collection:'site',config:config},
+        { id:1002, pId:10, name:"管道信息",isParent:true, icon:diy+"3.png",database:'oilgas',collection:'pipeline',config:config},
+        { id:20, pId:0, name:"广州市充电设施智能管理平台", open:true, icon:diy+"4.png"},
+        { id:2001, pId:20, name:"充电站",isParent:true, icon:diy+"5.png",database:'gzcdgl',collection:'charging',config:config1}
+    ];
+    $(document).ready(function(){
+        treepanel = $.fn.zTree.init($("#tree"), setting, zNodes);
+    });
+
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 12
+    });
+    var tdt   =   L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {maxZoom: 18, minZoom: 5}),
+        gd   =   L.tileLayer.chinaProvider('GaoDe.Normal.Map', {maxZoom: 18, minZoom: 5}).addTo(map),
+        google   =   L.tileLayer.chinaProvider('Google.Normal.Map', {maxZoom: 18, minZoom: 5}),
+        geoq   =   L.tileLayer.chinaProvider('Geoq.Normal.Map', {maxZoom: 18, minZoom: 5}),
+        tdta =  L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {maxZoom: 18, minZoom: 5}),
+        gz = L.esri.dynamicMapLayer({
+            url: 'http://192.168.0.23:6080/arcgis/rest/services/广州市地图/行政区划/MapServer',
+            opacity: 2
+        });
+    var baseLayers = {
+        "天地图": tdt,
+        "高德地图": gd,
+        "谷歌地图": google,
+        "智图地图": geoq,
+        "公司地图": gz
+    };
+    var overlays = {
+        "名称标识":tdta
+    };
+    L.control.layers(baseLayers, overlays,{position:'topright'}).addTo(map);
+
+    function loadData(treenode,callback){
+        $.ajax({
+            type: "get",
+            async:true,
+            url: "http://127.0.0.1:8080/query/"+treenode.database+"/"+treenode.collection,
+            dataType: "jsonp",
+            success: callback
+        });
+    }
+</script>
+</html>

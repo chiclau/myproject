@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/plugins/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script src="js/plugins/jquery.min.js"></script>
+    <script src="js/plugins/zTree/js/jquery.ztree.core.js"></script>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+</head>
+<body>
+<table style="height: 100%;width: 100%;"  border="1">
+    <tr >
+        <td align="left" valign="top" width="200">
+            <div class="zTreeDemoBackground left">
+                <ul id="tree" class="ztree"></ul>
+            </div></td>
+        <td><div id="map" style="height:750px;"></div></td>
+    </tr>
+
+</table>
+</body>
+<script type="text/javascript">
+    var setting = {
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback : {
+            onClick : function(event, treeId, treeNode, clickFlag){
+                if(!treeNode.layer){
+                    loadData(treeNode,function(data){
+                        var cities = L.layerGroup()
+                        L.geoJSON(data, {
+                            onEachFeature: function (feature, layer) {
+                                layer.bindPopup(feature.properties.NAME+"【<font color='red'>"+feature.properties.DWMC+"</font>】");
+                            }
+                        }).addTo(cities);
+                        treeNode.layer = cities;
+                        map.addLayer(cities);
+                    })
+                }else{
+                    map.removeLayer(treeNode.layer);
+                    treeNode.layer = null;
+                }
+            }
+        }
+    };
+    var zNodes =[
+        { id:2, pId:0, name:"油气", open:true, icon:"js/plugins/zTree/css/zTreeStyle/img/diy/4.png"},
+        { id:21, pId:2, name:"站点信息", icon:"js/plugins/zTree/css/zTreeStyle/img/diy/6.png",database:'oilgas',collection:'site'},
+        { id:22, pId:2, name:"管道信息", icon:"js/plugins/zTree/css/zTreeStyle/img/diy/7.png",database:'oilgas',collection:'pipeline'}
+    ];
+    $(document).ready(function(){
+        $.fn.zTree.init($("#tree"), setting, zNodes);
+    });
+
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 12
+    });
+    L.tileLayer.chinaProvider('Geoq.Normal.Gray', {maxZoom: 18, minZoom: 5}).addTo(map);
+
+
+    function loadData(treenode,callback){
+        $.ajax({
+            type: "get",
+            async: false,
+            url: "http://127.0.0.1:8080/query/"+treenode.database+"/"+treenode.collection,
+            dataType: "jsonp",
+            success: callback,
+            error: function(){
+                alert('fail');
+            }
+        });
+    }
+</script>
+</html>

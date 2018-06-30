@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css" />
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js" ></script>
+    <script src="data/站点.js"></script>
+    <script src="data/详细管线.js"></script>
+</head>
+<body class="">
+<div id="map" style="height: 680px;"></div>
+</body>
+<script type="text/javascript">
+    var height = document.body.clientHeight;
+    var map = L.map("map").setView([23.1, 113.2], 9);//定位在广州
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution : '测试',
+        maxZoom : 18,
+        id : 'mapbox.streets',
+        accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    }).addTo(map);
+    L.geoJSON(json_data_zd,{
+        filter: function (feature){
+            return true;
+            //return feature.properties.JSJD == '在建';
+        },
+        onEachFeature : function (feature, layer) {
+           layer.bindPopup(feature.properties.TYPE);
+        }
+    }).addTo(map);
+
+    L.geoJSON(json_data_gx).addTo(map);
+</script>
+</html>

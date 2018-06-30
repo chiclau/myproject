@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css" />
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js" ></script>
+</head>
+<body class="">
+<div id="map" style="height: 680px;"></div>
+</body>
+<script type="text/javascript">
+    var height = document.body.clientHeight;
+    var map = L.map("map").setView([23.1, 113.2], 9);//定位在广州
+
+/*    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution : '测试',
+        maxZoom : 18,
+        id : 'mapbox.streets',
+        accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    }).addTo(map);*/
+
+    var envLayer=L.esri.dynamicMapLayer({
+        url: 'http://192.168.0.23:6080/arcgis/rest/services/%E5%B9%BF%E5%B7%9E%E5%9C%B0%E5%9B%BE/%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%88%92/MapServer',
+        opacity: 1
+    });
+    map.addLayer(envLayer);
+
+
+    var envLayer1=L.esri.dynamicMapLayer({
+        url: 'http://192.168.0.23:6080/arcgis/rest/services/广州地图/电力/MapServer',
+        opacity: 1
+    });
+    var envLayer2=L.esri.dynamicMapLayer({
+        url: 'http://192.168.0.23:6080/arcgis/rest/services/广州地图/油气/MapServer',
+        opacity: 1,
+        layers: [34,45,47]
+    });
+
+</script>
+</html>

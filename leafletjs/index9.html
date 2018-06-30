@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index.html</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>index.html</title>
+	<link rel="stylesheet" href="js/plugins/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+	<script src="js/plugins/jquery.min.js"></script>
+	<script src="js/plugins/zTree/js/jquery.ztree.core.js"></script>
+	<link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+	<script src="js/leaflet/leaflet-src.js"></script>
+	<script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+	<script src="js/plugins/coordtransform.js"></script>
+	<script src="data/充电站.js"></script>
+	<script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js"></script>
+</head>
+<body>
+	<div id="mapid" style="width:1300px;height:650px"></div>
+</body>
+<script type="text/javascript">
+    // var gcj02towgs84 = coordtransform.gcj02towgs84(bd09togcj02[0],bd09togcj02[1]);
+	var map = L.map('mapid').setView([23.144521,113.397563], 13);
+    L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {maxZoom: 18, minZoom: 5}).addTo(map);
+    var envLayer=L.esri.dynamicMapLayer({
+        url: 'http://192.168.0.23:6080/arcgis/rest/services/广州市地图/行政区划/MapServer',
+        opacity: 1
+    });
+    map.addLayer(envLayer);
+    L.geoJSON(json_data_cdz,{
+        filter: function (feature){
+            return true;
+        },
+        onEachFeature : function (feature, layer) {
+            layer.bindPopup(feature.properties.CDZNAME);
+        }
+    }).addTo(map);
+</script>
+</html>

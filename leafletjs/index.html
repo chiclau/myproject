@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index.html</title>
+<meta name="keywords" content="keyword1,keyword2,keyword3">
+<meta name="description" content="this is my page">
+<meta name="content-type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+<script src="js/leaflet/leaflet.js"></script>
+<style type="text/css">
+</style>
+</head>
+<body>
+	<div id="mapid" style="width:800px;height:600px"></div>
+</body>
+<script type="text/javascript">
+	var mymap = L.map('mapid').setView([ 51.505, -0.09 ], 13);
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		attribution : '测试',
+		maxZoom : 18,
+		id : 'mapbox.streets',
+		accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+	}).addTo(mymap);
+
+	var marker = L.marker([ 51.5, -0.09 ]).addTo(mymap);
+	marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+	
+	var popup = L.popup()
+		.setLatLng([ 51.5, -0.09 ])
+		.setContent("I am a standalone popup.")
+		.openOn(mymap);
+		
+	var circle = L.circle([ 51.508, -0.11 ], {
+		color : 'red',
+		fillColor : '#f03',
+		fillOpacity : 0.5,
+		radius : 500
+	}).addTo(mymap);
+
+	var polygon = L.polygon([
+		[ 51.509, -0.08 ],
+		[ 51.503, -0.06 ],
+		[ 51.51, -0.047 ]
+	]).addTo(mymap);
+	
+	circle.bindPopup("I am a circle.");
+	polygon.bindPopup("I am a polygon.");
+
+	function onMapClick(e) {
+		alert("You clicked the map at " + e.latlng);
+	}
+
+	function onMapClick(e) {
+		popup.setLatLng(e.latlng)
+			.setContent("You clicked the map at " + e.latlng.toString())
+			.openOn(mymap);
+	}
+	mymap.on('click', onMapClick);
+</script>
+</html>

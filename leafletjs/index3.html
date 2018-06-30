@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>index.html</title>
+<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+<script src="js/leaflet/leaflet-src.js"></script>
+<script src="data/china.js"></script>
+<script src="data/shanghai.js"></script>
+</head>
+<body class="">
+	<div id="map" style="height: 680px;"></div>
+</body>
+<script type="text/javascript">
+	var map = L.map('map', {
+		crs : L.CRS.EPSG3857 //默认墨卡托投影 ESPG：3857
+	});
+	map.setView([ 35, 110 ], 5);
+	L.control.scale().addTo(map); //比例尺
+
+	//Google卫星
+	/* var google = L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+		attribution : 'google'
+	}).addTo(map); */
+
+	//osm地图
+	/* var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+		attribution : '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map) */
+
+
+    //mapbox地图
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		attribution : '测试',
+		maxZoom : 18,
+		id : 'mapbox.streets',
+		accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+	}).addTo(map);
+
+    var Esri_WorldStreetMap = L.tileLayer('http://192.168.0.23:6080/arcgis/rest/services/%E5%B9%BF%E5%B7%9E%E5%9C%B0%E5%9B%BE/%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%88%92/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+    });
+
+    L.geoJSON(json_china, {
+        style : {
+            "color" : 'black',
+            "weight" : 1
+        }
+//        ,onEachFeature : function (feature, layer) {
+//            layer.bindPopup(feature.properties.NAME);
+//        }
+    }).addTo(map);
+
+    var marker = L.marker([45.77519, 126.57349]).addTo(map);
+    marker.bindPopup("<b>哈尔滨</b>").openPopup();
+
+    var popup = L.popup();
+    map.on('click', function(e) {
+        popup.setLatLng(e.latlng)
+            .setContent("You clicked the map at " + e.latlng.toString())
+            .openOn(map);
+    });
+</script>
+</html>

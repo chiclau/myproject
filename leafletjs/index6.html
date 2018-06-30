@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js"></script>
+    <script src="data/站点.js"></script>
+    <script src="data/详细管线.js"></script>
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 12
+    });
+
+    L.esri.dynamicMapLayer({
+        url: 'http://192.168.0.23:6080/arcgis/rest/services/%E5%B9%BF%E5%B7%9E%E5%9C%B0%E5%9B%BE/%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%88%92/MapServer',
+        opacity: 2
+    }).addTo(map);
+
+
+    L.geoJSON(json_data_gx, {
+        onEachFeature: function (feature, layer) {
+            console.log(layer);
+            layer.options.color = 'red';
+            layer.bindPopup(feature.properties.TYPE);
+        }
+    }).addTo(map)
+
+    L.geoJSON(json_data_zd, {
+        pointToLayer: function (feature, latlng) {
+//            return L.marker(latlng, {icon: L.icon({
+//                iconUrl: feature.properties.JSJD =='已建'?'images/chart_bar.png':'images/department.png',
+//                iconSize: [16, 16]
+//            })});
+            return L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: feature.properties.JSJD == '已建' ? '#00FF00' : 'red',
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(feature.properties.TYPE + "["+feature.properties.JSJD+"]");
+        }
+    }).addTo(map);
+</script>
+</html>

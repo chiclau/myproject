@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/plugins/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script src="js/plugins/jquery.min.js"></script>
+    <script src="js/plugins/zTree/js/jquery.ztree.all.js"></script>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js"></script>
+</head>
+<body>
+<table style="height: 100%;width: 100%;"  border="1">
+    <tr >
+        <td align="left" valign="top" width="200">
+            <div class="zTreeDemoBackground left">
+                <ul id="tree" class="ztree"></ul>
+            </div></td>
+        <td><div id="map" style="height:940px;"></div></td>
+    </tr>
+
+</table>
+</body>
+<script type="text/javascript">
+    var setting = {
+        check: {
+            enable: true
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback : {
+            onCheck  : function(e, treeId, treeNode){
+                if(treeNode.checked){
+
+                }else{
+                    if(treeNode.database && treeNode.layer){
+                        map.removeLayer(treeNode.layer);
+                        treeNode.layer = null;
+                    }else {
+
+                    }
+                }
+            }
+        }
+    };
+    var zNodes =[
+        { id:1, pId:0, name:"油气", open:true, icon:"js/plugins/zTree/css/zTreeStyle/img/diy/4.png"},
+        { id:2, pId:1, name:"站点信息", icon:"js/plugins/zTree/css/zTreeStyle/img/diy/6.png",database:'oilgas',collection:'site'},
+        { id:3, pId:1, name:"管道信息", icon:"js/plugins/zTree/css/zTreeStyle/img/diy/7.png",database:'oilgas',collection:'pipeline'}
+    ];
+    $(document).ready(function(){
+        $.fn.zTree.init($("#tree"), setting, zNodes);
+    });
+
+    var mbAttr = '自定义图层';
+    var tdt   =   L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {maxZoom: 18, minZoom: 5,attribution: mbAttr}),
+        gd   =   L.tileLayer.chinaProvider('GaoDe.Normal.Map', {maxZoom: 18, minZoom: 5,attribution: mbAttr}),
+        gz = L.esri.dynamicMapLayer({
+            url: 'http://192.168.0.23:6080/arcgis/rest/services/%E5%B9%BF%E5%B7%9E%E5%9C%B0%E5%9B%BE/%E8%A1%8C%E6%94%BF%E5%8C%BA%E5%88%92/MapServer',
+            opacity: 2
+        });
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 10
+    });
+    var tdta =  L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {maxZoom: 18, minZoom: 5});
+    map.addLayer(gd);
+
+    var baseLayers = {
+        "天地图": tdt,
+        "高德地图": gd,
+        "广州市地图": gz
+    };
+    var overlays = {
+        "名称标识":tdta
+    };
+    L.control.layers(baseLayers, overlays,{position:'topright'}).addTo(map);
+
+    function loadData(treenode,callback){
+        $.ajax({
+            type: "get",
+            async: false,
+            url: "http://127.0.0.1:8080/query/"+treenode.database+"/"+treenode.collection,
+            dataType: "jsonp",
+            success: callback,
+            error: function(){
+                alert('fail');
+            }
+        });
+    }
+</script>
+</html>

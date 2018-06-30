@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="../js/leaflet/leaflet.css"/>
+    <script src="../js/leaflet/leaflet-src.js"></script>
+    <script src="../js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    //参考demo   http://leafletjs.com/examples/custom-icons/
+    var map = L.map('map').setView([ 51.505, -0.09 ], 13);
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        attribution : '测试',
+        maxZoom : 18,
+        id : 'mapbox.streets',
+        accessToken : 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    }).addTo(map);
+
+    var greenIcon = L.icon({
+        iconUrl: '../images/leaf-green.png',
+        shadowUrl: '../images/leaf-shadow.png',
+        iconSize:     [38, 95], // size of the icon
+        shadowSize:   [50, 64], // size of the shadow
+        iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+        shadowAnchor: [4, 62],  // the same for the shadow
+        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+    L.marker([51.5, -0.09], {icon: greenIcon}).addTo(map);
+
+    var LeafIcon = L.Icon.extend({
+        options: {
+            shadowUrl: '../images/leaf-shadow.png',
+            iconSize:     [38, 95],
+            shadowSize:   [50, 64],
+            iconAnchor:   [22, 94],
+            shadowAnchor: [4, 62],
+            popupAnchor:  [-3, -76]
+        }
+    });
+    var greenIcon = new LeafIcon({iconUrl: '../images/leaf-green.png'}),
+        redIcon = new LeafIcon({iconUrl: '../images/leaf-red.png'}),
+        orangeIcon = new LeafIcon({iconUrl: '../images/leaf-orange.png'});
+    L.icon = function (options) {
+        return new L.Icon(options);
+    };
+    L.marker([51.5, -0.09], {icon: greenIcon}).addTo(map).bindPopup("I am a green leaf.");
+    L.marker([51.495, -0.083], {icon: redIcon}).addTo(map).bindPopup("I am a red leaf.");
+    L.marker([51.49, -0.1], {icon: orangeIcon}).addTo(map).bindPopup("I am an orange leaf.");
+</script>
+</html>

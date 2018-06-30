@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+    <script src="data/详细管线.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js" ></script>
+
+    <link href="https://cdn.bootcss.com/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 12
+    });
+    L.tileLayer.chinaProvider('TianDiTu.Normal.Map', {maxZoom: 18, minZoom: 5}).addTo(map);
+    L.tileLayer.chinaProvider('TianDiTu.Normal.Annotion', {maxZoom: 18, minZoom: 5}).addTo(map);
+
+    var redMarker = L.AwesomeMarkers.icon({
+        icon: 'coffee',
+        markerColor: 'red',
+        iconSize: [38, 95],
+        iconAnchor: [22, 94],
+        popupAnchor: [-3, -76],
+        shadowSize: [68, 95],
+        shadowAnchor: [22, 94]
+    });
+    L.marker([23.1, 113.3], {icon: redMarker}).addTo(map);
+
+    L.geoJSON(json_data_gx, {
+        onEachFeature: function (feature, layer) {
+            console.log(layer);
+            layer.options.color = 'red';
+            layer.bindPopup(feature.properties.TYPE);
+        }
+    }).addTo(map);
+</script>
+</html>

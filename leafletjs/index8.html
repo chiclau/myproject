@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>index.html</title>
+    <link rel="stylesheet" href="js/leaflet/leaflet.css"/>
+    <script src="js/leaflet/leaflet-src.js"></script>
+    <script src="js/leaflet/plugins/leaflet.ChineseTmsProviders.js"></script>
+    <script src="data/详细管线.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.1.1/dist/esri-leaflet.js" ></script>
+    <script src="http://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+
+    <link href="https://cdn.bootcss.com/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+</head>
+<body class="">
+<div id="map" style="height:750px;"></div>
+</body>
+<script type="text/javascript">
+    //获取url中的参数
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+        if (r != null) return unescape(r[2]); return null; //返回参数值
+    }
+
+    var database = getUrlParam("database") || "oilgas";
+    var collection = getUrlParam("collection") || "pipeline";
+    var map = L.map('map', {
+        center: [23.1, 113.3],
+        zoom: 12
+    });
+    L.tileLayer.chinaProvider('Geoq.Normal.Gray', {maxZoom: 18, minZoom: 5}).addTo(map);
+    $.ajax({
+        type: "get",
+        async: false,
+        url: "http://127.0.0.1:8080/query/"+database+"/"+collection,
+        dataType: "jsonp",
+        success: function(data){
+            L.geoJSON(data, {
+                onEachFeature: function (feature, layer) {
+                    layer.options.color = 'red';
+                    layer.bindPopup(feature.properties.TYPE);
+                }
+            }).addTo(map);
+        },
+        error: function(){
+            alert('fail');
+        }
+    });
+
+</script>
+</html>
