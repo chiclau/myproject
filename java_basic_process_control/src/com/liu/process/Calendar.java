@@ -27,19 +27,36 @@ public class Calendar {
 			System.out.println("输入的年份不能小于1！！");
 			return;
 		}
-		weekDay=
-				
-				
-				
+		weekDay=(int) firstDayOfYear(year);
+		System.out.println(" "+year+"年");
+		System.out.println("=====================================");		
+			for(int i=1;i<=12;i++) {
+				System.out.println();
+				printMoth(i);
+				System.out.println();
+			}	
 				
 				
 				
 			
 	}
-	
+	/**打印每月日期 */
+	public static void printMoth(int m) {
+		printHead(m);
+		int days=daysOfMonth(m);
+		for(int i=1;i<=days;i++) {
+			if(i<10)System.out.println(" "+i);
+			else System.out.println("          "+i);
+			weekDay=(weekDay+1)%7;
+			if(weekDay==0) {
+				System.out.println();
+				System.out.print("      ");
+			}
+		}
+	}
 	/***打印每周星期标题*/	
 	public static void printHead(int m) {
-		System.out.println("   "+m+"  月   日      一       二      三       四       五   六");
+		System.out.println("     "+m+"  月    日      一       二      三       四       五   六");
 		System.out.println("      ");
 		for(int i=0;i<weekDay;i++)System.out.println("  ");
 	}
@@ -56,14 +73,22 @@ public class Calendar {
 	
 	/**返回每月的天数*/
 	public static int daysOfMonth(int m) {
-		switch (key) {
-		case value:
-			
-			break;
-
-		default:
-			break;
+		switch (m) {
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
+		case 12: return 31;
+		case 4:
+		case 6:
+		case 9:
+		case 11:return 30;
+		case 2:if(isLeapYear(year)) return 29;
+						else  return 28;
 		}
+		return 0;
 	}
 	
 	
