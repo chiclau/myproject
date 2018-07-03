@@ -1,0 +1,61 @@
+package com.lyht.business.analysisCalculation.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.Constants;
+import com.lyht.business.analysisCalculation.bean.Result;
+import com.lyht.business.analysisCalculation.dao.ResultDao;
+import com.lyht.business.system.bean.SysStaff;
+import com.lyht.util.Randomizer;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年6月4日 15:24:11
+ *说明:  产流计算结果service
+*/
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultService {
+	@Resource ResultDao resuldDao;
+	
+	
+		/**
+		 * 保存计算结果
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public Result saveResult(Result result,Result result1) {
+			String [] jyl=result.getJyl().split(",");
+			String [] yml=result.getYml().split(",");
+			String [] ymlTime=result.getYmlTime().split(",");
+			String staffCode=result.getCreateStaff();
+			for(int i=0;i<yml.length;i++) {
+				String id=Randomizer.nextNumber("r", 7);
+				Result result2=new Result();
+				result2.setJyl(jyl[i].trim());//降雨量
+				result2.setYml(yml[i].trim());//雨面量
+				result2.setYmlTime(ymlTime[i].trim());//雨面量时间
+				result2.setId(id);
+				result2.setCreateStaff(staffCode);
+				resuldDao.saveResult(result2);
+			}
+	
+			return result1;
+		}
+
+		/**
+		 * 根据id删除
+		 */
+		public void delResult(String ids) {
+			resuldDao.delResult(ids);
+		}
+
+
+
+
+
+}

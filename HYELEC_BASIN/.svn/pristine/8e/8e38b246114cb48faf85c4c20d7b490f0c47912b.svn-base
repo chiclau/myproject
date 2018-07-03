@@ -1,0 +1,99 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+
+<form id="query_form" name="info_form" class="form-inline"
+	autocomplete="off" method="post"
+	data-bv-message="This value is not valid"
+	data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+	data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+	data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+
+	<div class="modal fade" id="query_info_precipitation">
+		<div class="modal-dialog " style="width: 800px">
+			<div class="modal-content">
+				<div class="modal-header"
+					style="height: 40px">
+					<button type="button" class="btn btn-link close"
+						data-dismiss="modal">
+						<i class="icon icon-times"></i><span class="sr-only">关闭</span>
+					</button>
+					<h4 class="modal-title" style="line-height: 15px;">
+						<i class="icon icon-home"></i>&nbsp;&nbsp;降水量详细
+					</h4>
+				</div>
+				<div class="modal-body">
+					<table class="table table-bordered" style="margin-bottom: 0px;">
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>测站编码：</lable>
+							</td>
+							<td style="width: 300px; text-align: left"><lable
+								style="margin-left: 15px;" id="STCD_pptnDetail"></lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>时间：</lable>
+							</td>
+							<td style="width: 300px; text-align: left"><lable
+								style="margin-left: 15px;" id="TM_pptnDetail"></lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>时段降水量：</lable>
+							</td>
+							<td style="width: 300px; text-align: left"><lable
+								style="margin-left: 15px;" id="DRP_pptnDetail"></lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>时段长：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="INTV_pptnDetail"></lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>降水历时：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="PDR_pptnDetail"></lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>日降水量：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="DYP_pptnDetail"></lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>天气状况：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="WTH_pptnDetail"></lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable></lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;"></lable></td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer"
+					style="height: 40px;">
+					<button type="button" class="btn btn-large btn-primary"
+						data-dismiss="modal"
+						style="margin-top: -14px; margin-right: -5px">
+						<i class="icon icon-times"></i> 取消
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</form>
+
+
+

@@ -1,0 +1,118 @@
+ var flag = true;
+        $("input[name='czmc']").on('compositionstart',function(){// compositionstart 在输入一段需要确认的文本如拼音to汉字、语音时会触发
+            flag = false;
+        })
+        $("input[name='czmc']").on('compositionend',function(){//compositionend  在拼音选词完成、语音输入完毕时会触发
+            flag = true;
+        })
+        $("input[name='czmc']").each(function(i){
+        	
+        }).on('input',function(){
+        	
+        	
+            var _this = this;
+            setTimeout(function(){
+                if(flag){
+                    console.log($(_this).val());
+              /*      var json = "mStbprpFormBean.mStbprpInfoBean.stnm="+$(_this).val();
+                	var url = basePath + "chanliu/chanliu!list.action"
+                	common_ajax(json, url, function(response) {
+                		// 如果total是0，则该测站名称不存在
+                	});*/
+                }
+            },1)
+        })
+  
+     
+     //弹出列表框  
+    $("#txt1").click(function () {  
+        $("#div_items").css('display', 'block');  
+        return false;  
+    });  
+  
+    //隐藏列表框  
+    $("body").click(function () {  
+        $("#div_items").css('display', 'none');  
+    });  
+  
+    //移入移出效果  
+    $(".div_item").hover(function () {  
+        $(this).css('background-color', '#1C86EE').css('color', 'white');  
+    }, function () {  
+        $(this).css('background-color', 'white').css('color', 'black');  
+    });  
+  
+    //文本框输入  
+    $("#txt").keyup(function () {  
+        $("#div_items").css('display', 'block');//只要输入就显示列表框  
+  
+        if ($("#txt").val().length <= 0) {  
+            $(".div_item").css('display', 'block');//如果什么都没填，跳出，保持全部显示状态  
+            return;  
+        }  
+  
+        $(".div_item").css('display', 'none');//如果填了，先将所有的选项隐藏  
+  
+        for (var i = 0; i < $(".div_item").length; i++) {  
+            //模糊匹配，将所有匹配项显示  
+            if ($(".div_item").eq(i).text().substr(0, $("#txt").val().length) == $("#txt").val()) {  
+                $(".div_item").eq(i).css('display', 'block');  
+            }  
+        }  
+    });  
+  
+    //项点击  
+    $(".div_item").click(function () {  
+        $("#txt").val($(this).text());  
+              var json = "mStbprpFormBean.mStbprpFormBean.stcd='STCD7707'";
+    	var url = basePath + "chanliu/chanliu!list.action"
+    	common_ajax(json, url, function(response) {
+    		for (var i = 0; i < response.rows.length; i++) {
+				alert(response.rows[i])
+			}
+    	});
+    });  
+    //弹出列表框  
+    $("#txt").click(function () {  
+        $("#div_items").css('display', 'block');  
+        return false;  
+    });  
+  
+    //隐藏列表框  
+    $("body").click(function () {  
+        $("#div_items").css('display', 'none');  
+    });  
+  
+    //移入移出效果  
+    $(".div_item").hover(function () {  
+        $(this).css('background-color', '#1C86EE').css('color', 'white');  
+    }, function () {  
+        $(this).css('background-color', 'white').css('color', 'black');  
+    });  
+  
+    //文本框输入  
+    $("input[name='czmc']").keyup(function () {  
+        $("#div_items").css('display', 'block');//只要输入就显示列表框  
+  
+        if ($("#txt").val().length <= 0) {  
+            $(".div_item").css('display', 'block');//如果什么都没填，跳出，保持全部显示状态  
+            return;  
+        }  
+  
+        $(".div_item").css('display', 'none');//如果填了，先将所有的选项隐藏  
+  
+        for (var i = 0; i < $(".div_item").length; i++) {  
+            //模糊匹配，将所有匹配项显示  
+            if ($(".div_item").eq(i).text().substr(0, $("#txt").val().length) == $("#txt").val()) {  
+                $(".div_item").eq(i).css('display', 'block');  
+            }  
+        }  
+    });  
+  
+    //项点击  
+    $(".div_item").click(function () {  
+        $("#txt").val($(this).text());  
+    });  
+   
+        
+        

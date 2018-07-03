@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<!--    设置Convention插件是否从jar包中搜索Action类 [可选] 默认值为true -->
+    <constant name="struts.convention.action.disableJarScanning" value="true" />
+<!--     设置Convention插件文件协议类型[可选] -->
+    <constant name="struts.convention.action.fileProtocols" value="jar,wsjar" />
+<!--     设置Convention插件需要搜索的jar包 -->
+    <constant name="struts.convention.action.includeJars" value=".*?/lyht_*.*?jar(!/)?" />
+<!--     Convention会试图从指定包中发现Action类。 -->
+    <constant name="struts.convention.action.packages" value="com.lyht.business" />
+    <!-- 请求参数的编码方式 -->  
+    <constant name="struts.i18n.encoding" value="UTF-8"/>  
+    
+    <!-- 指定被struts2处理的请求后缀类型。多个用逗号隔开 -->  
+    <constant name="struts.action.extension" value="action,do,go,qqi"/>  
+    
+    <!-- 当struts.xml改动后，是否重新加载。默认值为false(生产环境下使用),开发阶段最好打开  -->  
+    <constant name="struts.configuration.xml.reload" value="true"/>  
+    
+    <!-- 是否使用struts的开发模式。开发模式会有更多的调试信息。默认值为false(生产环境下使用),开发阶段最好打开  -->  
+    <constant name="struts.devMode" value="false"/>  
+    
+    <!-- 设置浏览器是否缓存静态内容。默认值为true(生产环境下使用),开发阶段最好关闭  -->  
+    <constant name="struts.serve.static.browserCache" value="false" />  
+    
+    <!-- 指定由spring负责action对象的创建   -->
+    <constant name="struts.objectFactory" value="spring" />  
+      
+    <!-- 是否开启动态方法调用 -->  
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/> 
+    
+    <!-- 不进行扫描的包，用，分割，被包含的包，将不会被扫描成为action -->
+    <!--     <constant name="struts.convention.exclude.packages" value="com.lyht.service" /> -->
+    <!-- 进行扫描的根包，该包会被扫描成action -->
+    <constant name="struts.convention.action.packages" value="com.lyht" />
+    <!-- 用于进行action查找的后缀 -->
+    <constant name="struts.convention.action.suffix" value="Action" />
+    <!-- 指定的包会被进行扫描 -->
+    <constant name="struts.convention.package.locators" value="action,actions,struts,struts2" />
+    <!-- 返回页面类型 -->
+    <constant name="struts.convention.relative.result.types" value="dispatcher,velocity,freemarker" />
+    <package name="doc" extends="struts-default" namespace="/">   
+	    <action name="sell" class="com.lyht.business.doc.action.SellerStatAction" method="rec">  
+	             <result type="stream">   
+	             <param name="contentType">application/vnd.ms-excel</param> 
+	            <param name="inputName">targetFile</param>
+	             <param name="bufferSize">4096</param> 
+	            </result>  
+	    </action>  
+	</package>
+    
+</struts>    
