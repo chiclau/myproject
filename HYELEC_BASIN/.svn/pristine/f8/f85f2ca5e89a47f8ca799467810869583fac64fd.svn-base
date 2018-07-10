@@ -1,0 +1,93 @@
+﻿<%@ page language="java" pageEncoding="UTF-8"%>
+
+<form id="query_form" name="info_form" class="form-inline"
+	autocomplete="off" method="post"
+	data-bv-message="This value is not valid"
+	data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+	data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+	data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+
+	<div class="modal fade" id="query_info_waterLevelFlow">
+		<div class="modal-dialog " style="width: 700px">
+			<div class="modal-content">
+				<div class="modal-header"
+					style="height: 40px">
+					<button type="button" class="btn btn-link close"
+						data-dismiss="modal">
+						<i class="icon icon-times"></i><span class="sr-only">关闭</span>
+					</button>
+					<h4 class="modal-title" style="line-height: 15px;">
+						<i class="icon icon-home"></i>&nbsp;&nbsp;水位流量详细
+					</h4>
+				</div>
+				<div class="modal-body">
+					<table class="table table-bordered" style="margin-bottom: 0px;">
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>曲线名称：</lable>
+							</td>
+							<td style="width: 230px; text-align: left"><lable
+								style="margin-left: 15px;" id="LNNM_pptnDetail_s">水位流量关系曲线</lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>曲线序号：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="PTNO_pptnDetail_s">004</lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>测站编码：</lable>
+							</td>
+							<td style="width: 230px; text-align: left"><lable
+								style="margin-left: 15px;" id="STCD_pptnDetail_s">BM20180101</lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>水位：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="Z_pptnDetail_s">20m</lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>流量：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="Q_pptnDetail_s">2000m³/s</lable></td>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>修改时间：</lable>
+							</td>
+							<td style="text-align: left"><lable
+								style="margin-left: 15px;" id="MODITIME_pptnDetail_s"></lable></td>
+						</tr>
+						<tr>
+							<td
+								style="width: 100px; text-align: right; font-weight: bold; background: #f1f1f1">
+								<lable>备注：</lable>
+							</td>
+							<td style="text-align: left" colspan="3"><lable
+								style="margin-left: 15px;" id="COMMENTS_pptnDetail_s">江河渠道中某断面的流量与同时水位之间的对应关系。此项关系要根据该断面的多次实测流量和同时水位的资料来确定。通常用水位为纵坐标、流量为横坐标的水位流量关系曲线来表示，有时也可以选配适当的数学方程式，还可以根据曲线或方程式列出便于查读的水位流量关系表。</lable></td>
+						</tr>
+					</table>
+				</div>
+				<div class="modal-footer"
+					style="height: 40px;">
+					<button type="button" class="btn btn-large btn-primary"
+						data-dismiss="modal"
+						style="margin-top: -14px; margin-right: -5px">
+						<i class="icon icon-times"></i> 取消
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</form>
+
+
+

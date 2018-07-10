@@ -1,0 +1,206 @@
+package com.lyht.business.modelManage.dao;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.modelManage.bean.ModelInfo;
+import com.lyht.business.modelManage.formbean.ModelInfoFormBean;
+import com.lyht.util.CommonUtil;
+
+/**
+ *作者： 刘魁
+ *脚本日期:2018年5月15日 21:41:11
+ *说明:  模型信息Dao
+*/
+@Repository
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class ModelInfoDao extends HibernateBaseDao<ModelInfo> {
+	/**
+	 * 获取模型列表数据
+	 * */
+	public PageResults getModelInfoListData(ModelInfoFormBean mInfoBean) {
+		StringBuilder sql=new StringBuilder();
+		String str=spliceStrModelInfo(mInfoBean);
+		sql.append("SELECT T.* ,COUNT(M.PARA_CODE) AS CSSL FROM MODEL_INFO T   ");
+		sql.append("LEFT JOIN  MODEL_PARAMENTER M ON T.MODEL_CODE=M.MODEL_CODE ");
+		if(null!=str && !"".equals(str)){
+			sql.append(str);
+		}
+		sql.append("GROUP BY T.MODEL_CODE,T.MODEL_NAME,T.MODE_TYPE,T.REMARK,T.STATE  ");
+		sql.append(" ORDER BY MODEL_CODE");
+		return this.findPageByFetchedSql(sql.toString(), null, mInfoBean.getPageBean().getOffset(),mInfoBean.getPageBean().getLimit(), null);
+	}
+	
+	/**
+	 * 根据主键获取模型信息实体
+	 * */
+	public PageResults getModelInfoByCode(String ids) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT MODEL_CODE,MODEL_NAME,MODE_TYPE,REMARK, STATE FROM MODEL_INFO WHERE 1=1 ");
+		if(ids.length()>0){
+			sql.append(" AND MODEL_CODE ='"+ids+"'");
+		}
+		sql.append(" ORDER BY MODEL_CODE");
+		return this.findPageByFetchedSql(sql.toString(), null, 0, 100000000, null);
+	}
+	
+	/**
+	 * 根据主键ID获取实体
+	 * */
+	@SuppressWarnings("unchecked")
+	public ModelInfo  getModelInfoById(String id) {
+		ModelInfo modelInfo=new ModelInfo();
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT MODEL_CODE,MODEL_NAME,MODE_TYPE,REMARK, STATE FROM MODEL_INFO WHERE MODEL_CODE= '"+id+"'");
+		List<ModelInfo> modelList=null;
+		try{
+			modelList=this.getSession().createSQLQuery(sql.toString()).addEntity(ModelInfo.class).list();
+			for(int i=0;i<modelList.size();i++){
+				modelInfo=modelList.get(0);
+			}
+		}catch (Exception e) {
+			e.getStackTrace();
+		}
+		return modelInfo;
+	}
+	
+	/**
+	 * 根据主键删除模型信息实体
+	 * */
+	public void delModelInfoByCodes(String ids) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM MODEL_INFO WHERE MODEL_CODE IN ('"+ids+"')");
+		this.exectueSQL(sql.toString());
+	}
+	
+	/**
+	 * 增加实体对象
+	 * */
+	public void saveModelInfo(ModelInfo modelInfo){
+		StringBuilder sql=new StringBuilder();
+		sql.append("INSERT INTO MODEL_INFO (MODEL_CODE,MODEL_NAME,MODE_TYPE,REMARK,STATE) ");
+		sql.append( "VALUES ('"+modelInfo.getModelCode()+"','"+CommonUtil.trim(modelInfo.getModelName())+"',");
+		sql.append( " '"+CommonUtil.trim(modelInfo.getModelType())+"','"+CommonUtil.trim(modelInfo.getRemark())+"',");
+		sql.append( "'"+1+"')");
+		this.exectueSQL(sql.toString());
+	}
+	
+	
+	/**
+	 * 修改实体对象
+	 * */
+	public void updateModelInfo(ModelInfo modelInfo) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("UPDATE MODEL_INFO SET MODEL_NAME='"+modelInfo.getModelName()+"',MODE_TYPE='"+modelInfo.getModelType()+"',");
+		sql.append("REMARK='"+modelInfo.getRemark()+"',STATE='"+modelInfo.getState()+"' ");
+		sql.append("WHERE MODEL_CODE='"+modelInfo.getModelCode()+"'");
+		this.exectueSQL(sql.toString());				
+	}
+	
+	
+	
+	/**
+	 * 根据条件查询模型列表
+	 * */
+	private String spliceStrModelInfo(ModelInfoFormBean mInfoBean){
+		StringBuilder sql=new StringBuilder();
+		if(null!=mInfoBean){
+			if(CommonUtil.trim(mInfoBean.getSearchName()).length()>0){
+				sql.append("AND ((T.MODEL_CODE LIKE '%"+CommonUtil.trim(mInfoBean.getSearchName())+"%') ");
+				sql.append("OR (T.MODEL_NAME LIKE '%"+CommonUtil.trim(mInfoBean.getSearchName())+"%') ");
+				sql.append("OR (T.MODE_TYPE LIKE '%"+CommonUtil.trim(mInfoBean.getSearchName())+"%') ");
+				sql.append("OR (T.REMARK LIKE '%"+CommonUtil.trim(mInfoBean.getSearchName())+"%')) ");
+				//sql.append("OR (T.STATE LIKE '%"+CommonUtil.trim(mInfoBean.getSearchName())+"%')) ");
+			}	if(null!=mInfoBean.getModelInfoFormBean()){
+					if(CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelCode()).length()>0){
+					sql.append(" AND T.MODEL_CODE LIKE '%"+CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelCode())+"%'");
+					}
+					if(CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelName()).length()>0){
+						sql.append(" AND T.MODEL_NAME LIKE '%"+CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelName())+"%'");
+					}
+					if(CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelType()).length()>0){
+						sql.append(" AND T.MODE_TYPE LIKE '%"+CommonUtil.trim(mInfoBean.getModelInfoFormBean().getModelType())+"%'");
+					}
+					if(CommonUtil.trim(mInfoBean.getModelInfoFormBean().getRemark()).length()>0){
+						sql.append(" AND T.REMARK LIKE '%"+CommonUtil.trim(mInfoBean.getModelInfoFormBean().getRemark())+"%'");
+					}
+					/*if(CommonUtil.trim(mInfoBean.getModelInfoFormBean().getState()).length()>0){
+						sql.append(" AND T.STATE LIKE '%"+CommonUtil.trim(mInfoBean.getModelInfoFormBean().getState())+"%'");
+					}*/
+			}
+			
+		}
+		return sql.toString();
+	}
+	
+	
+	/**
+	 * 获取列表数据用于导出
+	 */
+	public PageResults getModelListData_export(ModelInfoFormBean modelInfoFormBean){
+		StringBuilder sql=new StringBuilder();
+		String str=spliceStrModelInfo(modelInfoFormBean);
+		sql.append("SELECT T.* ,COUNT(M.PARA_CODE) AS CSSL FROM MODEL_INFO T , MODEL_PARAMENTER M WHERE T.MODEL_CODE=M.MODEL_CODE	");
+		sql.append("GROUP BY T.MODEL_CODE,T.MODEL_NAME,T.MODE_TYPE,T.REMARK,T.STATE");
+		if(null!=str && !"".equals(str)){
+			sql.append(str);
+		}
+		sql.append(" ORDER BY T.MODEL_CODE");
+		return this.findPageByFetchedSql(sql.toString(), null
+				,modelInfoFormBean.getPageBean().getOffset()
+				,modelInfoFormBean.getPageBean().getLimit()
+				,null);
+	}
+	
+	/**
+	 * getModelnamebyType
+	 */
+	public PageResults getModelNamebyType(ModelInfoFormBean modelInfoFormBean) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT T.MODEL_NAME ,T.MODE_TYPE  FROM MODEL_INFO T  ");
+		sql.append("GROUP BY T.MODEL_CODE,T.MODE_TYPE,T.MODEL_NAME   "); 
+		sql.append("ORDER BY T.MODEL_CODE"); 
+		return this.findPageByFetchedSql(sql.toString(), null
+				,modelInfoFormBean.getPageBean().getOffset()
+				,modelInfoFormBean.getPageBean().getLimit()
+				,null);
+	}
+	
+	/**
+	 * 汇流
+	 * @param modelInfoFormBean
+	 * @return
+	 */
+	public PageResults getModelHuiliu(ModelInfoFormBean modelInfoFormBean) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT  T.MODEL_CODE AS RVCD,T.MODEL_NAME AS NAME,T.MODE_TYPE AS PID  FROM MODEL_INFO T WHERE T.MODE_TYPE=1 ");
+		sql.append("GROUP BY T.MODEL_CODE,T.MODE_TYPE,T.MODEL_NAME   "); 
+		sql.append("ORDER BY T.MODEL_CODE"); 
+		return this.findPageByFetchedSql(sql.toString(), null
+				,modelInfoFormBean.getPageBean().getOffset()
+				,modelInfoFormBean.getPageBean().getLimit()
+				,null);
+	}
+	
+	/**
+	 * 产流
+	 * @param modelInfoFormBean
+	 * @return
+	 */
+	public PageResults getModelChanliu(ModelInfoFormBean modelInfoFormBean) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT  T.MODEL_CODE AS RVCD,T.MODEL_NAME AS NAME,T.MODE_TYPE AS PID FROM MODEL_INFO T WHERE T.MODE_TYPE=2 ");
+		sql.append("GROUP BY T.MODEL_CODE,T.MODE_TYPE,T.MODEL_NAME   "); 
+		sql.append("ORDER BY T.MODEL_CODE"); 
+		return this.findPageByFetchedSql(sql.toString(), null
+				,modelInfoFormBean.getPageBean().getOffset()
+				,modelInfoFormBean.getPageBean().getLimit()
+				,null);
+	}
+	
+	
+}

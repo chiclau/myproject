@@ -1,0 +1,142 @@
+package com.lyht.business.analysisCalculation.action;
+
+import java.util.HashMap;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.lyht.Constants;
+import com.lyht.RetMessage;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.ModelProgram;
+import com.lyht.business.analysisCalculation.control.ModelProgramControl;
+import com.lyht.business.analysisCalculation.formbean.ModelProgramFromBean;
+import com.lyht.business.modelManage.formbean.ModelInfoFormBean;
+import com.lyht.business.system.bean.SysRole;
+import com.lyht.business.system.bean.SysStaff;
+import com.lyht.util.BaseLyhtAction;
+import com.lyht.util.CommonFunction;
+import com.lyht.util.CommonUtil;
+
+import net.sf.json.JSONArray;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年5月12日 17:31:11
+ *说明:  我的方案Action
+*/
+@Namespace("/myplan")
+@Controller
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+@Action("myplan")
+public class MyPlanAction extends BaseLyhtAction {
+
+	private static final long serialVersionUID = 1L;
+	private static Logger log = Logger.getLogger("MyPlanAction");
+	private ModelProgramFromBean modelprogramFormBean=new ModelProgramFromBean();
+	private ModelInfoFormBean modelInfoFormBean=new ModelInfoFormBean();
+	private String modeCode;
+	private String [] modelCode;
+	@Resource
+	private ModelProgramControl modelProgramControl;
+	
+	/**
+	 * 我的方案列表
+	 */
+	public String list(){
+		log.info("MyPlanAction=list:获取我的方案列表");
+		HashMap<String, Object> mHashMap=new HashMap<String,Object>();
+		RetMessage mRetMessage=new RetMessage();
+		PageResults mPageResults=new PageResults();
+		SysStaff  mSysStaff = (SysStaff) getSession().getAttribute(Constants.SESSION_STAFF);
+		SysRole sysRole=(SysRole) getSession().getAttribute(Constants.SESSION_ROLE);
+		if (sysRole.getRoleCode().equals("admins")) {//如果是管理员，则可以看到所有方案信息，不过滤
+			mSysStaff=null;
+		}
+		modelInfoFormBean.getModelInfoFormBean().setModelCode(modeCode);
+		mRetMessage= modelProgramControl.getModelMess(modelprogramFormBean, modelInfoFormBean,mPageResults,mSysStaff);
+		if (mRetMessage.getRetflag().equals(RetMessage.RETFLAG_ERROR)){
+			JSONArray mJSONArray = new JSONArray();
+			mHashMap.put("total", 0);
+			mHashMap.put("rows", mJSONArray);	
+		}else {
+			mHashMap.put("total", mPageResults.getTotalCount());
+			mHashMap.put("rows", mPageResults.getResults());	
+		}
+		mHashMap.put(RetMessage.AJAX_RETFLAG, mRetMessage.getRetflag());
+		mHashMap.put(RetMessage.AJAX_MESSAGE, mRetMessage.getMessage());
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 删除/批量删除我的方案
+	 * @return
+	 */
+	public String removeids(){
+		log.info("批量删除==MyPlanAction.removeids");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		RetMessage mRetMessage=new RetMessage();
+		String ids = CommonUtil.trim(modelprogramFormBean.getIds());
+		PageResults mPageResults=new PageResults(); 
+		mPageResults=modelProgramControl.getModelProgramByIds(ids);
+		mRetMessage=modelProgramControl.delModelInfoByCodes(ids, mPageResults.getResults());
+		mHashMap.put(RetMessage.AJAX_RETFLAG, mRetMessage.getRetflag());
+		mHashMap.put(RetMessage.AJAX_MESSAGE, mRetMessage.getMessage());		
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 查询方案FORM表单数据
+	 */
+	public String edit(){
+		log.info("MyPlanAction=edit:初始化方案信息FORM表单数据");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		RetMessage mRetMessage=new RetMessage();
+		ModelProgram modelProgram=new ModelProgram();
+		mRetMessage=modelProgramControl.view(modelprogramFormBean.getModelprogramFormBean().getProgCode(), modelProgram);
+		mHashMap.put("modelprogramFormBean", modelProgram);
+		mHashMap.put(RetMessage.AJAX_RETFLAG, mRetMessage.getRetflag());
+		mHashMap.put(RetMessage.AJAX_MESSAGE, mRetMessage.getMessage());		
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	
+	
+	
+	public ModelProgramFromBean getModelprogramFormBean() {
+		return modelprogramFormBean;
+	}
+
+	public void setModelprogramFormBean(ModelProgramFromBean modelprogramFormBean) {
+		this.modelprogramFormBean = modelprogramFormBean;
+	}
+	public ModelInfoFormBean getModelInfoFormBean() {
+		return modelInfoFormBean;
+	}
+	public void setModelInfoFormBean(ModelInfoFormBean modelInfoFormBean) {
+		this.modelInfoFormBean = modelInfoFormBean;
+	}
+	public String getModeCode() {
+		return modeCode;
+	}
+	public void setModeCode(String modeCode) {
+		this.modeCode = modeCode;
+	}
+	public String[] getModelCode() {
+		return modelCode;
+	}
+	public void setModelCode(String[] modelCode) {
+		this.modelCode = modelCode;
+	}
+	
+	
+	
+	
+}

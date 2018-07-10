@@ -1,0 +1,142 @@
+package com.lyht.business.consumer.hydrologicalData.control;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.lyht.RetMessage;
+import com.lyht.annotations.Optlog;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.consumer.hydrologicalData.bean.Pptn;
+import com.lyht.business.consumer.hydrologicalData.formbean.PptnFormBean;
+import com.lyht.business.consumer.hydrologicalData.service.PptnService;
+import com.lyht.business.search.action.SearchAction;
+import com.lyht.business.search.formBean.SearchFormBean;
+
+@Controller
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class PptnControl {
+	
+	private Logger log = Logger.getLogger(SearchAction.class);
+	@Resource private PptnService mPptnService;
+	
+	/**
+	 *  查询实时雨情信息
+	 * */
+	public List getRealTimeRain(SearchFormBean searchFormBean){
+			return  mPptnService.getPptnListByRain(searchFormBean);
+	}
+	
+	@Optlog(menuflag="PptnList", opttype = "getPptnMes") 
+	public RetMessage getPptnMes(PptnFormBean mPptnFormBean,PageResults mPageResults){
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			BeanUtils.copyProperties(mPageResults,mPptnService.getPptnListData(mPptnFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="PptnExport", opttype = "export") 
+	public RetMessage export(PptnFormBean mPptnFormBean,PageResults prs,HttpServletRequest request,HttpServletResponse response){
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			mPptnService.export(mPptnFormBean,prs,request,response);
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("导出数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"导出数据失败！");
+			e.printStackTrace();
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="PptnImport", opttype = "import") 
+	public RetMessage importPptn(File[] file,String[] fileFileName){
+		RetMessage ret=new RetMessage();
+		try {
+			mPptnService.importPptn(file,fileFileName);
+			ret.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			ret.setMessage("导入成功！");
+		}catch (Exception e) {
+			ret.setRetflag(RetMessage.RETFLAG_ERROR);
+			ret.setMessage(RetMessage.ERROR_SERVICE_MSG+"导入失败！");
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
+	@Optlog(menuflag="PptnView", opttype = "view") 
+	public RetMessage view(PptnFormBean mPptnFormBean,Pptn mPptn){
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			BeanUtils.copyProperties(mPptn,mPptnService.getPptnInfoById(mPptnFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="PptnCreate", opttype = "create")  
+	public RetMessage create(Pptn mPptn){
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			mPptnService.create(mPptn);
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("新增信息成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"新增信息失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="PptnUpdate",opttype = "update")
+	public RetMessage update(Pptn mPptn){
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			mPptnService.update(mPptn);
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("修改信息成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"修改信息失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="PptnDelete",opttype = "deletPptnInfoByIds") 
+	public RetMessage deletPptnInfoByIds(PptnFormBean mPptnFormBean){
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			mPptnService.deletPptnInfoByIds(mPptnFormBean);
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("删除数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"删除数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+
+}

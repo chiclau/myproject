@@ -1,0 +1,9 @@
+jdbc.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+jdbc.url=jdbc:sqlserver://www.lanyuhuitong.cn:1433;DataBaseName=HYELEC_BASIN
+jdbc.user=sa
+jdbc.password=lanyuhuitong@sa
+
+linshi.jdbc.driver=com.microsoft.sqlserver.jdbc.SQLServerDriver
+linshi.jdbc.url=jdbc:sqlserver://www.lanyuhuitong.cn:1433;DataBaseName=HYELEC_BASIN
+linshi.jdbc.user=sa
+linshi.jdbc.password=lanyuhuitong@sa

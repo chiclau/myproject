@@ -1,0 +1,399 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<title>资料管理</title>
+</head>
+<%@include file="/common/inc/inc.inc"%>
+<%@include file="/common/inc/bootstrapTable.inc"%>
+<body style="background-color: #FCFCFC;">
+	<div class="container-fluid">
+		<%@include file="/common/inc/top.jsp"%>
+		<div class="row" style="width:100%;height:500px;">
+			<div id="hszlb_div" class="col-md-6" style="height:100%;">
+				<div id="hszlb_chart" style="width: 100%;height:100%;"></div>
+			</div>
+			<div class="col-md-6" style="height:100%;">
+				<div id="tsqxChart" style="width: 100%;height:100%;"></div>
+			</div>
+			<div class="col-md-12" style="height:100%;">
+				<input type="button" value="获取图表数据" class="btn" onclick="getMyChart()">
+				<input type="button" value="切换" class="btn" onclick="switchChart()">
+				<a class="btn btn-success" style="height: 27px;
+	    border-radius: 3px;margin-left:676px" href="mainList2.jsp">下一步</a>
+			</div>
+		</div>
+		
+	</div>
+</body>
+<script src="<%=basePath%>common/eCharts/chanliu-echarts.min.js"></script>
+<script>
+$(function(){
+	getHszlbGxt("hszlb_chart","testsyq_1-n.json",temp);
+})
+function getMyChart(){
+	console.log(myChart.getOption().series);
+}
+var temp = "";
+var symbolSize = 20;
+var floatData = [["2018-04-01 20:00:00","5.0"]];
+var lineData = [["2018-04-01 20:00:00","5.0"],["2018-04-01 21:00:00","3.0"],["2018-04-01 22:00:00","2.0"],["2018-04-01 23:00:00","1.0"]];
+
+	function switchChart(){
+		if(temp == ""){
+			temp = "line";
+		}else if(temp == "line"){
+			temp = "float";
+		}else if(temp == "float"){
+			temp = "line";
+			
+			var newTime = new Date(floatData[0][0]);
+			var oldTime = new Date(lineData[0][0]);
+			var newValue = parseInt(floatData[0][1]);
+			var oldValue = parseInt(lineData[0][1]);
+			
+			var diffTime = newTime - oldTime;
+			var diffValue = newValue - oldValue;
+			for(var i = 0 ; i < lineData.length ; i++){
+				var newTempTime = new Date(lineData[i][0]).getTime() + diffTime;
+				var newTempValue = parseInt(lineData[i][1]) + diffValue;
+				lineData[i][0] = getFormatDate(new Date(newTempTime));
+				lineData[i][1] = newTempValue;
+			}
+		}
+		getHszlbGxt("hszlb_chart","testsyq_1-n.json",temp);
+	}			
+		
+				
+//初始化统计图				
+var myChart = echarts.init(document.getElementById('hszlb_chart'));
+
+function getHszlbGxt(chart,url,data) {
+    $.ajax({
+        url : url,
+        type : "get",
+        dataType : "JSON",
+        async : false,
+        traditional: true,
+        // data : data,
+        success : function(response) {
+            getChart(chart,response,data);
+        }
+    });
+}
+var resizeWorldMapContainer = function () {
+	document.getElementById('hszlb_chart').style.width = document.getElementById('hszlb_div').innerWidth+'px';
+	document.getElementById('hszlb_chart').style.height = document.getElementById('hszlb_div').innerHeight+'px';
+};
+
+resizeWorldMapContainer();
+window.onresize = function () {
+    //重置容器高宽
+    resizeWorldMapContainer();
+    myChart.resize();
+};
+//生成统计图
+function  getChart(chart,response,data) {
+	myChart.clear();
+	
+	var series = getSeries(response.DATA);
+	if(data == "line"){
+		series = getSeriesOfLine(response.DATA);
+	}else if(data == "float"){
+		series = getSeriesOfFloat(response.DATA);
+	}
+    var yAxis = getYAxis(response.DATA);
+    var legend_data= getLegend_data(response.DATA);
+    var title = response.EXTRADATA.CHARTTITLE;
+    var start = response.EXTRADATA.START;
+    var end = response.EXTRADATA.END;
+// 指定图表的配置项和数据
+    var option = {
+        title : {
+            text: title,//主标题
+            //subtext: '2009-6-12 2:00 - 2009-10-18 8:00',//副标题
+            x: 'center',//标题剧中
+            padding:0
+        },
+        color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+        grid: {
+            left: '3%',
+            right: '4%',
+            top:20,
+            bottom: 30,
+            containLabel: true
+        },
+        tooltip : {//鼠标悬浮提示信息
+            trigger: 'axis',//显示横坐标信息
+            axisPointer: {//xy提示轴线
+                type: 'cross',
+                label: {
+                    backgroundColor: '#505765'
+                }
+            }
+        },
+        legend: {
+            data:legend_data, //最上边的切换按钮
+            //x: 'left'//按钮位置
+            bottom:0
+        },
+        xAxis : [
+            {
+                splitLine:{show: false},//去除网格线
+                type : 'time',
+                min:start,
+                max:end,
+            },
+            {
+                splitLine:{show: false},//去除网格线
+                type : 'time',
+                axisLine: {
+                    onZero: false,
+                }
+            }
+        ],
+        yAxis: yAxis,
+        series:  series
+    };
+
+
+// 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+    myChart.setOption({
+        graphic: echarts.util.map(floatData, function (item, dataIndex) {
+            return {
+                type: 'circle',
+                position: myChart.convertToPixel('grid', item),
+                shape: {
+                    r: symbolSize / 2
+                },
+                invisible: true,
+                draggable: true,
+                ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                onmousemove: echarts.util.curry(showTooltip, dataIndex),
+                onmouseout: echarts.util.curry(hideTooltip, dataIndex),
+                z: 100
+            };
+        })
+    });
+}
+
+window.addEventListener('resize', function () {
+    myChart.setOption({
+        graphic: echarts.util.map(floatData, function (item, dataIndex) {
+            return {
+                position: myChart.convertToPixel('grid', item)
+            };
+        })
+    });
+});
+
+function showTooltip(dataIndex) {
+    myChart.dispatchAction({
+        type: 'showTip',
+        seriesIndex: 0,
+        dataIndex: dataIndex
+    });
+}
+
+function hideTooltip(dataIndex) {
+    myChart.dispatchAction({
+        type: 'hideTip'
+    });
+}
+
+function onPointDragging(dataIndex, dx, dy) {
+	floatData[dataIndex] = myChart.convertFromPixel('grid', this.position);
+    myChart.setOption({
+        series: [{
+            id: 'float',
+            data: floatData
+        }]
+    });
+}
+
+function getYAxis(data){
+    var temp = new Array(data.length);
+    for(var i = 0 ; i < data.length ; i < i++){
+        if(data[i].TYPE == "line"){
+            temp[i] = {
+                "splitLine":{"show": false},//去除网格线
+                "name": data[i].NAME,
+                "type": "value",
+                "max":data[i].MAX,
+                "min":data[i].MIN
+            }
+        }else if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "splitLine":{show: false},//去除网格线
+                "name": data[i].NAME,
+                "nameLocation": 'start',
+                "type": 'value',
+                "inverse": true,//反向坐标
+                "max":data[i].MAX,
+                "min":data[i].MIN
+            }
+        }
+
+    }
+    return temp;
+}
+function getSeries(data){
+    var temp = new Array();
+    for(var i = 0 ; i<data.length ;i++){
+        if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "yAxisIndex":1,
+                "barWidth":10,
+                "data":data[i].DATA
+            };
+        }else if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "showSymbol": false,
+                "smooth": true,
+                "lineStyle": {
+	                "normal":{
+	                	"width": 1.5
+	                }
+                },
+                "data":data[i].DATA
+            };
+        }
+
+    }
+    return temp;
+}
+function getSeriesOfFloat(data){
+    var temp = new Array();
+    for(var i = 0 ; i<data.length ;i++){
+        if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "yAxisIndex":1,
+                "barWidth":10,
+                "data":data[i].DATA
+            };
+        }else if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "showSymbol": false,
+                "smooth": true,
+                "lineStyle": {
+	                "normal":{
+	                	"width": 1.5
+	                }
+                },
+                "data":data[i].DATA
+            };
+        }
+
+    }
+    temp[data.length] = {
+		"id": "float",
+        "type": "line",
+        "smooth": true,
+        "symbolSize": symbolSize,
+        "data": floatData
+    }
+    return temp;
+}
+function getSeriesOfLine(data){
+    var temp = new Array();
+    for(var i = 0 ; i<data.length ;i++){
+        if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "yAxisIndex":1,
+                "barWidth":10,
+                "data":data[i].DATA
+            };
+        }else if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "showSymbol": false,
+                "smooth": true,
+                "lineStyle": {
+	                "normal":{
+	                	"width": 1.5
+	                }
+                },
+                "data":data[i].DATA
+            };
+        }
+
+    }
+    
+    temp[data.length] = {
+    	"id":"line",
+        "type": "line",
+        "data": lineData,
+        
+        "name":"退水曲线",
+        "showSymbol": true,
+        "smooth": true,
+        "lineStyle": {
+	        "normal":{
+	        	"width": 1.5
+	        }
+        }
+    }
+    return temp;
+}
+function getLegend_data(data) {
+    var temp = new Array(data.length);
+    for(var i = 0 ; i < data.length ; i < i++){
+        temp[i] = data[i].NAME;
+    }
+    return temp;
+}
+
+//格式化时间
+function getFormatDate(date) {
+    var seperator1 = "/";
+    var seperator2 = ":";
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if(month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if(strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var hours="";
+    var minut="";
+    var seconds="";
+    if(date.getHours()<10){
+        hours="0"+date.getHours();
+    }else{
+        hours=date.getHours();
+    }
+
+    if(date.getMinutes()<10){
+        minut="0"+date.getMinutes();
+    }else{
+        minut=date.getMinutes();
+    }
+
+    if(date.getSeconds()<10){
+        seconds="0"+date.getSeconds();
+    }else{
+        seconds=date.getSeconds();
+    }
+    var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+        + " " + hours + seperator2 + minut
+        + seperator2 + seconds;
+    return currentdate;
+}
+</script>
+</html>
+<!-- 不要改变以下引用顺序 -->

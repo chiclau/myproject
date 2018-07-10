@@ -1,0 +1,75 @@
+ body {
+        padding: 0;
+        margin: 0;
+    } 
+    .container-fluid:first-child .navbar-header {
+       margin-top: -3px;
+    }
+    .container-fluid:first-child .navbar-header h3{
+       font-size:20px;
+    }
+    html,
+    body,
+    #map {
+        height: 100%;
+    }
+    /*Òþ²ØµØÍ¼×ó±ß¼Ó¼õºÅ*/
+    .leaflet-left{
+    	display:none;
+    }
+     /*Òþ²ØµØÍ¼×ó±ß¼Ó¼õºÅ*/
+   .leaflet-right{
+      display:none;
+    }
+    /*ËÑË÷¿òÑùÊ½*/
+   .input-group{
+    position: absolute;
+    width:400px;
+    top: 80px;
+    left:20px;
+   }
+   .input-group .form-control:last-child, .input-group-addon:last-child, .input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group > .btn, .input-group-btn:last-child > .dropdown-toggle, .input-group-btn:first-child > .btn:not(:first-child), .input-group-btn:first-child > .btn-group:not(:first-child) > .btn{
+    border-radius:5px;
+   }
+   
+  .input-group .form-control{
+    height:44px;
+    border-radius:2px;
+  }
+  .input-group-btn>.btn {
+    width: 70px;
+    height: 44px;
+    }
+    /*×ó²àÀ¸Ä¿*/
+    .lanmu-left{
+      position: absolute;
+      width:196px;
+      height:490px;
+      background:#3CB7F4;    
+	  top: 150px;
+	  left:20px;
+	  color:white;
+    }
+    .lanmu-left h2{
+      height:48px;
+      width:100%;
+      margin:0px;
+      line-height:48px;    
+	  font-weight:400;
+	  padding-left:20px;
+	  border-bottom:2px solid #A1A1A1;
+    }
+  #tree{
+     height:440px;
+     overflow:auto;
+  }
+   #maincontent{
+    padding-left:0px;
+    padding-right:0px;
+   } 
+   .navbar-nav>li>.dropdown-menu{
+    margin-top:4px;
+   }
+  .dropdown-menu{
+    margin-top:0px;
+   }

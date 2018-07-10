@@ -1,0 +1,201 @@
+package com.lyht.business.modelManage.control;
+
+import java.io.File;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.lang.model.type.PrimitiveType;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+
+import com.lyht.RetMessage;
+import com.lyht.annotations.Optlog;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.consumer.hydrologicalData.formbean.StbprpFormBean;
+import com.lyht.business.modelManage.bean.ModelInfo;
+import com.lyht.business.modelManage.bean.ModelParamenter;
+import com.lyht.business.modelManage.formbean.ModelInfoFormBean;
+import com.lyht.business.modelManage.formbean.ModelParaFormBean;
+import com.lyht.business.modelManage.service.ModelInfoService;
+import com.lyht.business.modelManage.service.ModelParamenterService;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年5月4日 11:41:11
+ *说明:  模型列表Control
+*/
+@Controller
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class ModelInfoControl {
+	@Resource
+	private ModelInfoService modelInfoService;
+	@Resource
+	private ModelParamenterService mpservice;
+	
+	@Optlog(menuflag="modelInfoList", opttype = "getModelInfoMes") 
+	public RetMessage getModelMess(ModelInfoFormBean modelInfoFormBean,PageResults mPageResults) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(mPageResults,modelInfoService.getModelInfoListData(modelInfoFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="modelInfoView", opttype = "view") 
+	public RetMessage view(String id,ModelInfo modelInfo) {
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			ModelParamenter mParamenter=new ModelParamenter();
+			ModelParaFormBean modelParaBean=new ModelParaFormBean();
+			ModelInfoFormBean mBean=new ModelInfoFormBean();
+			BeanUtils.copyProperties(modelInfo,modelInfoService.getModeInfo(id));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	
+	
+	@Optlog(menuflag="modelInfoCreate", opttype = "create")  
+	public  RetMessage create(ModelInfo modelInfo,ModelParamenter mp,ModelInfo modBean) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(modelInfo,modelInfoService.create(modelInfo,mp));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("新增信息成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"新增信息失败！");
+		}
+		return mRetMessage;
+	}
+	
+	//更新模型和参数
+	@Optlog(menuflag="modelInfoUpdate",opttype = "update")
+	public RetMessage update(ModelInfo modelInfo,ModelInfo modBean,ModelParamenter mp) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(modBean,modelInfoService.update(modelInfo,mp));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("修改信息成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"修改信息失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="modelInfoUpdate",opttype = "getModelInfoByCode") 
+	public PageResults getModelInfoListByIds(String ids){
+		PageResults mPageResults=new PageResults();
+		try {
+			mPageResults=modelInfoService.getModelInfoByCode(ids);
+		} catch (Exception e) {
+			e.getStackTrace();
+		}
+		return mPageResults;
+	}
+	
+	@Optlog(menuflag="modelInfoDelete",opttype = "delModelInfoByCodes") 
+	public RetMessage delModelInfoByCodes(String ids,List list) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			modelInfoService.delModelInfoByCodes(ids);
+			list.clear();
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("删除数据成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"删除数据失败！");
+		}
+		return mRetMessage;
+	}
+	//导入
+	@Optlog(menuflag="modelInfoImport", opttype = "import") 
+	public RetMessage importModel(File[] file,String[] fileFileName){
+		RetMessage ret=new RetMessage();
+		try {
+			modelInfoService.importModel(file, fileFileName);
+			ret.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			ret.setMessage("导入成功！");
+		}catch (Exception e) {
+			ret.setRetflag(RetMessage.RETFLAG_ERROR);
+			ret.setMessage(RetMessage.ERROR_SERVICE_MSG+"导入失败！");
+			e.printStackTrace();
+		}
+		return ret;
+	}
+
+	//导出
+	@Optlog(menuflag="modelInfoExport", opttype = "export") 
+	public RetMessage export(ModelInfoFormBean modelInfoFormBean,PageResults prs,HttpServletRequest request,HttpServletResponse response){
+		RetMessage mRetMessage=new RetMessage();
+		try{
+			modelInfoService.export(modelInfoFormBean, prs, request, response);
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("导出数据成功！");
+		}catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"导出数据失败！");
+			e.printStackTrace();
+		}
+		return mRetMessage;
+	}
+	
+	
+	@Optlog(menuflag="getModelNameByType", opttype = "getModelNameByType") 
+	public RetMessage getModelNameByType(ModelInfoFormBean modelInfoFormBean,PageResults mPageResults) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(mPageResults,modelInfoService.getModelNamebyType(modelInfoFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="getModelHuiliu", opttype = "getModelHuiliu") 
+	public RetMessage getModelHuiliu(ModelInfoFormBean modelInfoFormBean,PageResults mPageResults) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(mPageResults,modelInfoService.getModelHuiliu(modelInfoFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+	
+	@Optlog(menuflag="getModelChanliu", opttype = "getModelChanliu") 
+	public RetMessage getModelChanliu(ModelInfoFormBean modelInfoFormBean,PageResults mPageResults) {
+		RetMessage mRetMessage=new RetMessage();
+		try {
+			BeanUtils.copyProperties(mPageResults,modelInfoService.getModelChanliu(modelInfoFormBean));
+			mRetMessage.setRetflag(RetMessage.RETFLAG_SUCCESS);
+			mRetMessage.setMessage("查询数据成功！");
+		} catch (Exception e) {
+			mRetMessage.setRetflag(RetMessage.RETFLAG_ERROR);
+			mRetMessage.setMessage(RetMessage.ERROR_SERVICE_MSG+"查询数据失败！");
+		}
+		return mRetMessage;
+	}
+}
