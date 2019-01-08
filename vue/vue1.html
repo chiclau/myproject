@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Vue 测试实例 - 菜鸟教程(runoob.com)</title>
+<script src="https://cdn.staticfile.org/vue/2.4.2/vue.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <p style="color: green">{{ message }}</p>
+</div>
+
+<font id="f">{{ message1 }}</font>
+</body>
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    message: 'Hello Vue.js! hha my first vue code ,good job!'
+  }
+})
+
+new Vue({
+  el: '#f',
+  data: {
+    message1: 'good job!'
+  }
+})
+</script>
+</html>

@@ -1,0 +1,5 @@
+vue 1.0和2.0的不同点
+vue1.0 ready(){}方法
+在vue2.0中是mounted(){}方法
+
+vue2.0和vue1.0 v-for指令不同
