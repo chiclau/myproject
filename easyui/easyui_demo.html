@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="keywords" content="jquery,ui,easy,easyui,web">
+	<meta name="description" content="easyui help you build your web page easily!">
+	<title>jQuery EasyUI Demo</title>
+	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.1.min.js"></script>
+	<script type="text/javascript" src="http://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			$(document).bind('contextmenu',function(e){
+				$('#mm').menu('show', {
+					left: e.pageX,
+					top: e.pageY
+				});
+				return false;
+			});
+
+
+			$('#cc').combo({
+				required:true,
+				editable:false
+			});
+			$('#sp').appendTo($('#cc').combo('panel'));
+			$('#sp input').click(function(){
+				var v = $(this).val();
+				var s = $(this).next('span').text();
+				$('#cc').combo('setValue', v).combo('setText', s).combo('hidePanel');
+			});
+		});
+		function showmenu(){
+			$('#mm').menu('show', {
+				left: 20,
+				top: 40
+			});
+		}
+
+		function clearForm(){
+			$('#ff').form('clear');
+		}
+
+		function confirm1(){
+			$.messager.confirm('My Title', 'Are you confirm this?', function(r){
+				if (r){
+					alert('confirmed: '+r);
+				}
+			});
+		}
+		function prompt1(){
+			$.messager.prompt('My Title', 'Please type something', function(r){
+				if (r){
+					alert('you type: '+r);
+				}
+			});
+		}
+	</script>
+</head>
+<body>
+	<h2>Interactive Messager</h2>
+	<p>Click on each button to display interactive message box.</p>
+	<div style="margin:20px 0;">
+		<a href="#" class="easyui-linkbutton" onclick="confirm1();">Confirm</a>
+		<a href="#" class="easyui-linkbutton" onclick="prompt1()">Prompt</a>
+	</div>
+<h2>Basic LinkButton</h2>
+<!-- 	<p>Buttons can be created from <a> or <button> elements.</p>
+	<div style="margin:10px 0 40px 0;"></div>
+	<p>Basic Buttons</p>
+	<div style="padding:5px 0;">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add'">Add</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">Remove</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'">Save</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cut',disabled:true">Cut</a>
+		<a href="#" class="easyui-linkbutton">Text Button</a>
+	</div>
+	<p>Fixed Width Buttons</p>
+	<div style="padding:5px 0;">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:80px">Search</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-print'" style="width:80px">Print</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:80px">Reload</a>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-help'" style="width:80px">Help</a>
+	</div> -->
+
+<h2>Basic Form</h2>
+	<p>Fill the form and submit it.</p>
+	<div style="margin:20px 0;"></div>
+	<div class="easyui-panel" title="New Topic" style="width:400px">
+		<div style="padding:10px 60px 20px 60px">
+	    <form id="ff" method="post">
+	    	<table cellpadding="5">
+	    		<tr>
+	    			<td>Name:</td>
+	    			<td><input class="easyui-textbox" type="text" name="name" data-options="required:true"></input></td>
+	    		</tr>
+	    		<tr>
+	    			<td>Email:</td>
+	    			<td><input class="easyui-textbox" type="text" name="email" data-options="required:true,validType:'email'"></input></td>
+	    		</tr>
+	    		<tr>
+	    			<td>Subject:</td>
+	    			<td><input class="easyui-textbox" type="text" name="subject" data-options="required:true"></input></td>
+	    		</tr>
+	    		<tr>
+	    			<td>Message:</td>
+	    			<td><input class="easyui-textbox" name="message" data-options="multiline:true" style="height:60px"></input></td>
+	    		</tr>
+	    		<tr>
+	    			<td>Language:</td>
+	    			<td>
+	    				<select class="easyui-combobox" name="language"><option value="ar">Arabic</option><option value="bg">Bulgarian</option><option value="ca">Catalan</option><option value="zh-cht">Chinese Traditional</option><option value="cs">Czech</option><option value="da">Danish</option><option value="nl">Dutch</option><option value="en" selected="selected">English</option><option value="et">Estonian</option><option value="fi">Finnish</option><option value="fr">French</option><option value="de">German</option><option value="el">Greek</option><option value="ht">Haitian Creole</option><option value="he">Hebrew</option><option value="hi">Hindi</option><option value="mww">Hmong Daw</option><option value="hu">Hungarian</option><option value="id">Indonesian</option><option value="it">Italian</option><option value="ja">Japanese</option><option value="ko">Korean</option><option value="lv">Latvian</option><option value="lt">Lithuanian</option><option value="no">Norwegian</option><option value="fa">Persian</option><option value="pl">Polish</option><option value="pt">Portuguese</option><option value="ro">Romanian</option><option value="ru">Russian</option><option value="sk">Slovak</option><option value="sl">Slovenian</option><option value="es">Spanish</option><option value="sv">Swedish</option><option value="th">Thai</option><option value="tr">Turkish</option><option value="uk">Ukrainian</option><option value="vi">Vietnamese</option></select>
+	    			</td>
+	    		</tr>
+	    	</table>
+	    </form>
+	    <div style="text-align:center;padding:5px">
+	    	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">Submit</a>
+	    	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()">Clear</a>
+	    </div>
+	    </div>
+	</div>
+
+	<h2>Basic FileBox</h2>
+	<p>The filebox component represents a file field of the forms.</p>
+	<div style="margin:20px 0;"></div>
+	<div class="easyui-panel" title="Upload File" style="width:400px;padding:30px 70px 50px 70px">
+		<div style="margin-bottom:20px">
+			<div>Name:</div>
+			<input class="easyui-textbox" style="width:100%">
+		</div>
+		<div style="margin-bottom:20px">
+			<div>File1:</div>
+			<input class="easyui-filebox" name="file1" data-options="prompt:'Choose a file...'" style="width:100%">
+		</div>
+		<div style="margin-bottom:20px">
+			<div>File2:</div>
+			<input class="easyui-filebox" name="file2" data-options="prompt:'Choose another file...'" style="width:100%">
+		</div>
+		<div>
+			<a href="#" class="easyui-linkbutton" style="width:100%">Upload</a>
+		</div>
+	</div>
+<h2>Basic Draggable</h2>
+	<p>Move the boxes below by clicking on it with mouse.</p>
+	<div style="margin:20px 0;"></div>
+	<div class="easyui-draggable" style="width:200px;height:150px;background:#fafafa;border:1px solid #ccc"></div>
+	<div class="easyui-draggable" data-options="handle:'#title'" style="width:200px;height:150px;background:#fafafa;border:1px solid #ccc;margin-top:10px">
+		<div id="title" style="padding:5px;background:#ccc;color:#fff">Title</div>
+	</div>
+	<h2>Basic Dialog</h2>
+	<p>Click below button to open or close dialog.</p>
+	<div style="margin:20px 0;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="$('#dlg').dialog('open')">Open</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="$('#dlg').dialog('close')">Close</a>
+	</div>
+	<div id="dlg" class="easyui-dialog" title="Basic Dialog" data-options="iconCls:'icon-save'" style="width:400px;height:200px;padding:10px">
+		The dialog content.
+	</div>
+	<hr>
+	<div>
+		Click <a href="#" onclick="showmenu()">here</a> to show the menu.
+	</div>
+	
+	<div id="mm" class="easyui-menu" style="width:120px;">
+		<div onclick="javascript:alert('new')">New</div>
+		<div>
+			<span>Open</span>
+			<div style="width:150px;">
+				<div><b>Word</b></div>
+				<div>Excel</div>
+				<div>PowerPoint</div>
+			</div>
+		</div>
+		<div icon="icon-save">Save</div>
+		<div class="menu-sep"></div>
+		<div>Exit</div>
+	</div>
+
+	<h2>Basic CheckBox</h2>
+	<form id="ff">
+		<div style="margin-bottom:20px">
+			<input class="easyui-checkbox" name="fruit" value="Apple" label="Apple:">
+		</div>
+		<div style="margin-bottom:20px">
+			<input class="easyui-checkbox" name="fruit" value="Orange" label="Orange:">
+		</div>
+		<div style="margin-bottom:20px">
+			<input class="easyui-checkbox" name="fruit" value="Banana" label="Banana:">
+		</div>
+	</form>
+	<h2>Basic Calendar</h2>
+	<p>Click to select date.</p>
+	<div style="margin:20px 0"></div>
+	<div class="easyui-calendar" style="width:250px;height:250px;"></div>
+<h2>Basic Combo</h2>
+	<p>Click the right arrow button to show drop down panel that can be filled with any content.</p>
+	<div style="margin:20px 0"></div>
+	<select id="cc" style="width:150px"></select>
+	<div id="sp">
+		<div style="color:#99BBE8;background:#fafafa;padding:5px;">Select a language</div>
+		<div style="padding:10px">
+			<input type="radio" name="lang" value="01"><span>Java</span><br/>
+			<input type="radio" name="lang" value="02"><span>C#</span><br/>
+			<input type="radio" name="lang" value="03"><span>Ruby</span><br/>
+			<input type="radio" name="lang" value="04"><span>Basic</span><br/>
+			<input type="radio" name="lang" value="05"><span>Fortran</span>
+		</div>
+	</div>
+
+
+	<h2>Basic ComboBox</h2>
+	<p>Type in ComboBox to try auto complete.</p>
+	<div style="margin:20px 0"></div>
+	
+	<select class="easyui-combobox" name="state" style="width:200px;">
+		<option value="AL">Alabama</option>
+		<option value="AK">Alaska</option>
+		<option value="AZ">Arizona</option>
+		<option value="AR">Arkansas</option>
+		<option value="CA">California</option>
+		<option value="CO">Colorado</option>
+		<option value="CT">Connecticut</option>
+		<option value="DE">Delaware</option>
+		<option value="FL">Florida</option>
+		<option value="GA">Georgia</option>
+		<option value="HI">Hawaii</option>
+		<option value="ID">Idaho</option>
+		<option value="IL">Illinois</option>
+		<option value="IN">Indiana</option>
+		<option value="IA">Iowa</option>
+		<option value="KS">Kansas</option>
+		<option value="KY">Kentucky</option>
+		<option value="LA">Louisiana</option>
+		<option value="ME">Maine</option>
+		<option value="MD">Maryland</option>
+		<option value="MA">Massachusetts</option>
+		<option value="MI">Michigan</option>
+		<option value="MN">Minnesota</option>
+		<option value="MS">Mississippi</option>
+		<option value="MO">Missouri</option>
+		<option value="MT">Montana</option>
+		<option value="NE">Nebraska</option>
+		<option value="NV">Nevada</option>
+		<option value="NH">New Hampshire</option>
+		<option value="NJ">New Jersey</option>
+		<option value="NM">New Mexico</option>
+		<option value="NY">New York</option>
+		<option value="NC">North Carolina</option>
+		<option value="ND">North Dakota</option>
+		<option value="OH" selected>Ohio</option>
+		<option value="OK">Oklahoma</option>
+		<option value="OR">Oregon</option>
+		<option value="PA">Pennsylvania</option>
+		<option value="RI">Rhode Island</option>
+		<option value="SC">South Carolina</option>
+		<option value="SD">South Dakota</option>
+		<option value="TN">Tennessee</option>
+		<option value="TX">Texas</option>
+		<option value="UT">Utah</option>
+		<option value="VT">Vermont</option>
+		<option value="VA">Virginia</option>
+		<option value="WA">Washington</option>
+		<option value="WV">West Virginia</option>
+		<option value="WI">Wisconsin</option>
+		<option value="WY">Wyoming</option>
+	</select>
+
+	<h2>Shared Calendar in DateBox</h2>
+	<p>Multiple datebox components can share a calendar and use it to pick dates.</p>
+	<div style="margin:20px 0;"></div>
+	<table>
+		<tr>
+			<td>Start Date:</td>
+			<td>
+				<input class="easyui-datebox" data-options="sharedCalendar:'#aa1'">
+			</td>
+			<td>End Date:</td>
+			<td>
+				<input class="easyui-datebox" data-options="sharedCalendar:'#aa1'">
+			</td>
+		</tr>
+	</table>
+	<div id="aa1" class="easyui-calendar"></div>
+</body>
+</html>
