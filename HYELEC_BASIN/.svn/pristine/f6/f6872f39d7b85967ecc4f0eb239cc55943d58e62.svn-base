@@ -1,0 +1,198 @@
+package com.lyht.business.consumer.hydrologicalData.dao;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.consumer.hydrologicalData.bean.Fsdr;
+import com.lyht.business.consumer.hydrologicalData.formbean.FsdrFormBean;
+import com.lyht.util.CommonUtil;
+import com.lyht.util.DateUtil;
+import com.lyht.util.Randomizer;
+
+@Repository
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class FsdrDao extends HibernateBaseDao<Fsdr>{
+
+	/**
+	 * 获取列表数据
+	 * */
+	public PageResults getFsdrListData(FsdrFormBean mFsdrFormBean){
+		StringBuilder sql=new StringBuilder();
+		String str=spliceStrFsdr(mFsdrFormBean);
+		sql.append("SELECT B.STCD AS STCD_1,C.STCD AS STCD_2,FSDR.UPSTCD,FSDR.DWSTCD,");
+		sql.append("FSDR.RCHLEN,FSDR.SFTQ,FSDR.QMGN,FSDR.MNTRTM,FSDR.MXTRTM,FSDR.AVTRTM,");
+		sql.append("FSDR.MODITIME,B.STNM AS STNM_1,C.STNM AS STNM_2 FROM ST_FSDR_B FSDR ");
+		sql.append("INNER JOIN ST_STBPRP_B B ON FSDR.UPSTCD=B.STCD ");
+		sql.append("INNER JOIN ST_STBPRP_B C ON FSDR.DWSTCD=C.STCD WHERE 1=1 ");
+		if(null!=str && !"".equals(str)){
+			sql.append(str);
+		}
+		sql.append(" ORDER BY FSDR.UPSTCD");
+		return this.findPageByFetchedSql(sql.toString(), null
+				,mFsdrFormBean.getPageBean().getOffset()
+				,mFsdrFormBean.getPageBean().getLimit()
+				,null);
+	}
+	/**
+	 * 获取列表数据用于导出
+	 * */
+	public PageResults getFsdrListData_export(FsdrFormBean mFsdrFormBean){
+		StringBuilder sql=new StringBuilder();
+		String str=spliceStrFsdr(mFsdrFormBean);
+		sql.append(" SELECT b.STNM as UPSTCD,c.STNM as DWSTCD,a.RCHLEN,a.SFTQ,a.QMGN,a.MNTRTM,a.MXTRTM,a.AVTRTM FROM ");
+		sql.append(" ST_FSDR_B a LEFT JOIN ST_STBPRP_B b ON a.UPSTCD = b.STCD LEFT JOIN ST_STBPRP_B c ON a.DWSTCD = c.STCD WHERE 1=1  ");
+		if(null!=str && !"".equals(str)){
+			sql.append(str);
+		}
+		
+		sql.append(" ORDER BY UPSTCD");
+		return this.findPageByFetchedSql(sql.toString(), null
+				,mFsdrFormBean.getPageBean().getOffset()
+				,mFsdrFormBean.getPageBean().getLimit()
+				,null);
+	}
+	
+	/**
+	 * 根据主键ID删除行政区代码实体
+	 * */
+	public void deletFsdrInfoByIds(String ids,String ids_){
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM ST_FSDR_B WHERE UPSTCD ='"+ids+"' AND DWSTCD ='"+ids_+"'");
+		this.exectueSQL(sql.toString());
+	}
+	
+	/**
+	 * 增加实体对象
+	 * */
+	public void saveFsdrInfo(Fsdr mFsdr){
+		String sql=execQL(mFsdr); //执行sql语句操作
+		this.exectueSQL(sql);
+	}
+	
+	/**
+	 * 修改实体对象
+	 * */
+	public void updateFsdrInfo(Fsdr mFsdr){
+		String sql = updateById(mFsdr);//执行sql语句操作
+		this.exectueSQL(sql);
+	}
+	
+	/**
+	 * 根据主键ID获取实体
+	 * */
+	@SuppressWarnings("unchecked")
+	public Fsdr getFsdrInfoById(String upstcd){
+		Fsdr mFsdr=new Fsdr();
+		String sql=execById(upstcd);//执行sql语句操作
+		List<Fsdr> mFsdrList=null;
+		try{
+			mFsdrList=this.getSession().createSQLQuery(sql.toString()).addEntity(Fsdr.class).list();
+			for(int i=0;i<mFsdrList.size();i++){
+				mFsdr=mFsdrList.get(0);
+			}
+		}catch (Exception e) {
+			e.getStackTrace();
+		}
+		return mFsdr;
+	}
+	
+	
+	/**
+	 * 根据条件查询行政区代码
+	 * */
+	private String spliceStrFsdr(FsdrFormBean mFsdrFormBean){
+		StringBuilder sql=new StringBuilder();
+		if(null!=mFsdrFormBean){
+			if(CommonUtil.trim(mFsdrFormBean.getSearchName()).length()>0){
+				sql.append("AND ((fsdr.UPSTCD LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.DWSTCD LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.RCHLEN LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.SFTQ LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.QMGN  LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.MNTRTM LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.MXTRTM LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (fsdr.AVTRTM LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (b.STNM LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%') ");
+				sql.append("OR (c.STNM LIKE '%"+CommonUtil.trim(mFsdrFormBean.getSearchName())+"%')) ");
+			}
+			if(null!=mFsdrFormBean.getmFsdrInfoBean()){
+				if(CommonUtil.trim(mFsdrFormBean.getmFsdrInfoBean().getDwstcd()).length()>0){
+					sql.append(" AND fsdr.UPSTCD = '"+CommonUtil.trim(mFsdrFormBean.getmFsdrInfoBean().getUpstcd())+"'");
+				}
+				if(CommonUtil.trim(mFsdrFormBean.getmFsdrInfoBean().getDwstcd()).length()>0){
+					sql.append(" AND fsdr.DWSTCD = '"+CommonUtil.trim(mFsdrFormBean.getmFsdrInfoBean().getDwstcd())+"'");
+				}
+			}
+		}
+		return sql.toString();
+	}
+	
+	/**
+	 * 执行新增语句
+	 * */
+	private String execQL(Fsdr mFsdr){
+		String modiTime=DateUtil.getDateTime(); //获取当前系统时间
+		StringBuilder sql=new StringBuilder();
+		sql.append("INSERT INTO ST_FSDR_B (UPSTCD,DWSTCD,RCHLEN,SFTQ,QMGN,MNTRTM,MXTRTM,AVTRTM,MODITIME) ");
+		sql.append("VALUES ('"+CommonUtil.trim(mFsdr.getUpstcd())+"','"+CommonUtil.trim(mFsdr.getDwstcd())+"',");
+		sql.append("'"+CommonUtil.trim(mFsdr.getRchlen())+"','"+CommonUtil.trim(mFsdr.getSftq())+"',");
+		sql.append("'"+CommonUtil.trim(mFsdr.getQmgn())+"','"+CommonUtil.trim(mFsdr.getMntrtm())+"',");
+		sql.append("'"+CommonUtil.trim(mFsdr.getMxtrtm())+"','"+CommonUtil.trim(mFsdr.getAvtrtm())+"','"+modiTime+"')");
+		return sql.toString();
+	}
+	
+	/**
+	 * 根据ID执行查询语句
+	 * */
+	private String execById(String upstcd){
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT UPSTCD,DWSTCD,RCHLEN,SFTQ,QMGN,MNTRTM,MXTRTM,AVTRTM,MODITIME FROM ST_FSDR_B WHERE UPSTCD='"+upstcd+"'");
+		return sql.toString();
+	}
+	
+	/**
+	 * 根据ID执行修改语句
+	 * */
+	private String updateById(Fsdr mFsdr){
+		StringBuilder sql=new StringBuilder();
+		sql.append("UPDATE ST_FSDR_B SET UPSTCD = '"+CommonUtil.trim(mFsdr.getUpstcd())+"', DWSTCD = '"+CommonUtil.trim(mFsdr.getDwstcd())+"', ");
+		sql.append(" RCHLEN = "+CommonUtil.trim(mFsdr.getRchlen())+", SFTQ = "+CommonUtil.trim(mFsdr.getSftq())+", QMGN = "+CommonUtil.trim(mFsdr.getQmgn())+",");
+		sql.append(" MNTRTM = "+CommonUtil.trim(mFsdr.getMntrtm())+" , MXTRTM = "+CommonUtil.trim(mFsdr.getMxtrtm())+", ");
+		sql.append(" AVTRTM = "+CommonUtil.trim(mFsdr.getAvtrtm())+" WHERE UPSTCD = '"+CommonUtil.trim(mFsdr.getUpstcd())+"' AND DWSTCD='"+CommonUtil.trim(mFsdr.getDwstcd())+"'");
+		return sql.toString();
+	}
+	
+	/**
+	 * 根据上下游获取实体
+	 * */
+	@SuppressWarnings("unchecked")
+	public Fsdr getFsdrInfoByud(FsdrFormBean mFsdrFormBean){
+		Fsdr mFsdr=new Fsdr();
+		String sql=execByud(mFsdrFormBean);//执行sql语句操作
+		List<Fsdr> mFsdrList=null;
+		try{
+			mFsdrList=this.getSession().createSQLQuery(sql.toString()).addEntity(Fsdr.class).list();
+			for(int i=0;i<mFsdrList.size();i++){
+				mFsdr=mFsdrList.get(0);
+			}
+		}catch (Exception e) {
+			e.getStackTrace();
+		}
+		return mFsdr;
+	}
+	/**
+	 * 根据上下游执行查询语句
+	 * */
+	private String execByud(FsdrFormBean mFsdrFormBean){
+		StringBuilder sql=new StringBuilder();
+		sql.append("SELECT UPSTCD,DWSTCD,RCHLEN,SFTQ,QMGN,MNTRTM,MXTRTM,AVTRTM,");
+		sql.append("MODITIME FROM ST_FSDR_B WHERE UPSTCD='"+mFsdrFormBean.getmFsdrInfoBean().getUpstcd()+"' ");
+		sql.append("AND DWSTCD='"+mFsdrFormBean.getmFsdrInfoBean().getDwstcd()+"'");
+		return sql.toString();
+	}
+}

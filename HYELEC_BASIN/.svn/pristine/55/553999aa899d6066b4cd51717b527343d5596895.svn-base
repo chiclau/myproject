@@ -1,0 +1,96 @@
+package com.lyht.business.analysisCalculation.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.ResultSecond;
+import com.lyht.business.analysisCalculation.bean.ResultSecondQl;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResultSecondQlDao;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultSecondService {
+	@Resource
+	private ResultSecondDao rsDao;
+	@Resource 
+	private ResultSecondQlDao resultSecondQlDao;
+	//保存LYMJ
+	@Transactional(propagation=Propagation.REQUIRED)
+	public ResultSecond  saveResultStep2(String stcd,String pch,String lymj,String data) {
+		ResultSecond resultSecond=new ResultSecond();
+		resultSecond.setLLMJ(Integer.parseInt(lymj));
+		resultSecond.setPch(pch);
+		resultSecond.setSTCD(stcd);
+		 JSONArray dataArray = JSONArray.fromObject(data);
+		 resultSecondQlDao.deleteStep2Data(stcd, pch);
+		 if(dataArray!=null && dataArray.size()>0){
+			 for(int i=0;i<dataArray.size();i++){
+				 JSONObject dataJson = dataArray.getJSONObject(i);
+				 ResultSecondQl ql = new ResultSecondQl();
+				 String nm = stcd+pch+dataJson.getString("DATE");
+				 nm=nm.replace("-", "");
+				 nm=nm.replace(" ", "");
+				 nm=nm.replace(":", "");
+				 ql.setNm(nm);
+				 ql.setStcd(stcd);
+				 ql.setPch(pch);
+				 ql.setTm(dataJson.getString("DATE"));
+				 ql.setQ(dataJson.getDouble("LL"));
+				 ql.setYml(dataJson.getDouble("JYL"));
+				 resultSecondQlDao.save(ql);
+			 }
+		 }
+		 PageResults p=rsDao.getSecond(resultSecond);
+		 if(p.getResults().size()>0) {
+			 rsDao.updateSecondLymj(resultSecond);
+			 return resultSecond;
+		 }else {
+			 rsDao.saveResultSecond(resultSecond);//新增
+			 return resultSecond;
+		}
+	 }
+	//保存PA
+	public ResultSecond savePa(ResultSecond rs) {
+		PageResults p=rsDao.getSecond(rs);
+		 if(	p.getResults().size()>0) {
+			 rsDao.updateSecondPa(rs);
+			 return rs;
+		 }else {
+			 rsDao.saveResultSecond(rs);//新增
+			 return rs;
+		}
+	}
+	
+		//保存RS
+		public ResultSecond saveRs(ResultSecond rs) {
+			PageResults p=rsDao.getSecond(rs);
+			 if(p.getResults().size()>0) {
+				 rsDao.updateSecondRs(rs);
+				 return rs;
+			 }else {
+				 rsDao.saveResultSecond(rs);//新增
+				 return rs;
+			}
+		}
+		
+		//保存RX
+		public ResultSecond saveRx(ResultSecond rs) {
+			PageResults p=rsDao.getSecond(rs);
+			 if(	p.getResults().size()>0) {
+				 rsDao.updateSecondRx(rs);
+				 return rs;
+			 }else {
+				 rsDao.saveResultSecond(rs);//新增
+				 return rs;
+			}
+		}
+}

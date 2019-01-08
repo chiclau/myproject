@@ -1,0 +1,1379 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+	<div  style="width:100%;height:100%;overflow-y:auto;">
+		<div style="width:100%;height:500px;">
+			<div id="hszlb_step3_div"  style="width:50%;height:100%;float: left;">
+				<div id="hszlb_step3_chart" style="width: 90%;height:90%;margin-left: 5px;highlight-color:#000000;" ></div>
+			</div>
+			<div id="tsqx_div"  style="width:50%;height:100%;float: right;">
+				<div id="tsqx_step3_chart" style="width: 90%;height:90%;"></div>
+			</div>
+		</div>	
+			<div style="width:100%;height:50px;">
+				<div style="width:50%;height:100%;float: left;">
+				<button class="btn" onclick="saveStep3Result()">选择节点保存提交</button>
+				<input type="button" onclick="cl_excel3()" id="chanliu_daochu3" style="margin-left: 20px;" value="导出到excel"  class="btn btn-primary" >
+				</div>
+					<div style="width:50%;height:100%;float: right;">
+								<label>站名:<input type="hidden" name="" id="userName"></label>
+							<input type="text" name="mTsqxFormBean.mTsqxInfoBean.username" id="stnm" class="form-control" 
+								readonly style="width: 80px;display:inline;">
+							<label>洪号:</label>
+							<input type="text" class="form-control"  id="TAB_PCH"
+								readonly style="width: 150px;display:inline;">	
+							<label>流域面积(km²):</label>
+							<input type="text" id="lymj" class="form-control" 
+								readonly style="width: 100px;display:inline;">
+					</div>
+			</div>  
+
+			<div id="jls_step3_div" style="width: 100%;height: calc(100% - 550px);" >
+				<table id="chanliu_step3_table" lay-filter="hszlb_table"></table>
+			</div>
+		</div>
+
+<%-- <script src="../business/consumer/analysisjs/chanliujs/chanliu3.js"></script> --%>
+<script>
+var symbolSize = 20;
+var newData = [];
+var oldData = [];
+var lineData = [];
+var lineData2 = [];
+var tempData = [];
+//导出到excel
+function cl_excel3(){
+
+	var h=hh;
+	if(h==''){
+		confirm("产流计算", "请选择一条计算结果")
+		return false;
+	}
+	var url= basePath + "chanliu/chanliu!chanLiuExportExcel3.action?pch="+h+"&stcd="+stcd +"&beginDate="+beginDate+"&endDate="+endDate ;      
+	confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出到excel","您确定要导出到excel吗？","icon-info", function(result) {
+		   if(result){
+			   window.location.href=url;
+		   }
+		});
+}
+$(function(){
+	loadChanliuStepEchart();
+	//getHszlbGxt("hszlb_step3_chart",basePath + "chanliu/chanliu!step2chart.action",{"stcd":stcd,"start":beginDate,"pch":hh, "end":endDate,"INTERVAL":interval} );
+	//getHszlbGxt("tsqx_step3_chart",basePath + "chanliu/chanliu!getTsqx.action",{"stcd":stcd,"start":beginDate, "end":endDate,"username":staffCode} );
+	//LoadEditData(stcd,staffName);
+	//getJlsTable("#jls_step3_div","#chanliu_step3_table","test_jls_tab.json");
+	$("#stnm").val(stnm);
+	$("#TAB_PCH").val(hh);//洪号
+	$("#lymj").val(lymj);//流域面积
+})
+
+function loadChanliuStepEchart(){
+	$.ajax({
+        url : basePath + "chanliu/chanliu!chanliuStep3ChartData.action",
+        type : "post",
+        dataType : "JSON",
+        async : false,
+        traditional: true,
+        data : {"stcd":stcd,"start":beginDate, "end":endDate,"username":staffCode,"pch":hh,"INTERVAL":interval},
+        success : function(response) {
+          if(response.reflag==1||response.reflag=="1"){
+        	xdata=response.tsqxXdata;
+        	var tsqxData={
+        		xdata:response.tsqxXdata,
+        		max:response.tsqxMax,
+        		min:response.tsqxMin,
+        		data:response.tsqxData
+        	};
+        	loadTsqxEchart(tsqxData);
+        	var thridResult=response.thirdResult;
+        	var llAndJylData={
+        		llData:response.llData,
+        		maxLL:response.maxLL,
+        		minLL:response.minLL,
+        		jylData:response.jylData,
+        		maxJYL:response.maxJYL,
+        		maxTSQX:response.tsqxMax,
+        		minTSQX:response.tsqxMin,
+        		thridResult:thridResult
+        	};
+        	loadLLandJYLEchart(llAndJylData);
+        	var secondList = response.secondList;
+        	var dataList=new Array();
+        	if(thridResult!=null && thridResult.length>0){
+        		dataList = dataList.concat(thridResult);
+        		if(secondList!=null && secondList.length>0){
+        			var second=secondList[0];
+        			dataList.push({DT:"流量合计",INTERVAL:"",Q:"",QT:second.SQT3});
+					dataList.push({DT:"R实(mm)",INTERVAL:"",Q:"",QT:second.RS});
+        		}
+        	}
+        	loadStep3Table("#jls_step3_div","#chanliu_step3_table",dataList);
+          }else{
+          	layer.msg(response.message);
+          }
+        }
+    });
+}
+function loadLLandJYLEchart(llAndJylData){
+	var maxLL=llAndJylData.maxLL;
+	var minLL=llAndJylData.minLL;
+	var maxJYL=llAndJylData.maxJYL;
+	var maxTSQX=llAndJylData.maxTSQX;
+	var minTSQX=llAndJylData.minTSQX;
+	maxLL=maxLL>maxTSQX?maxLL:maxTSQX;
+	minLL=minLL<minTSQX?minLL:minTSQX;
+	if(maxLL==0){
+	   maxLL=10;
+	}
+	var llScale=standard(maxLL,minLL,4);
+	var llValue=llScale[3];
+	maxLL=llScale[0]+llValue*4;
+	minLL=llScale[1];
+	if(maxJYL==0){
+	   maxJYL=10;
+	}
+	var jylScale=standard(maxJYL,0,4);
+	var jylValue=jylScale[3];
+	maxJYL=jylScale[0]+jylValue*4;
+	var llData=llAndJylData.llData;
+	lineData=llData;
+	tempData[0]=llData!=null && llData.length>0?llData[0]:null;
+	var llLen=llData!=null?llData.length:0;
+	var minLLX=llData!=null && llLen>0?llData[0][0]:null;
+	var maxLLX=llData!=null && llLen>0?llData[llLen-1][0]:null;
+	var jylData=llAndJylData.jylData;
+	var jylLen=jylData!=null?jylData.length:0;
+	var minJYLX=jylData!=null && jylLen>0?jylData[0][0]:null;
+	var maxJYLX=jylData!=null && jylLen>0?jylData[jylLen-1][0]:null;
+	var thridResult=llAndJylData.thridResult;
+	var minX=null;
+	if(minLLX!=null && minJYLX!=null){
+		minX=minLLX<minJYLX?minLLX:minJYLX;
+	}else if(minLLX!=null){
+		minX=minLLX;
+	}else if(minJYLX!=null){
+		minX=minJYLX;
+	}
+	var maxX=null;
+	if(maxLLX!=null && maxJYLX!=null){
+		maxX=maxLLX>maxJYLX?maxLLX:maxJYLX;
+	}else if(maxLLX!=null){
+		maxX=maxLLX;
+	}else if(maxJYLX!=null){
+		maxX=maxJYLX;
+	}
+	var resultMaxX=(thridResult!=null && thridResult.length>0)?thridResult[thridResult.length-1].DT:null;
+	if(resultMaxX!=null && resultMaxX.substring(0,16)>maxX){
+		maxX=resultMaxX.substring(0,16);
+	}
+	if(minX!=null){
+		var mt=new Date(minX+":00").getTime()-3600*1000;
+		minX=new Date(mt).getTime();
+	}
+	if(maxX!=null){
+		var mt=new Date(maxX+":00").getTime()+3600*1000;
+		maxX=new Date(mt).getTime();
+	}
+	console.log(llData)
+	var myChart = echarts.init(document.getElementById('hszlb_step3_chart'));
+	var leged=["流量","降雨量"];
+	var series = new Array();
+    series.push({
+                "name":"流量",
+                type: 'line',
+				smooth:true,
+				smoothMonotone:'none',
+                "lineStyle": {
+                "normal":
+                {
+                "width": 1.5
+                }
+                },
+                "data":llData
+            });
+    series.push({
+                "name":"降雨量",
+                "type":"bar",
+                "yAxisIndex":1,
+                "data":jylData
+            });
+            
+    
+    if(thridResult!=null && thridResult.length>0){
+    	var niheData=new Array();
+    	for(var i=0;i<thridResult.length;i++){
+    		niheData.push([thridResult[i].DT.substring(0,16),thridResult[i].Q]);
+    	}
+    	leged.push("分割洪水");
+    	series.push({
+    			id:'tsqx',
+                "name":"分割洪水",
+                type: 'line',
+				smooth:true,
+				smoothMonotone:'none',
+                "lineStyle": {
+                "normal":
+                {
+                "width": 1.5
+                }
+                },
+                "data":niheData
+            });
+    }
+	var yAxis = new Array(); 
+	yAxis.push({
+                "name": "流量",
+                "type": "value",
+                "max":maxLL,
+                "min":minLL,
+            	interval:llValue
+            });
+    yAxis.push({
+                "name": "降雨量",
+                "nameLocation": 'start',
+                "type": 'value',
+                "inverse": true,//反向坐标
+                "max":maxJYL,
+                "min":0,
+            	interval:jylValue
+            });
+     
+	var option = {
+		        title : {
+		            x: 'center',//标题剧中
+		            padding:0
+		        },
+		        color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+		        grid: {
+		        	right:'50px'
+		        },
+		        tooltip : {//鼠标悬浮提示信息
+		            trigger: 'axis',//显示横坐标信息
+				    axisPointer: {//xy提示轴线
+		                type: 'cross',
+		                label: {
+		                    backgroundColor: '#505765'
+		                }
+		            }
+		        },
+		        legend: {
+		            data:leged, //最上边的切换按钮
+		        },
+		        xAxis : [
+		            {
+		                type : 'time'
+		            }
+		        ],
+		        yAxis: yAxis,
+		        series:  series
+		    };
+		myChart.clear();
+    	myChart.setOption(option);
+    	myChart.setOption({
+            graphic: echarts.util.map(newData, function (item, dataIndex) {
+                return {
+                    type: 'circle',
+                    position: myChart.convertToPixel('grid', item),
+                    shape: {
+                        r: symbolSize / 2
+                    },
+                    invisible: true,
+                    draggable: true,
+                    ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                    onmousemove: echarts.util.curry(showTooltip, dataIndex),
+                    onmouseup: echarts.util.curry(hideTooltip, dataIndex),
+                    z: 100
+                };
+            })
+        });
+}
+function loadTsqxEchart(tsqxData){
+	var max=tsqxData.max;
+	var min=tsqxData.min;
+	var dataList=tsqxData.data;
+	xdata=tsqxData.xdata;
+	if(max==0){
+	   max=10;
+	}
+	var scaleArr=standard(max,min,5);
+	var corvalue=scaleArr[3];
+	max=scaleArr[0]==max?max+corvalue:scaleArr[0];
+	min=scaleArr[1];
+	var myChart2 = echarts.init(document.getElementById('tsqx_step3_chart'));
+	var	yAxis = {
+    			type: 'value',
+    			name:'流量Q(m³/s)',
+				min:min,
+				max:max,
+				interval:corvalue
+    		};
+    var series=new Array();
+    var legend_data = new Array();
+    if(dataList!=null && dataList.length>0){
+    	legend_data=getLegend_data(dataList);
+    	for(var i=0;i<dataList.length;i++){
+    		series.push({
+                "name":dataList[i].NAME,
+                type: 'line',
+				smooth:true,
+				smoothMonotone:'none',
+                "lineStyle": {
+                "normal":
+                {
+                "width": 1.5
+                }
+                },
+                "data":dataList[i].DATA
+            });
+    	}
+    }
+	var title="退水曲线图";
+	    var option = {
+	            title : {
+	                text: title,//主标题
+	                x: 'left',//标题剧中
+	                padding:0
+	            },
+	            color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+	            grid: {
+	            	right:'50px'
+	            },
+	            tooltip : {//鼠标悬浮提示信息
+	                trigger: 'axis',//显示横坐标信息
+	    		    axisPointer: {//xy提示轴线
+	                    type: 'cross',
+	                    label: {
+	                        backgroundColor: '#505765'
+	                    }
+	                }
+	            },
+	            legend: {
+	                data:legend_data, //最上边的切换按钮
+	            },
+	            xAxis :
+	                {
+	                	name:"时段(T)",
+	                    type : 'value',
+	                	interval:1,
+	                    min:parseInt(xdata[0]),
+	                    max:parseInt(xdata[xdata.length-1])+1,
+	                },
+	            yAxis: yAxis,
+	            series:  series
+	        };
+	 	myChart2.clear();
+		myChart2.setOption(option);
+		myChart2.on('click', function (params) { //点击右边的曲线触发的方法
+			//debugger;
+	    	newData = this.getOption().series[params.seriesIndex].data;
+   			oldData = this.getOption().series[params.seriesIndex].data;
+			var newValue = tempData[0]!=null?parseInt(tempData[0][1]):0;
+			var oldValue = parseInt(oldData[0][1]);
+			var diffValue = newValue ;
+			var l=newData.length;
+			if(newData!=null&&newData.length>0){
+				var diyige=	newData[0][0];//右边第一个值
+				var xin=[];
+				for(var i = 0 ; i < newData.length ; i++){
+					if(diyige==newData[i][0]){
+						xin.push(newData[i]);
+						diyige++;
+					}else{
+						var x1=newData[i-1][0];
+						var y1=newData[i-1][1];
+						var x2=newData[i][0];
+						var y2=newData[i][1];
+						var x=diyige;
+						if(i>0 && diyige>x1 && diyige<x2){
+							var l=y1-y2;
+							var c1=x-x1;
+							var c2=x2-x;
+							var bl=c1/(c1+c2);
+							var y=(x1+l*bl).toFixed(2);
+							xin.push([x,y]);
+							diyige++;
+						}
+					}
+				}  
+			}
+	
+			var zuobian1=lineData[0][0];
+			if(xin!=null && xin.length>0){
+				for(var i=0; i<xin.length;i++){
+					xin[i][0]=lineData[i][0];
+				}
+			}
+			newData=xin;
+			loadRightTsqx(xin);
+		});
+}
+function loadRightTsqx(tsqxData){
+				myChart.setOption({
+					legend: {
+			            data:["流量","降雨量","退水曲线"], //最上边的切换按钮
+			        },
+			        series: [{
+			            id: 'tsqx',
+			            name:"退水曲线",
+			            type: 'line',
+						smooth:true,
+						smoothMonotone:'none',
+		                "lineStyle": {
+		                "normal":
+		                {
+		                "width": 1.5
+		                }
+		                },
+			            data: tsqxData
+			        }],
+			        graphic: echarts.util.map(newData, function (item, dataIndex) {
+		                return {
+		                    type: 'circle',
+		                    position: myChart.convertToPixel('grid', item),
+		                    shape: {
+		                        r: symbolSize / 2
+		                    },
+		                    invisible: true,
+		                    draggable: true,
+		                    ondrag: echarts.util.curry(onPointDragging, dataIndex),
+		                    onmousemove: echarts.util.curry(showTooltip, dataIndex),
+		                    onmouseup: echarts.util.curry(hideTooltip, dataIndex),//鼠标点击放开之后保证黄线不移动
+		                    z: 100
+		                };
+		            })
+			    });
+}
+function saveStep3Result(){
+	var dataList = new Array();
+	var sumData=new Array();
+	var subObject={};
+	var llhj=0,rs=0;
+	if(lineData2!=null && lineData2.length>0){
+		for(var i=0;i<lineData2.length;i++){
+			var qt=0;
+			if(i<lineData2.length-1){
+				var q1=Number(lineData2[i][1]).toFixed(3);
+				var q2=Number(lineData2[i+1][1]).toFixed(3);
+				qt=(parseFloat(q1)+parseFloat(q2))*parseInt(interval)*60/2;
+				qt=Number(qt).toFixed(3);
+				llhj=parseFloat(llhj)+parseFloat(qt);
+			}
+			sumData.push({DT:lineData2[i][0],INTERVAL:interval,Q:Number(lineData2[i][1]).toFixed(3),QT:qt});
+			dataList.push({DT:lineData2[i][0],INTERVAL:interval,Q:Number(lineData2[i][1]).toFixed(3),QT:qt});
+		}
+		llhj=Number(llhj).toFixed(3);
+		dataList.push({DT:"流量合计",INTERVAL:"",Q:"",QT:llhj});
+		var rs=parseFloat(llhj)/parseFloat(lymj)/1000;
+		rs=Number(rs).toFixed(2);
+		dataList.push({DT:"R实(mm)",INTERVAL:"",Q:"",QT:rs});
+		subObject={subdata:sumData,sumQt:llhj,rs:rs};
+	}
+	loadStep3Table("#jls_step3_div","#chanliu_step3_table",dataList);
+	var json = {
+       "pch":$("#TAB_PCH").val(),
+   		"stcd" : stcd,
+   		"BEGINDATE" : beginDate,
+   		"ENDDATE" : endDate,
+   		"INTERVAL" : interval,
+   		"DATA" : JSON.stringify(subObject)
+    }
+    $.ajax({
+        url : basePath + "chanliu/chanliu!saveStep3Result.action",
+        type : "post",
+        dataType : "json",
+        traditional: true,
+        data : json,
+        success : function(response) {
+        	if(response.reflag==1||response.reflag=="1"){
+        		layer.msg("保存成功!");
+        	}else{
+        		layer.msg(response.message);
+        	}
+        }
+    });
+}
+//提交单场洪水数据
+function saveLine2(){
+	//debugger;
+    var json = {
+      "pch":$("#TAB_PCH").val(),
+   		"STCD" : stcd,
+   		"BEGINDATE" : beginDate,
+   		"LYMJ":lymj ,
+   		"ENDDATE" : endDate,
+   		"INTERVAL" : interval,
+   		"DATA" : [lineData2]
+    }
+    $.ajax({
+        url : basePath + "chanliu/chanliu!saveLineFor3.action",
+        type : "post",
+        dataType : "json",
+        async : false,
+        traditional: true,
+        data : json,
+        success : function(response) {
+        	rshi=response.rs
+        	getStep3Table("#jls_step3_div","#chanliu_step3_table",basePath + "chanliu/chanliu!qiuHe.action?STCD="+stcd+"&INTERVAL="+interval+"&pch="+$("#TAB_PCH").val()+"&LYMJ="+lymj);
+        }
+    });
+}
+	function loadStep3Table(chart, tab, tableData){
+		var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;
+	        table.render({
+	            elem: tab,
+	            data:tableData,
+	            height: height,
+	            width: width,
+	            limit:tableData.length,
+	            id:'cz',
+	            cols: [
+	                [{
+	                    field: 'DT',
+	                    title: '日期',
+	                },{
+	                    field: 'INTERVAL',
+	                    title: '时差(分钟)',
+	                },{
+	                    field: 'Q',
+	                    title: '流量(m³/s)',
+	                    templet:function(row){
+	                    	if(row.Q!=null && row.Q!=""){
+	                    		return Number(row.Q).toFixed(3);
+	                    	}else{
+	                    		return "";
+	                    	}
+	                    }
+	                },{
+	                    field: 'QT',
+	                    title: 'Q*T(m³)',
+	                    templet:function(row){
+	                    	if(row.QT!=null && row.QT!=""){
+	                    		return Number(row.QT).toFixed(3);
+	                    	}else{
+	                    		return "";
+	                    	}
+	                    }
+	                }]
+	            ],
+	            page: false
+	        });
+	    });
+	}
+//测站列表数据表格
+	function getStep3Table(chart, tab, url){
+	    var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;
+	        table.render({
+	            elem: tab,
+	            url: url,
+	            height: height,
+	            width: width,
+	            id:'cz',
+	            request: {pageName: 'pageIndex' //页码的参数名称，默认：page
+	                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+	            },
+	            response: {
+	                statusName: 'CODE' //数据状态的字段名称，默认：code
+	                ,
+	                statusCode: 1 //成功的状态码，默认：0
+	                ,
+	                msgName: 'MESSAGE' //状态信息的字段名称，默认：msg
+	                ,
+	                countName: 'TOTALAMOUNT' //数据总数的字段名称，默认：count
+	                ,
+	                dataName: 'DATA'
+	            } //数据列表的字段名称，默认：data} //如果无需自定义数据响应名称，可不加该参数
+	            ,
+	            cols: [
+	                [{
+	                    field: 'DATE',
+	                    title: '日期',
+	                },{
+	                    field: 'SC',
+	                    title: '时差(分钟)',
+	                },{
+	                    field: 'LL',
+	                    title: '流量(m³/s)',
+	                },{
+	                    field: 'QT',
+	                    title: 'Q*T(m³)',
+	                }]
+	            ],
+	            page: false
+	        });
+	    });
+    }
+
+//初始化统计图				
+var myChart = echarts.init(document.getElementById('hszlb_step3_chart'));
+var myChart2 = echarts.init(document.getElementById('tsqx_step3_chart'));
+var xdata;
+function getHszlbGxt(chart,url,data) {
+    $.ajax({
+        url : url,
+        type : "post",
+        dataType : "JSON",
+        async : false,
+        traditional: true,
+        data : data,
+        success : function(response) {
+        	xdata=response.x;
+        	//初始化点击退水段数据添加到降雨流量统计图的坐标
+        	if(chart == "hszlb_step3_chart"){
+        		for(var i = 0;i < response.DATA.length ;i++){
+        			if(response.DATA[i].TYPE == "line"){
+        				lineData = response.DATA[i].DATA;
+        			}
+        		}
+        		tempData[0] = response.DATA[0].DATA[0];
+        	}
+            getChart(chart,response,data);
+        }
+    });
+}
+
+//生成统计图
+function  getChart(chart,response,data) {
+	var series = {};
+	var yAxis = {};
+	var title;
+	var legend_data= getLegend_data(response.DATA);
+    var title = response.EXTRADATA.CHARTTITLE;
+    var start = response.EXTRADATA.START;
+    var end = response.EXTRADATA.END;
+	if(chart == "hszlb_step3_chart"){
+		var myChart = echarts.init(document.getElementById('hszlb_step3_chart'));
+		series = getSeriesOfTsqx(response.DATA);
+		yAxis = getYAxis(response.DATA);   
+	var option = {
+		        title : {
+		            text: title,//主标题
+		            x: 'center',//标题剧中
+		            padding:0
+		        },
+		        color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+		        grid: {
+		        	right:'50px'
+		        },
+		        tooltip : {//鼠标悬浮提示信息
+		            trigger: 'axis',//显示横坐标信息
+				    axisPointer: {//xy提示轴线
+		                type: 'cross',
+		                label: {
+		                    backgroundColor: '#505765'
+		                }
+		            }
+		        },
+		        legend: {
+		            data:legend_data, //最上边的切换按钮
+		        },
+		        xAxis : [
+		            {
+		                type : 'time',
+		            	scale:true,
+		                min:start,
+		                max:end,
+		            },
+		            {
+		                type : 'time',
+		            	scale:true,
+		                axisLine: {
+		                    onZero: false,
+		                }
+		            }
+		        ],
+		        yAxis: yAxis,
+		        series:  series
+		    };
+	}else if(chart == "tsqx_step3_chart"){//退水曲线
+		var myChart2 = echarts.init(document.getElementById('tsqx_step3_chart'));
+		series = getSeries(response.DATA);
+		yAxis = getYAxisOf1Y();
+		title="退水曲线图";
+	    var option = {
+	            title : {
+	                text: title,//主标题
+	                x: 'left',//标题剧中
+	                padding:0
+	            },
+	            color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+	            grid: {
+	            	right:'50px'
+	            },
+	            tooltip : {//鼠标悬浮提示信息
+	                trigger: 'axis',//显示横坐标信息
+	    		    axisPointer: {//xy提示轴线
+	                    type: 'cross',
+	                    label: {
+	                        backgroundColor: '#505765'
+	                    }
+	                }
+	            },
+	            legend: {
+	                data:legend_data, //最上边的切换按钮
+	            },
+	            xAxis :
+	                {
+	                	 name:"时段(T)",
+	                    type : 'value',
+	                	scale:true,
+	                    min:start,
+	                    max:end,
+	                },
+	            yAxis: yAxis,
+	            series:  series
+	        };
+	}
+// 使用刚指定的配置项和数据显示图表。
+    if(chart == "hszlb_step3_chart"){
+    	myChart.clear();
+    	myChart.setOption(option);
+    	myChart.setOption({
+            graphic: echarts.util.map(newData, function (item, dataIndex) {
+                return {
+                    type: 'circle',
+                    position: myChart.convertToPixel('grid', item),
+                    shape: {
+                        r: symbolSize / 2
+                    },
+                    invisible: true,
+                    draggable: true,
+                    ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                    onmousemove: echarts.util.curry(showTooltip, dataIndex),
+                    onmouseup: echarts.util.curry(hideTooltip, dataIndex),
+                    z: 100
+                };
+            })
+        });
+	}else if(chart == "tsqx_step3_chart"){
+		myChart2.clear();
+		myChart2.setOption(option);
+		myChart2.on('click', function (params) { //点击右边的曲线触发的方法
+			//debugger;
+	    	newData = this.getOption().series[params.seriesIndex].data;
+   			oldData = this.getOption().series[params.seriesIndex].data;
+			var newValue = parseInt(tempData[0][1]);
+			var oldValue = parseInt(oldData[0][1]);
+			var diffValue = newValue ;
+			var l=newData.length;
+
+			if(newData!=null&&newData.length>0){
+				var diyige=	newData[0][0];//右边第一个值
+				var xin=[];
+				for(var i = 0 ; i < newData.length ; i++){
+					if(diyige==newData[i][0]){
+						xin.push(newData[i]);
+						diyige++;
+					}else{
+						var x1=newData[i-1][0];
+						var y1=newData[i-1][1];
+						var x2=newData[i][0];
+						var y2=newData[i][1];
+						var x=diyige;
+						if(i>0&&diyige>x1&&diyige<x2){
+							var l=y1-y2;
+							var c1=x-x1;
+							var c2=x2-x;
+							var bl=c1/(c1+c2);
+							var y=(x1+l*bl).toFixed(2);
+							xin.push([x,y]);
+							diyige++;
+						}
+					}
+				
+					}  
+			}
+	
+			var zuobian1=lineData[0][0];
+			if(xin!=null&&xin.length>0){
+				for(var i=0; i<xin.length;i++){
+					xin[i][0]=lineData[i][0];
+				}
+			}
+			newData=xin;
+			var tsqxY={
+					y:xin
+			};
+			clickEcarts("hszlb_step3_chart",tsqxY,basePath + "chanliu/chanliu!step2chart.action",{"stcd":stcd,"start":beginDate,"pch":hh, "end":endDate,"INTERVAL":interval} );
+		});
+	}
+
+}
+//窗口大小改变重新计算隐藏的拖拽节点的坐标
+window.addEventListener('resize', function () {
+    myChart.setOption({
+        graphic: echarts.util.map(newData, function (item, dataIndex) {
+            return {
+                position: myChart.convertToPixel('grid', item)
+            };
+        })
+    });
+});
+
+function showTooltip(dataIndex) {
+    myChart.dispatchAction({
+        type: 'showTip',
+        seriesIndex: 0,
+        dataIndex: dataIndex
+    });
+}
+//拟合曲线
+function niheyunsuan(oldLineData,niheLineData){
+	var result=new Array();
+	if(oldLineData!=null && oldLineData.length>0){
+		var position=-1;
+		//查询拟合曲线第一个点所在的位置
+		for(var i=0;i<oldLineData.length-1;i++){
+			var opoint1=oldLineData[i];
+			var opoint2=oldLineData[i+1];
+			if (niheLineData != null && niheLineData.length > 0) {
+				var nihepoint = niheLineData[0];
+				if (nihepoint[0] > opoint1[0] && nihepoint[0] <= opoint2[0]) {
+					var t1 = new Date(nihepoint[0]).getTime() - new Date(opoint1[0]).getTime();
+					var t2 = new Date(opoint2[0]).getTime() - new Date(nihepoint[0]).getTime();
+					if (t1 > t2) {
+						position = (i + 1);
+					} else {
+						position = i;
+					}
+					break;
+				}
+			}
+		}
+		//求拟合曲线与真实曲线每个位置的差值
+		if(position>-1){
+			var nhposition=-1;
+			var czlist=new Array();//计算拟合曲线与原曲线同位置的差值
+			if (niheLineData != null && niheLineData.length > 0) {
+				var ot=new Date(oldLineData[position][0]).getTime();
+				for(var i=0;i<niheLineData.length;i++){
+					var t1 = formatDateTime(new Date(ot + (Number(interval)*i) * 60 * 1000));
+					niheLineData[i][0]=t1;
+					var n=niheLineData[i];
+					if(position+i<oldLineData.length){
+						var o = oldLineData[position+i];
+						if(parseFloat(o[1])>parseFloat(n[1])){
+							czlist.push([i,parseFloat(o[1])-parseFloat(n[1])]);
+						}else{
+							czlist.push([i,parseFloat(n[1])-parseFloat(o[1])]);
+						}
+					}else{
+						break;
+					}
+				}
+				myChart.setOption({
+			        series: [{
+			            id: 'tsqx',
+			            type: 'line',
+						smooth:true,
+						smoothMonotone:'none',
+		                "lineStyle": {
+		                "normal":
+		                {
+		                "width": 1.5
+		                }
+		                },
+			            data: niheLineData
+			        }],
+			    });
+			}
+			//查找拟合点，把第一个升序的点作为拟合点
+			for(var j=0;j<czlist.length-1;j++){
+				if(czlist[j][1]<czlist[j+1][1]){
+					nhposition=czlist[j][0];
+					break ;
+				}
+			}
+			//
+			var isAddOne=(oldLineData[position+nhposition][1]<niheLineData[nhposition][1]);
+			var olen=isAddOne?position+1:position;
+			for(var k=0;k<olen+nhposition;k++){
+				result.push(oldLineData[k]);
+			}
+			var dt=result[result.length-1][0];
+			var nlen=isAddOne?nhposition+1:nhposition;
+			for(var n=nlen;n<niheLineData.length;n++){
+				result.push(niheLineData[n]);
+			}
+		}
+	}
+	return result;
+}
+//已知切点的拟合运算
+function niheyunsuanByQiedian(dataIndex,oldLineData,niheLineData){
+	var result=new Array();
+	if(oldLineData!=null && oldLineData.length>0){
+		var position=-1;
+		//查询拟合曲线第一个点所在的位置
+		for(var i=0;i<oldLineData.length;i++){
+			if(oldLineData[i][0]<niheLineData[dataIndex][0]){
+				if(i<oldLineData.length-1){
+					var t1=new Date(oldLineData[i][0]);
+					var t2=new Date(oldLineData[i+1][0]);
+					var t=new Date(niheLineData[dataIndex][0]);
+					if(t.getTime()-t1.getTime()>t2.getTime()-t.getTime()){
+						result.push(oldLineData[i]);
+					}
+				}else{
+					result.push(oldLineData[i]);
+				}
+			}
+		}
+		var dt=new Date(result[result.length-1][0]).getTime();
+		if(dataIndex>0){
+			for(var j=dataIndex-1;j>-1;j--){
+				var t1 = formatDateTime(new Date(dt - (Number(interval)*(dataIndex-1-j)) * 60 * 1000));
+				niheLineData[j][0]=t1;
+			}
+		}
+		for(var k=dataIndex;k<niheLineData.length;k++){
+			var t1 = formatDateTime(new Date(dt + Number(interval)*(k-dataIndex+1) * 60 * 1000));
+			niheLineData[k][0]=t1;
+			result.push(niheLineData[k]);
+		}
+		myChart.setOption({
+			        series: [{
+			            id: 'tsqx',
+			            type: 'line',
+						smooth:true,
+						smoothMonotone:'none',
+		                "lineStyle": {
+		                "normal":
+		                {
+		                "width": 1.5
+		                }
+		                },
+			            data: niheLineData
+			        }],
+		});
+	}
+	return result;
+}
+function hideTooltip(dataIndex) {
+    myChart.dispatchAction({
+        type: 'hideTip'
+    });
+    lineData2 = [];
+	lineData2=niheyunsuanByQiedian(dataIndex,lineData,newData);
+	myChart.setOption({
+        series: [{
+            id: 'line2',
+            type: 'line',
+			smooth:true,
+			smoothMonotone:'none',
+		    "lineStyle": {
+		        "normal":{
+		                "width": 1.5
+		         }
+		    },
+            data: lineData2
+        }],
+    });
+    //鼠标移出当前节点重新计算隐藏可拖拽节点的坐标  避免其余坐标不变导致其余节点不可继续拖拽的问题
+    myChart.setOption({
+        graphic: echarts.util.map(newData, function (item, dataIndex) {
+            return {
+                position: myChart.convertToPixel('grid', item)
+            };
+        })
+    });
+}
+function onPointDragging(dataIndex, dx, dy) {
+	//debugger;
+	newData[dataIndex] = myChart.convertFromPixel('grid', this.position);
+	//dataIndex  当前拖拽节点在数组中的索引   根据所拖拽的节点 对比拖拽前后数据的差值   做数据同步
+    var newTime = new Date(newData[dataIndex][0]);
+	var oldTime = new Date(oldData[dataIndex][0]);
+	var newValue = parseInt(newData[dataIndex][1]);
+	var oldValue = parseInt(oldData[dataIndex][1]);
+	var diffValue = 0; //这个设置为0，不允许上下拖动，只允许左右拖动
+	for(var i=dataIndex;i>-1;i--){
+		var newTempTime = newTime.getTime() - (dataIndex-i)*interval*60*1000;
+		var newTempValue = parseInt(oldData[i][1]) + diffValue;
+		newData[i][0] = getFormatDate(new Date(newTempTime));
+		newData[i][1] = newTempValue;
+		oldData[i][0] = getFormatDate(new Date(newTempTime));
+		oldData[i][1] = newTempValue;
+	}
+	for(var i = dataIndex+1 ; i < newData.length ; i++){
+		var newTempTime = newTime.getTime() + (i-dataIndex)*interval*60*1000;
+		var newTempValue = parseInt(oldData[i][1]) + diffValue;
+		newData[i][0] = getFormatDate(new Date(newTempTime));
+		newData[i][1] = newTempValue;
+		oldData[i][0] = getFormatDate(new Date(newTempTime));
+		oldData[i][1] = newTempValue;
+	}
+	//   更新echart  形成线拖拽的效果
+	myChart.setOption({
+		legend: {
+			       data:["流量","降雨量","退水曲线","拟合曲线"], //最上边的切换按钮
+			    },
+        series: [{
+            id: 'line2',
+            name:"拟合曲线",
+            type: 'line',
+			smooth:true,
+			smoothMonotone:'none',
+		    "lineStyle": {
+		        "normal":{
+		                "width": 1.5
+		         }
+		    },
+            data: newData
+        }],
+    });
+}
+//双Y轴
+function getYAxis(data){
+    var temp = new Array(data.length);
+    for(var i = 0 ; i < data.length ; i < i++){
+        if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name": data[i].NAME,
+                "type": "value",
+                "max":data[i].MAX,
+                "min":data[i].MIN,
+            	scale:true,
+            }
+        }else if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name": data[i].NAME,
+                "nameLocation": 'start',
+                "type": 'value',
+                "inverse": true,//反向坐标
+                "max":data[i].MAX,
+                "min":data[i].MIN,
+            	scale:true,
+            }
+        }
+
+    }
+    return temp;
+}
+//单Y轴
+function getYAxisOf1Y(){
+    var temp = {
+    		type: 'value',
+    			name:'流量Q(m³/s)',
+				scale:true
+    		};
+    return temp;
+}
+function getSeries(data){
+    var temp = new Array();
+    for(var i = 0 ; i<data.length ;i++){
+        if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "yAxisIndex":1,
+                ' barCategoryGap':'10%'  ,
+                "data":data[i].DATA
+            };
+        }else if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                type: 'line',
+				smooth:true,
+				smoothMonotone:'none',
+                "lineStyle": {
+                "normal":
+                {
+                "width": 1.5
+                }
+                },
+                "data":data[i].DATA
+            };
+        }
+
+    }
+    return temp;
+}
+function getSeriesOfTsqx(data){ //左边	
+    var temp = new Array();
+    for(var i = 0 ; i<data.length ;i++){
+        if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                "yAxisIndex":1,
+                ' barCategoryGap':'10%'  ,
+                "data":data[i].DATA
+            };
+        }else if(data[i].TYPE == "line"){
+            temp[i] = {
+                "name":data[i].NAME,
+                "type":data[i].TYPE,
+                smooth:true,
+				smoothMonotone:'none',
+                "lineStyle": {
+                "normal":
+                {
+                "width": 1.5
+                }
+                },
+                "data":data[i].DATA
+            };
+        }
+
+    }
+    temp[data.length] = {
+        	"id":"tsqx",
+            "type": "line",
+            "data": newData,
+            smooth:true,
+			smoothMonotone:'none',
+            "lineStyle": {
+            "normal":
+            {
+            "width": 1.5
+            }
+            },
+            "name":"退水曲线",
+        }
+    temp[data.length+1] = {
+        	"id":"line2",
+            "type": "line",
+            "data": lineData2,
+            smooth:true,
+			smoothMonotone:'none',
+            "lineStyle": {
+            "normal":
+            {
+            "width": 1.5
+            }
+            },
+            "name":"单场洪水",
+           // "showSymbol": true,
+        }
+    return temp;
+}
+function getLegend_data(data) {
+    var temp = new Array(data.length);
+    for(var i = 0 ; i < data.length ; i < i++){
+        temp[i] = data[i].NAME;
+    }
+    return temp;
+}
+//eChart宽高自适应
+var resizeWorldMapContainer = function () {
+	document.getElementById('hszlb_step3_chart').style.width = document.getElementById('hszlb_step3_div').innerWidth+'px';
+	document.getElementById('hszlb_step3_chart').style.height = document.getElementById('hszlb_step3_div').innerHeight+'px';
+	document.getElementById('tsqx_step3_chart').style.width = document.getElementById('tsqx_div').innerWidth+'px';
+	document.getElementById('tsqx_step3_chart').style.height = document.getElementById('tsqx_div').innerHeight+'px';
+};
+
+resizeWorldMapContainer();
+window.onresize = function () {
+	$(".layui-border-box").width($("#jls_step3_div").width() - 2);
+    //重置容器高宽
+    resizeWorldMapContainer();
+    myChart.resize();
+    myChart2.resize();
+};
+
+
+
+
+//格式化时间
+function getFormatDate(date) {
+    var seperator1 = "-";
+    var seperator2 = ":";
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if(month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if(strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var hours="";
+    var minut="";
+    var seconds="";
+    if(date.getHours()<10){
+        hours="0"+date.getHours();
+    }else{
+        hours=date.getHours();
+    }
+
+    if(date.getMinutes()<10){
+        minut="0"+date.getMinutes();
+    }else{
+        minut=date.getMinutes();
+    }
+
+    if(date.getSeconds()<10){
+        seconds="0"+date.getSeconds();
+    }else{
+        seconds=date.getSeconds();
+    }
+    var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+        + " " + hours + seperator2 + minut;
+        /* + seperator2 + seconds; */
+    //console.log(currentdate);
+    return currentdate;
+}
+
+
+var formatDateTime = function(date) {
+	var y = date.getFullYear();
+	var m = date.getMonth() + 1;
+	m = m < 10 ? ('0' + m) : m;
+	var d = date.getDate();
+	d = d < 10 ? ('0' + d) : d;
+	var h = date.getHours();
+	h = h < 10 ? ('0' + h) : h;
+	var minute = date.getMinutes();
+	minute = minute < 10 ? ('0' + minute) : minute;
+	var second = date.getSeconds();
+	second = second < 10 ? ('0' + second) : second;
+	return y + '-' + m + '-' + d + ' ' + h + ':' + minute; // 返回时：分
+};
+
+//点击之后
+function clickEcarts(chart,tsqxY,url,data) {
+	//debugger;
+	var y=tsqxY.y[0][1];
+    $.ajax({
+        url : url,
+        type : "post",
+        dataType : "JSON",
+        async : false,
+        traditional: true,
+        data : data,
+        success : function(response) {
+        	xdata=response.x;
+     		var res={
+     				tsqx: y,//1个值
+     				response:response
+     		}
+
+            getChart1(chart,res,data);
+        }
+    });
+}
+//生成统计图
+function  getChart1(chart,response,data) {
+	var series = {};
+	var yAxis = {};
+	var title;
+	if(chart == "hszlb_step3_chart"){
+	var max=response.tsqx;
+		var myChart = echarts.init(document.getElementById('hszlb_step3_chart'));
+		series = getSeriesOfTsqx(response.response.DATA);
+		yAxis = getY(response.response.DATA,max);   
+	var option = {
+		        title : {
+		            text: title,//主标题
+		            x: 'center',//标题剧中
+		            padding:0
+		        },
+		        color:['#000000','#0000EE','#6699FF','#FF8833','#6666FF','#FF9966','#66CCFF','#FFCC66','#99CCFF','#FFCC99','#CCFFFF'],
+		        grid: {
+		        	right:'50px'
+		        },
+		        tooltip : {//鼠标悬浮提示信息
+		            trigger: 'axis',//显示横坐标信息
+				    axisPointer: {//xy提示轴线
+		                type: 'cross',
+		                label: {
+		                    backgroundColor: '#505765'
+		                }
+		            }
+		        },
+		        legend: {
+		            data:legend_data, //最上边的切换按钮
+		        },
+		        xAxis : [
+		            {
+		                type : 'time',
+		            	scale:true,
+		                min:start,
+		                max:end,
+		            },
+		            {
+		                type : 'time',
+		            	scale:true,
+		                axisLine: {
+		                    onZero: false,
+		                }
+		            }
+		        ],
+		        yAxis: yAxis,
+		        series:  series
+		    };
+	}
+    var legend_data= getLegend_data(response.response.DATA);
+    var title = response.response.EXTRADATA.CHARTTITLE;
+    var start = data.start;
+    var end = data.end;
+// 使用刚指定的配置项和数据显示图表。
+    if(chart == "hszlb_step3_chart"){
+    	myChart.clear();
+    	myChart.setOption(option);
+    	myChart.setOption({
+            graphic: echarts.util.map(newData, function (item, dataIndex) {
+                return {
+                    type: 'circle',
+                    position: myChart.convertToPixel('grid', item),
+                    shape: {
+                        r: symbolSize / 2
+                    },
+                    invisible: true,
+                    draggable: true,
+                    ondrag: echarts.util.curry(onPointDragging, dataIndex),
+                    onmousemove: echarts.util.curry(showTooltip, dataIndex),
+                    onmouseup: echarts.util.curry(hideTooltip, dataIndex),//鼠标点击放开之后保证黄线不移动
+                    z: 100
+                };
+            })
+        });
+	}
+
+}
+
+
+//双Y轴
+function getY(data,max){
+    var temp = new Array(data.length);
+    for(var i = 0 ; i < data.length ; i < i++){
+        if(data[i].TYPE == "line"){
+	        	if(max>data[i].MAX){//如果右边选择的线的值大于左边的最大值，
+	        		   temp[i] = {
+	        	                "name": data[i].NAME,
+	        	                "type": "value",
+	        	                "max":max, //那么新图的最大值为右边的max*2
+	        	                "min":data[i].MIN,
+	        	            	scale:true,
+	        	            }
+	        	}else {
+	        		  temp[i] = {
+	      	                "name": data[i].NAME,
+	      	                "type": "value",
+	      	                "max":data[i].MAX,//否则不变
+	      	                "min":data[i].MIN,
+	      	            	scale:true,
+	      	            }
+				}
+        }else if(data[i].TYPE == "bar"){
+            temp[i] = {
+                "name": data[i].NAME,
+                "nameLocation": 'start',
+                "type": 'value',
+                "inverse": true,//反向坐标
+                "max":data[i].MAX,
+                "min":data[i].MIN,
+            	scale:true,
+            }
+        }
+
+    }
+    return temp;
+}
+</script>
+<!-- 不要改变以下引用顺序 -->

@@ -1,0 +1,414 @@
+(function($) {
+	//当前工程内码
+	var engineeringNm = sessionStorage.getItem("engineeringNm");
+	$.Myplan_Query = function(option) {
+		//option自定义参数覆盖
+		//A、界面控件变量
+		var opt_control={
+			 query_table 			:$('#query_myplan_table')		//页面BootStrapTable的ID
+			,query_searchName		:$('#query_searchName')	//页面模糊查询input
+			,query_info_show		:$("#query_info_show")	//双击事件窗口id
+			,query_ref				:$("#query_myplan_ref")		//模糊查询
+			//,query_add				:$("#query_add")		//添加按钮
+			//,material_add			:$("#material_add")		//添加物资按钮
+			//,self_remove			:$(".removeSelf")		//删除物资按钮
+			//,data_body				:$("#data_body")		//物资添加列表tbody
+			,detail_body			:$("#detail_body")		//物资详细列表tbody
+			,evaluate_table			:$("#evaluate_table")	//履约评价详细列表
+			,noneEvaluate			:$("#noneEvaluate")		//履约评价待评价提示
+			,btn_del				:$("#btn_myplan_del")			//批量删除按钮
+			,modellist_dialog		:$("#modellist_dialog")		//添加编辑窗口
+			,modellist_form			:$("#modellist_form")		//添加编辑的表单
+			,removeIds				:$("#removeIds")		//要删除的物资id
+			,evaluation_form		:$("#evaluation_form")		//履约评价的表单
+			,uploading_data_dialog	:$('#uploading_data_dialog') //文件上传模态框
+			,enginner_dialog		:$('#enginner_dialog') //选择工程模态框
+			//,loadTreeDate			:$('#loadTreeDate') //树形选择框
+			//,zTreeDiv				:$('#zTreeDiv') //ztree域
+			//,treeDemo				:$('#treeDemo') //ztree
+			,engineerCode			:$('#engineerCode') //编辑页工程编码
+			,engineerName			:$('#engineerName')	//编辑页工程名称
+			,info_upload			:$("#info_upload")	//文件上传模态框
+			,btn_into_pptn			:$("#btn_into_pptn")	//导入按钮
+			,btn_outAll_pptn	    :$('#btn_outAll_pptn') //导出全部按钮
+			,btn_outPage_pptn		:$('#btn_outPage_pptn') //导出当前页按钮
+		}
+		
+		//B、请求地址URL
+		var opt_url={
+			url_list			:basePath + "myplan/myplan!list.action"//查询数据URL
+			,url_save			:basePath + "myplan/myplan!save.action"//添加或修改保存主合同URL
+			,url_remove			:basePath + "myplan/myplan!removeids.action"//删除URL
+			,url_edit			:basePath + "myplan/myplan!edit.action"//修改查询数据
+			,url_import			:basePath + "myplan/myplan!importPptn.action"//导入
+			,url_export			:basePath + "myplan/myplan!export.action"//导出
+		}
+		//全部变量，自定义的覆盖默认变量
+		var opt_all=($.extend(opt_control,opt_url,option));
+		var TableQueryParams;
+	    //////////////////////////////////////////////////////////////////////////////////////////////////
+		this.InitData=function(opt){
+			opt_all=$.extend(opt_all,opt);   
+			opt_all.query_table.bootstrapTable($.extend(g_bootstrapTable_Options,
+				{
+				      url			 	:opt_all.url_list   // 请求后台的URL（*）
+			         ,queryParams	  	:queryParams		// 传递参数（*）
+			         ,onDblClickRow 	:onDblClickRow		// 行双击事件
+			         ,onSort			:onSort             // 排序事件
+		             ,rowStyle			:comm_rowStyle		//行样式，可自定义
+		             ,onLoadSuccess		:comm_onLoadSuccess //数据加载错误
+		             ,onCheckAll 		:onCheckAll   //全选
+		             ,onCheck  			:onCheck   //单选
+		             ,onUncheck  		:onUncheck   //不选
+		             ,onUncheckAll 		:onUncheckAll  //全不选
+		             ,singleSelect		:false
+		             ,uniqueId			:"ID"
+		             ,pageSize:15
+				}));
+			//选中多行改变表格背景色
+			   function onCheckAll(rows){
+			    for(var i=0;i<rows.length;i++){
+			     commRowStyle(i);
+			    }
+			   }
+			   //循环改变所有行颜色
+			   function commRowStyle(i){
+			    $("#query_table tbody tr[data-index="+i+"]").addClass("success");
+			   }
+			   //全不选时颜色恢复
+			   function onUncheckAll(){
+			    $("#query_table tbody tr").removeClass("success");
+			   }
+			   //选中一行改变表格背景色
+			   function onCheck(rows){
+			    $("#query_table tbody tr[data-uniqueid="+rows.id+"]").addClass("success");
+			   }
+			   //不选中时颜色恢复
+			   function onUncheck(rows){
+			    $("#query_table tbody tr[data-uniqueid="+rows.id+"]").removeClass("success");
+			   }
+			// 提交查询函数
+			function queryParams(params) {  // 配置参数
+				//查询条件
+				TableQueryParams = params;
+				var opt_parms={
+					 "modelprogramFormBean.searchName"			:opt_control.query_searchName.val() // 查询关键字
+				//	 ,"modelprogramFormBean.supply"			:opt_control.select_supply.val() // 查询供应厂商
+				};
+			    var temp = {   // 这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+			       "modelprogramFormBean.pageBean.limit"			: params.limit   // 页面大小
+			      ,"modelprogramFormBean.pageBean.offset"			: params.offset  // 当前记录偏移条数
+			      ,"modelprogramFormBean.pageBean.sort"				: params.sort  	  // 排序列名
+			      ,"modelprogramFormBean.pageBean.sortOrder" 		: params.order   // 排位命令（desc，asc）
+			      //,"contInfoFormBean.contInfoBean.engineerCode":engineeringNm
+			    };
+			    temp=$.extend(temp,opt_parms,opt);
+				return temp;
+			}
+			// 双击事件
+			function onDblClickRow(row){
+				if (row) {
+					_table(row.ID);
+				}
+			}
+			// 排序事件
+			function onSort(name, order){
+				_refresh();
+			}
+		}
+		
+		// 初始化增加、修改和删除,公开函数
+		this.InitAddEditDel=function(opt){
+			opt_all=$.extend(opt_all,opt);
+			//opt_all.query_add.bind("click",event_add);
+			opt_all.btn_del.bind("click",event_del);
+			opt_all.query_ref.bind("click",event_ref);
+			//opt_all.material_add.bind("click",event_addMaterial);
+			//opt_all.medium_name.bind("change",event_ref);
+			//opt_all.loadTreeDate.bind("click",event_showZtree);
+		
+			
+			//初始化主合同编辑表单 保存button类型为submit
+			opt_all.modellist_form.bootstrapValidator().on("success.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+				// 校验数据正确,执行保存数据
+				_save();
+				
+			}).on("error.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+			});	
+			
+			//初始化履约评价编辑表单 保存button类型为submit
+			//校验履约评价不能为0
+			opt_all.evaluation_form.bootstrapValidator({}).on("success.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+				// 校验数据正确,执行保存数据
+				_save_evaluation();
+				
+			}).on("error.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+			});	
+		}
+		//下拉数据初始化
+		this.InitSelect = function (){}
+		
+	    // 修改记录，调出窗体,公开函数
+		this.edit=function(id) {
+			_edit(id);
+		}
+		// 履约评价
+		this.evaluation=function(id) {
+			_Evaluation(id);
+		}
+		
+		//单条删除
+		this.del=function(id){
+			if(id != null && id != "" && id != 0){
+				_del(id);
+			}
+		}
+		//绑定删除事件
+		function event_del(){
+			_removeids();
+		}
+		// 批量删除
+		function _removeids(){
+           // 获取删除选中的ids
+           var ids = g_select_and_tip(opt_all.query_table,"PROG_CODE");
+           if (ids.length==0) return;
+           
+           $(".fixed-table-container tbody tr.selected td").addClass("row-bcground");
+           
+           var url= opt_all.url_remove+"?modelprogramFormBean.ids="+ids
+            
+           confirm("资料管理","您确定要删除这些记录吗？","icon-remove-sign", function(result) {
+      
+			   if(result){
+			 		common_ajax(null, url, function(response){
+						// 删除后，从后台取出返回数据
+					    _refresh();
+					    var msg = new $.zui.Messager("消息提示："+response.message, {placement: "center",type:"primary"});
+					    msg.show();	
+						    
+			 		}); 
+               }
+			});    
+		}
+		
+		//删除单条记录
+		function _del(id){
+			var url= opt_all.url_remove+"?modelprogramFormBean.ids="+id
+			$(".table tbody tr[data-uniqueid="+id+"] td").addClass("row-bcground");
+			confirm("资料管理","您确定要删除该条记录吗？","icon-remove-sign", function(result) {
+			   if(result){
+			 		common_ajax(null, url, function(response){
+						// 删除后，从后台取出返回数据
+					    _refresh();
+					    var msg = new $.zui.Messager("消息提示："+response.message, {placement: "center",type:"primary"});
+					    msg.show();	
+			 		}); 
+               }
+			}); 
+		}
+		
+		//新增和编辑函数
+		function _edit(id){
+			//加载Edit页面基本选择数据，成功后调用显示编辑页面
+			//加载字典分类数据下拉框数据
+			Load_EditSelectData( 
+				function(){ 
+					LoadEditData(id);
+				}
+			);
+		}
+		function LoadEditData(id){
+			var url = opt_all.url_edit+"?modelprogramFormBean.modelprogramFormBean.progCode=" + id;
+			common_ajax(null,url, function(response) {
+				//debugger;
+				opt_all.modellist_dialog.find('.modal-title').html("<i class='icon icon-pencil'></i>&nbsp;修改方案信息");
+				　$("#query_cs").empty();//移除
+				comm_loadFormData_flag(response.rows[0],"_plan");
+			//	debugger;
+				for(var i=0;i<response.valueList.length;i++){
+					var  name=response.valueList[i].PARA_NAME; 
+					var symbol=response.valueList[i].PARA_SYMBOL; 
+					var code=response.valueList[i].CODE;
+					var value=response.valueList[i].PARA_VALUE;
+					var tr = "";
+					tr+= "<tr class='t1'>"+
+						"<th align='right'>"+name+"("+symbol+")</th>" +
+								"<th><input  class='form-control' style='width:200px;' type='text' name='modelprogramFormBean.valueList["+i+"].paraValue' value='"+value+"'></th>" +
+								"<input type='hidden' name='modelprogramFormBean.valueList["+i+"].code' value='"+code+"'>"+
+						"</tr>";
+					　$("#query_cs").append(tr);　　  
+				}
+				$("#query_cs").attr("trnum",response.valueList.length);
+				$("#list").val(response.valueList);
+				opt_all.modellist_dialog.modal({
+					 show : true
+					,backdrop : false// 背景遮挡
+					,moveable : true
+				}).on('hide.zui.modal', function() {
+					_reset();//当第一次验证正确后，关闭窗体。再进来时，重置窗体(保留窗体上数据)。
+	            });
+				
+			})
+			
+		}
+		//初始化ztree
+		function zTreeDataLoad(type){
+//			opt_all.zTreeDiv.hide();
+			
+			var url = opt_all.url_engineer;
+			common_ajax(null,url, function(data) {
+				loadzTreeInfo(data.engineers,type);
+			});
+		}
+		
+		
+		//点击新增物资时显示输入框
+		function _edit_material(detailData){}
+		
+		// 保存主合同数据
+		function _save() {
+			// 参数需要保存的表单，保存url,需要更新的bootstrapTable,必须设置uniqueId: "id"
+	 		var json=opt_all.modellist_form.serialize();
+	 		common_ajax(json, opt_all.url_save, function(response){
+	 			opt_all.modellist_dialog.modal("hide");
+			    //重置表单
+			    _reset();
+			    // 刷新列表
+			    _refresh();
+	 		});
+		}
+		
+		// 保存履约评价数据
+		function _save_evaluation(){
+			// 参数需要保存的表单，保存url,需要更新的bootstrapTable,必须设置uniqueId: "id"
+			var json = opt_all.evaluation_form.serialize();
+			common_ajax(json, opt_all.url_save_evaluate, function(response){
+				opt_all.evaluation_dialog.modal("hide");
+				//重置列表
+				_reset_evaluation();
+				// 刷新列表
+				_refresh();
+			});
+		}
+		
+		//新增和编辑履约评价加载数据弹窗
+		function _Evaluation(id){
+			//加载Edit页面基本选择数据，成功后调用显示编辑页面
+			//加载字典分类数据下拉框数据
+			Load_EditSelectData( 
+				function(){ 
+					LoadEvaluationData(id);
+				}
+			);
+		}
+		//显示详情
+		function _table(queryId){
+			opt_all.detail_body.html("");
+			var url = opt_all.url_list+"?contEvaluateFormBean.contEvaluateBean.id=" + queryId;
+			common_ajax(null,url, function(response) {
+				for(var key in response.rows[0]){
+				   if($("#"+key+"_detail")[0]){
+					   $("#"+key+"_detail").html(response.rows[0][key]);
+				   }
+				}
+			});
+			opt_all.query_info_show.modal({
+				show 	   : true
+				,backdrop  : "static" // 背景遮挡
+					,moveable  : true
+			}).on('shown.zui.modal', function() {
+			});
+		}
+		
+		//加载供货厂商及需求单位下拉
+		
+		//加载所属工程下拉
+		
+		//加载需求单位下拉
+		
+		//上传文件
+		
+		//附件信息模态框
+		
+		
+		
+		
+		//删除文件
+		
+		
+		//加载Edit页面上数据，并调出增加或编辑页面显示
+		
+		//加载履约评价页面上数据，并调出页面显示
+		
+	
+	
+		
+		//****绑定事件
+		//绑定添加或修改事件
+		function event_showZtree(){
+			opt_all.enginner_dialog.modal({
+				show : true
+				,backdrop : false // 背景遮挡
+				,moveable : true
+			}).on('shown.zui.modal', function() {
+//				_reset();//当第一次验证正确后，关闭窗体。再进来时，重置窗体(保留窗体上数据)。
+			});
+		}
+		
+		function event_add(){
+			_edit(0);
+		}
+
+		function event_addMaterial(){
+			//新增物资时显示输入框
+			_edit_material();
+		}
+		
+		//绑定刷新事件
+		function event_ref(){
+			 _refresh();
+		}
+		
+		//删除物资输入框
+		function event_selfRemove(){
+    		var myId = $(this).data("id");
+    		if(myId==null){
+    			$(this).parent("td").parent("tr").remove();
+    		}
+		}
+		
+		//****绑定事件******end
+	    // 刷新
+	    function _refresh(){
+	    	opt_all.query_table.bootstrapTable('refresh');
+	    }
+	    this.flash=function(nm){
+	    	engineeringNm=nm;
+			_refresh();
+		}
+		// 重置主合同
+		function _reset(){
+			opt_all.removeIds.val("");
+			//opt_all.modellist_form.data('bootstrapValidator').resetForm(true);
+		}
+		// 重置履约评价表单
+		function _reset_evaluation(){
+			//opt_all.evaluation_form.data('bootstrapValidator').resetForm(true);
+		}
+		//公开函数
+		this.reset=function(){
+			_reset();
+		}
+		////////////////////////////////////////////////////////////////////////////////
+		//加载所有外键表到下拉框，无
+		function Load_EditSelectData(callback){
+			//所有编辑页面下拉框加载
+			callback();
+		}
+	};
+})(jQuery);
+			

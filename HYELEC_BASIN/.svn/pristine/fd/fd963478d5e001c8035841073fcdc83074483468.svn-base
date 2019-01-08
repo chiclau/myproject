@@ -1,0 +1,90 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.math.BigDecimal;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.business.analysisCalculation.bean.ResultSixth;
+import com.lyht.business.analysisCalculation.bean.ResultSixthResult;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResultSixthDao;
+import com.lyht.business.analysisCalculation.dao.ResultSixthResultDao;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultSixthService {
+	@Resource
+	private ResultSixthDao rsDao;
+	@Resource
+	private ResultSecondDao secondDao;
+	@Resource ResultSixthResultDao resultSixthResultDao;
+	public void saveResultSixth(ResultSixth rs) {
+		rsDao.delResultSixth(rs);
+		rsDao.saveResultSixth(rs);
+	}
+	@Transactional(propagation=Propagation.REQUIRED)
+	public Hashtable<String,Object> saveStep6ResultData(String stcd,String pch,String data){
+		Hashtable<String,Object> table = new Hashtable<String,Object>();
+		try {
+			JSONObject dataJson = JSONObject.fromObject(data);
+			JSONArray array= dataJson.getJSONArray("tableData");
+			JSONObject fcJson=dataJson.getJSONObject("fcjg");
+			rsDao.deleteByStcdAndPch(stcd, pch);
+			if(array!=null && array.size()>0){
+				for(int i=0;i<array.size();i++) {
+					 JSONObject jObject=array.getJSONObject(i);
+					 ResultSixth  rSixth=new ResultSixth();
+					 rSixth.setTm(jObject.getString("DATE"));
+					 rSixth.setEr(jObject.getDouble("ER"));
+					 rSixth.setE(jObject.getDouble("E"));
+					 rSixth.setEpe(jObject.getDouble("EPE"));
+					 rSixth.setErc(jObject.getDouble("ERC"));
+					 rSixth.setP(jObject.getDouble("P"));
+					 rSixth.setPape(jObject.getDouble("PAPE"));
+					 rSixth.setPe(jObject.getDouble("PE"));
+					 rSixth.setR(jObject.getDouble("R"));
+					 rSixth.setRgdx(jObject.getDouble("RGDX"));
+					 rSixth.setSdrc(jObject.getDouble("SDRC"));
+					 rSixth.setStcd(stcd);
+					 rSixth.setPch(pch);
+					 rsDao.saveResultSixth(rSixth);
+				 }
+			}
+			if(fcJson.containsKey("FCS") && fcJson.containsKey("FCJ")
+					&& fcJson.containsKey("FC") && fcJson.containsKey("TC")){
+				ResultSixthResult sixResult = new ResultSixthResult();
+				sixResult.setNm(stcd+pch);
+				sixResult.setStcd(stcd);
+				sixResult.setPch(pch);
+				double rc=fcJson.getDouble("RC");
+				double tc=fcJson.getDouble("TC");
+				sixResult.setRc(rc);
+				sixResult.setTc(tc);
+				double rctc=tc!=0?rc/tc:0;
+				rctc = new BigDecimal(rctc).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+				sixResult.setRctc(rctc);
+				sixResult.setFc(fcJson.getDouble("FC"));
+				resultSixthResultDao.saveOrUpdate(sixResult);
+			}
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "保存失败!");
+		}
+		return table;
+	}
+}

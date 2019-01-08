@@ -1,0 +1,38 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.analysisCalculation.bean.ResultSixth;
+import com.lyht.business.consumer.hydrologicalData.bean.Tsqx;
+import com.lyht.util.Randomizer;
+@Repository
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class ResultSixthDao extends HibernateBaseDao<ResultSixth> {
+	
+	/**
+	 * 保存计算结果6
+	 * @param rs
+	 */
+	public void saveResultSixth(ResultSixth rs) {
+		StringBuilder sql=new StringBuilder();
+		String id=Randomizer.nextNumber("rx", 6);
+		sql.append("INSERT INTO C_RESULT_SIXTH (ID,P,E,PE,EPE,PAPE,ERC,SDRC,R,RGDX,ER,TM,PCH,STCD) VALUES(");
+		sql.append("'"+id+"',"+rs.getP()+" ,"+rs.getE()+" ,'"+rs.getPe()+"',"+rs.getEpe()+" , "+rs.getPape()+","+rs.getErc()+","+rs.getSdrc()+", ");
+		sql.append(""+rs.getR()+","+rs.getRgdx()+", "+rs.getEr()+" , '"+rs.getTm()+"' ,'"+rs.getPch()+"','"+rs.getStcd()+"')");
+		this.exectueSQL(sql.toString());
+	}
+	
+	public void delResultSixth(ResultSixth rs) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM  C_RESULT_SIXTH WHERE PCH='"+rs.getPch()+"' AND STCD='"+rs.getStcd()+"'");
+		this.exectueSQL(sql.toString());
+	}
+	public void deleteByStcdAndPch(String stcd,String pch){
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM  C_RESULT_SIXTH WHERE PCH='"+pch+"' AND STCD='"+stcd+"'");
+		this.exectueSQL(sql.toString());
+	}
+}

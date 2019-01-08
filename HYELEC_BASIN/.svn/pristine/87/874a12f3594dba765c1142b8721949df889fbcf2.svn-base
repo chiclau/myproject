@@ -1,0 +1,527 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<div class="container-fluid" id="cljs_mainList">
+		<div style="width:100%;height:400px;">
+			<div style="height:40px;width:80%;">
+				<div style="padding-left:30px;float:left;width:40%;line-height:40px;">1、瞬时单位线净雨过程及净雨的矩计算表</div>
+				<div style="width:60%;float: right;">
+					<label>站名:</label>
+					<input id="huiliujisuan_step4_stcd" class="form-control" style="width: 150px;display:inline;"></input>
+					<label>洪号:</label>
+					<select id="huiliujisuan_step4_pch" class="form-control" style="width: 150px;display:inline;"></select>
+					<button class="layui-btn" onclick="queryHuiLiuStep4Table1()" value="查询">查询</button>
+					<button class="layui-btn" onclick="calcHuiliuStep4Data()" value="计算">计算</button>
+					<input type="button" onclick="shdwxf_export(1)" id="shdwxf_export" style="margin-left: 20px;" value="导出到excel"  class="layui-btn" >	
+				</div>
+			</div>
+			<div id="step4_div1" style="height:calc(100% - 40px);width:100%;">
+				<table class="layui-hide" id="step4_table1" lay-filter="hszlb_table"></table>
+			</div>
+		</div>
+		<div style="width:100%;height:400px;margin-top:20px;">
+			<div style="height:40px;width:100%;">
+				<div style="padding-left:30px;float:left;width:40%;line-height:40px;">2、瞬时单位线流量过程及流量矩计算表</div>
+				<div style="width:60%;float: right;">
+				<input type="button" onclick="shdwxf_export(2)" id="shdwxf_export2" style="margin-left: 20px;" value="导出到excel"  class="layui-btn" >	
+				</div>
+			</div>
+			<div id="step4_div2" style="height:calc(100% - 40px);width:100%;">
+				<table class="layui-hide" id="step4_table2" lay-filter="hszlb_table"></table>
+			</div>
+		</div>
+		<div style="width:100%;height:500px;margin-top:20px;">
+			<div style="height:40px;">
+				<div style="width:50%;float:left;padding-left:30px;line-height:40px;">3.瞬时单位线流量过程计算,单站综合及误差统计</div>
+				<div style="width:50%;float:right;">
+					<button class="layui-btn" value="单站综合及误差统计" onclick="step4Zhcx()">单站综合及误差统计</button>
+	<input type="button" onclick="shdwxf_export3()" id="shdwxf_export3" style="margin-left: 20px;" value="导出到excel"  class="layui-btn" >	
+				</div>
+			</div>
+			<div style="height:calc(100% - 40px);width:100%;">
+				<div id="step4_div4" style="width:50%;height:100%;float:left;">
+					<table class="layui-hide" id="step4_table4" lay-filter="hszlb_table"></table>
+				</div>
+				<div id="step2_echart" style="width:50%;height:100%;float:right;">
+					<div id="huiliu_step4_echarts" style="height:400px;"></div>
+				</div>
+			</div>
+		</div>
+</div>
+<!-- 不要改变以下引用顺序 -->
+<script type="text/javascript">
+//初始化统计图				
+//var myChart = echarts.init(document.getElementById('tsqx_chart'));
+var step4SubForm={};
+$(function(){
+	initHuiliuStep4StcdCombox();
+	//getwdrsTable("#wdrs_div","#wdrs_tab","test_jls_tab.json");
+	//getTlgcxTable("#wdrs_div","#tlgcx_tab","test_jls_tab.json"); //	2、推理过程线计算
+	//getwctj_tab("#tlgs_div","#wctj_tab","test_jls_tab.json");
+//	getGxt("tsqx_chart","test_tsd3.json","");
+})
+
+
+function shdwxf_export(num){
+	var stcd =$("#huiliujisuan_step4_stcd").combox("getValue");
+	var pch = $("#huiliujisuan_step4_pch").val();
+	if(stcd==null||pch==null){
+		layer.msg("请选择一条记录");
+		return false;
+	}
+	var url= basePath + "huiliu/huiliu!shdwxf_export.action?STCD="+stcd+"&PCH="+pch+"&table="+num;
+		confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出到excel","您确定要导出到excel吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url;
+			   }
+			}); 
+	}
+	
+function shdwxf_export3(num){
+	var stcd = $("#huiliujisuan_step4_stcd").combox("getValue");
+	if(stcd==null){
+		layer.msg("请选择一条记录");
+		return false;
+	}
+	var url= basePath + "huiliu/huiliu!shdwxf_export3.action?STCD="+stcd;
+		confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出到excel","您确定要导出到excel吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url;
+			   }
+			}); 
+	}
+function initHuiliuStep4StcdCombox(){
+	$("#huiliujisuan_step4_stcd").combox({
+		url:basePath + "huiliu/huiliu!huiliuStep2StcdSelect.action",
+		label:"STNM",
+		value:"STCD",
+		dataKey:"dataList",
+		height:'250px',
+		width:'150px',
+		isPager:false,
+		select:function(item){
+			qjstcd=item.STCD;
+			qjstnm=item.STNM;
+			loadHuiliuStep4PchSelect();
+		}
+	});
+	if(qjstcd!=null && $.trim(qjstcd).length>0 && qjstnm!=null && $.trim(qjstnm).length>0){
+		$("#huiliujisuan_step4_stcd").combox("setValue",{label:qjstnm,value:qjstcd});
+		loadHuiliuStep4PchSelect();
+	}
+}
+function loadHuiliuStep4PchSelect(){
+	var stcd = $("#huiliujisuan_step4_stcd").combox("getValue");
+	var url= basePath + "huiliu/huiliu!huiliuStep2PchSelect.action";
+	$.ajax({
+		url:url,
+		type:"post",
+		data:{"stcd":stcd},
+		dataType:"json",
+		success:function(response){
+			var pchList = response.dataList;
+			$("#huiliujisuan_step4_pch").empty();
+			if(pchList !=null && pchList.length>0){
+				for (var i = 0; i < pchList.length; i++) {
+					if(i==0 && (qjpch==null || $.trim(qjpch).length<1)){
+						qjpch=pchList[i].PCH;
+					}
+					$("#huiliujisuan_step4_pch").append("<option value='"+pchList[i].PCH+"' > "+pchList[i].PCH+"</option>");
+				}
+				$("#huiliujisuan_step4_pch").val(qjpch);
+				if(qjpch!=null && $.trim(qjpch).length>0){
+					queryHuiLiuStep4Table1();
+				}
+			}else{
+				$("#huiliujisuan_step4_pch").append("<option value='' selected='selected' > 请选择  </option>")
+			}
+		}
+	});
+}
+//第三步综合查询
+function step4Zhcx(){
+	var stcd = $("#huiliujisuan_step4_stcd").combox("getValue");
+	var url= basePath + "huiliu/huiliu!huiliuStep4Search.action?STCD="+stcd;
+	common_ajax(null, url, function(response) {
+			if(response.reflag==1||response.reflag=="1"){
+				var mjList = response.mjDataList;
+				var mcList = response.mcDataList;
+				var cxList = response.cxDataList;
+				
+				step4SearhcTable("#step4_div4","#step4_table4",cxList);
+				var dataOne = [];
+				var dataTwo = [];
+				for(var i=0;i<mjList.length;i++){
+					dataOne.push([mjList[i].mj,mjList[i].am13]);
+				}
+				for(var j=0;j<mcList.length;j++){
+					dataTwo.push([mcList[j].mj,mcList[j].am13]);
+				}
+				loadStep4ZhcxEchart(dataOne,dataTwo);
+			}	
+	});
+}
+function isNumber(val){
+    var regPos = /^\d+(\.\d+)?$/; //非负浮点数
+    if(regPos.test(val)){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+//调用接口计算M值和表3中的数据
+function calcHuiliuStep4Data(){
+	var stcd = $("#huiliujisuan_step4_stcd").combox("getValue");
+	var pch = $("#huiliujisuan_step4_pch").val();
+	var table2Data=step4SubForm.table2Data;
+	if(table2Data!=null && table2Data.length>0){
+		for(var i=0;i<table2Data.length;i++){
+			var qj=table2Data[i].QJ;
+			if(qj==null){
+				layer.msg("第"+(i+1)+"行Q基不能为空!");
+				return false;
+			}
+			if(!isNumber(qj)){
+				layer.msg("第"+(i+1)+"行Q基必须为大于等于0的数字!");
+				return false;
+			}
+		}
+	}
+	//
+	var k=5,n=10,m=15,mi=2,qpj=3,qi=4,a=2,am=5,m1=11,kj=8,mj=12;
+	//
+	var data={stcd:stcd,pch:pch,m1:m1,k:k,kj:kj,n:n,
+	m:m,mi:mi,mj:mj,qpj:qpj,qi:qi,a:a,am:am,
+	table1Data:step4SubForm.table1Data,table2Data:step4SubForm.table2Data};
+	var url= basePath + "huiliu/huiliu!calcHuiliuStep4Save.action";
+	$.ajax({
+		url:url,
+		type:"post",
+		data:{data:JSON.stringify(data)},
+		dataType:"json",
+		success:function(response){
+			if(response.reflag==1||response.refalg=="1"){
+				step4SubForm.table1Data=response.elist;
+				var table1Data=response.elist;
+				step4Table1("#step4_div1","#step4_table1",table1Data);
+				var table2Data=response.qlist;
+				step4SubForm.table2Data=response.qlist;
+				step4Table2("#step4_div2","#step4_table2",table2Data);
+			}else{
+				layer.msg(response.message);
+			}
+		}
+	});
+}
+
+//第三步散点趋势图
+function loadStep4ZhcxEchart(dataOne,dataTwo){
+	var myChart = echarts.getInstanceByDom(document.getElementById('huiliu_step4_echarts'));
+	if(myChart){
+		myChart.dispose();
+	}
+	myChart = echarts.init(document.getElementById('huiliu_step4_echarts'));
+	option = {
+	    title : {
+	        text: '散点分部趋势图'
+	    },
+	    legend: {
+	        data:['m计散点','趋势图']
+	    },
+	    xAxis : [
+	        {
+	            type : 'value',
+	            name:'mm',
+	            scale:true,
+	            axisLabel : {
+	                formatter: '{value}'
+	            }
+	        }
+	    ],
+	    yAxis : [
+	        {
+	            type : 'value',
+	            name:'mm/h',
+	            scale:true,
+	            axisLabel : {
+	                formatter: '{value}'
+	            }
+	        }
+	    ],
+	    series : [
+	        {
+	            name:'m计',
+	            type:'scatter',
+	            data: dataOne,
+	            markPoint : {
+	                data : [
+	                    {type : 'max', name: '最大值'},
+	                    {type : 'min', name: '最小值'}
+	                ]
+	            }
+	        },
+	        {
+	            name:'趋势图',
+	            type:'line',
+	            data: dataTwo,
+	            markPoint : {
+	                data : [
+	                    {type : 'max', name: '最大值'},
+	                    {type : 'min', name: '最小值'}
+	                ]
+	            }
+	        }
+	    ]
+	};
+	myChart.setOption(option);	
+}
+//查询第三步第一个数据表格
+function queryHuiLiuStep4Table1(){
+	var stcd =$("#huiliujisuan_step4_stcd").combox("getValue");
+	var pch = $("#huiliujisuan_step4_pch").val();
+	var url= basePath + "huiliu/huiliu!queryInitHuiliuStep4Data.action?STCD="+stcd+"&PCH="+pch;
+	$.ajax({
+		url:url,
+		type:"post",
+		data:{STCD:stcd,PCH:pch},
+		dataType:"json",
+		success:function(response){
+			if(response.reflag==1||response.refalg=="1"){
+				step4SubForm.table1Data=response.elist;
+				var table1Data=response.elist;
+				step4Table1("#step4_div1","#step4_table1",table1Data);
+				var table2Data=response.qlist;
+				step4SubForm.table2Data=response.qlist;
+				step4Table2("#step4_div2","#step4_table2",table2Data);
+			}else{
+				layer.msg(response.message);
+			}
+		}
+	});
+}
+
+//测站列表数据表格
+	function step4Table1(chart, tab, tableData){
+	    var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;  
+	        table.render({
+	            elem: tab,
+	            height: height,
+	            width: width,
+	            id:'step4Table1',
+	            limit:tableData.length,
+	            data:tableData,
+	            cols: [
+	                [{
+	                    field: 'DT',
+	                    title: '时间'
+	                },			
+	                {
+	                    field: 'II',
+	                    title: 'I<sub>i</sub>',
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'MI',
+	                    title: 'm<sub>i</sub>',
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'MI2',
+	                    title: 'M<sub>i</sub><sup>2</sup>',
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'IIMI',
+	                    title: 'I<sub>i</sub>m<sub>i</sub>',
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'IIMI2',
+	                    title: 'I<sub>i</sub>M<sub>i</sub><sup>2</sup>',
+	                    edit:'text'
+	                }]
+	            ],
+	            page: false,
+	            done: function(res, curr, count){
+			        step4SubForm.table1Data=res.data;
+			    }
+	        });
+	    });
+    }
+    function step4Table2(chart, tab, tableData){
+	    var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;  
+	        table.render({
+	            elem: tab,
+	            height: height,
+	            width: width,
+	            id:'step4Table2',
+	            limit:tableData.length,
+	            data:tableData,
+	            cols: [
+	                [{
+	                    field: 'DT',
+	                    title: '时间'
+	                },			
+	                {
+	                    field: 'QS',
+	                    title: 'Q<sub>实</sub>'
+	                },
+	                {
+	                    field: 'QJ',
+	                    title: 'Q<sub>基</sub>',
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'QSQJ',
+	                    title: 'Q<sub>实</sub>-Q<sub>基</sub>'
+	                },
+	                {
+	                    field: 'QPJ',
+	                    title: "<span style='text-decoration:overline;'>Q</span>"
+	                },
+	                {
+	                    field: 'MI',
+	                    title: 'M<sub>i</sub>'
+	                },
+	                {
+	                    field: 'MI2',
+	                    title: 'M<sub>i</sub><sup>2</sup>'
+	                },
+	                {
+	                    field: 'MIQPJ',
+	                    title: "M<sub>i</sub><span style='text-decoration:overline;'>Q</span>",
+	                    edit:'text'
+	                },
+	                {
+	                    field: 'MIQI',
+	                    title: "M<sub>i</sub>Q<sub>i</sub>"
+	                }]
+	            ],
+	            page: false,
+	            done: function(res, curr, count){
+			        step4SubForm.table2Data=res.data;
+			    }
+	        });
+	    });
+    }
+    function formatterDateTime(dateStr){
+    	var date = new Date(dateStr);
+    	var yyyy=date.getFullYear();
+    	var mm=date.getMonth()+1;
+    	var dd=date.getDate();
+    	var hh=date.getHours();
+    	var mi=date.getMinutes();
+    	var str=yyyy.toString();
+    	str=str+"-"+(mm<10?"0"+mm.toString():mm.toString());
+    	str=str+"-"+(dd<10?"0"+dd.toString():dd.toString());
+    	str=str+" "+(hh<10?"0"+hh.toString():hh.toString());
+    	str=str+":"+(mi<10?"0"+mi.toString():mi.toString());
+    	return str;
+    }
+    function formatterTimeStr(dateStr){
+    	var date = new Date(dateStr);
+    	var yyyy=date.getFullYear();
+    	var mm=date.getMonth()+1;
+    	var dd=date.getDate();
+    	var hh=date.getHours();
+    	var mi=date.getMinutes();
+    	var str=yyyy.toString();
+    	str=str+(mm<10?"0"+mm.toString():mm.toString());
+    	str=str+(dd<10?"0"+dd.toString():dd.toString());
+    	str=str+(hh<10?"0"+hh.toString():hh.toString());
+    	str=str+(mi<10?"0"+mi.toString():mi.toString());
+    	return str;
+    }
+  //单站综合及误差统计table
+	function step4SearhcTable(chart, tab, tableData){
+	    var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;
+	        table.render({
+	            elem: tab,
+	            height: height,
+	            width: width,
+	            id:'step3Table4',
+	            data:tableData,
+	            limit:tableData.length,
+	            cols: [
+	            	[ //标题栏
+	            	    {field: 'PCH', title: '洪号', rowspan: 2,align: 'center',edit:"text"} //rowspan即纵向跨越的单元格数
+	            	    ,{field: 'YX', title: '优选',  colspan: 3,align: 'center',edit:"text"}
+	            	    ,{field: 'AM13', title: 'a>1/3a<sub>max</sub>',  rowspan: 2,align: 'center',edit:"text"}
+	            	    ,{field:'M1C',align: 'center', title: 'm<sub>1查</sub>', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	    ,{field:'KJ',title: 'k<sub>计</sub>',align: 'center', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	    ,{field:'MJ',title: 'M<sub>计</sub>',align: 'center', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	  	,{field:'MC',title: 'M<sub>查</sub>',align: 'center', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	  	,{field:'MS',title: '误差',align: 'center', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	  	,{field:'SFHG',title: '是否合格',align: 'center', rowspan: 2} //colspan即横跨的单元格数，这种情况下不用设置field和width
+	            	  ], [
+	            	    {field: 'N', title: 'n', align: 'center'}
+	            	    ,{field: 'K', title: 'k',align: 'center' }
+	            	    ,{field: 'M1', title: 'm<sub>1</sub>', align: 'center'}
+	            	  ]
+	            ],
+	            page: false
+	        });
+	    });
+    }
+    function getGxt(chart,url,data) {
+        $.ajax({
+            url : url,
+            type : "get",
+            dataType : "JSON",
+            async : false,
+            traditional: true,
+            // data : data,
+            success : function(response) {
+                getChart(chart,response,data);
+            }
+        });
+    }
+
+
+//格式化时间
+function getFormatDate(date) {
+    var seperator1 = "/";
+    var seperator2 = ":";
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if(month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if(strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var hours="";
+    var minut="";
+    var seconds="";
+    if(date.getHours()<10){
+        hours="0"+date.getHours();
+    }else{
+        hours=date.getHours();
+    }
+
+    if(date.getMinutes()<10){
+        minut="0"+date.getMinutes();
+    }else{
+        minut=date.getMinutes();
+    }
+
+    if(date.getSeconds()<10){
+        seconds="0"+date.getSeconds();
+    }else{
+        seconds=date.getSeconds();
+    }
+    var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+        + " " + hours + seperator2 + minut
+        + seperator2 + seconds;
+    return currentdate;
+}
+</script>

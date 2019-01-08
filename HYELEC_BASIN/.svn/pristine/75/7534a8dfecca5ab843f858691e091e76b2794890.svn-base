@@ -1,0 +1,66 @@
+package com.lyht.business.analysisCalculation.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.ResultSecond;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultSecondService {
+	@Resource
+	private ResultSecondDao rsDao;
+	//保存LYMJ
+	@Transactional(propagation=Propagation.REQUIRED)
+	public ResultSecond  saveResultLymj(ResultSecond rs) {
+		PageResults p=rsDao.getSecond(rs);
+		 if(	p.getResults().size()>0) {
+			 rsDao.updateSecondLymj(rs);
+			 return rs;
+		 }else {
+			 rsDao.saveResultSecond(rs);//新增
+			 return rs;
+		}
+	 }
+	//保存PA
+	public ResultSecond savePa(ResultSecond rs) {
+		PageResults p=rsDao.getSecond(rs);
+		 if(	p.getResults().size()>0) {
+			 rsDao.updateSecondPa(rs);
+			 return rs;
+		 }else {
+			 rsDao.saveResultSecond(rs);//新增
+			 return rs;
+		}
+	}
+	
+		//保存RS
+		public ResultSecond saveRs(ResultSecond rs) {
+			PageResults p=rsDao.getSecond(rs);
+			 if(p.getResults().size()>0) {
+				 rsDao.updateSecondRs(rs);
+				 return rs;
+			 }else {
+				 rsDao.saveResultSecond(rs);//新增
+				 return rs;
+			}
+		}
+		
+		//保存RX
+		public ResultSecond saveRx(ResultSecond rs) {
+			PageResults p=rsDao.getSecond(rs);
+			 if(	p.getResults().size()>0) {
+				 rsDao.updateSecondRx(rs);
+				 return rs;
+			 }else {
+				 rsDao.saveResultSecond(rs);//新增
+				 return rs;
+			}
+		}
+}

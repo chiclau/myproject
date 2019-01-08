@@ -1,0 +1,916 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<style type="text/css">
+        .div_items {  
+            position: relative;  
+            width: 100%;  
+            height: 200px;  
+            border: 1px solid #66afe9;  
+            border-top: 0px;  
+            overflow: auto;  
+            display: none;  
+        }  
+        .div_item {  
+            width: 100%;  
+            height: 20px;  
+            margin-top: 1px;  
+            font-size: 13px;  
+            line-height: 20px;  
+        }  
+#stnm{
+ width:200px;
+}
+#base{
+ margin-bottom:10px;
+}
+.date{
+ margin-top:0px;
+}
+/* #table1{
+ width:1124px;
+} */
+.addTd2{
+  width:172px;
+}
+.datetimepicker{
+ margin-top:30px;margin-left:-7px;
+}
+
+</style>
+	<div class="container-fluid" id="cljs_step5_mainList">
+			<div class="row-fluid">
+				<div class="col-md-3" style="margin-left:16px;width: 28%">
+					雨量站 : <input type="text" class="" style="width:200px" name="" value="" id="cols"><input
+						type="button" style="margin-left:3px;" value="确定" onclick="queding5()"  >
+				</div>
+				<div class="col-md-3" style="width: 20%;margin-left:4px;">
+					<div class="input-append date form_datetime">
+						时间区间 : <input size="16" id="start" type="text" readonly> <span
+							class="add-on"><i class="icon-th"></i></span>
+					</div>
+				</div>
+				<div class="col-md-2 " style="width:15%;">
+					<div class="input-append date form_datetime">
+						-- <input size="16" id="end" type="text" readonly> <span
+							class="add-on"><i class="icon-th"></i></span>
+					</div>
+				</div>
+				<div class="col-md-4">
+					时间间隔 : <input type="text" id="jiange" name="" value="60">(时间精确到分钟)
+				</div>
+			</div>
+				
+				</div>
+						<div id="hszlb_step5_div" class="chart">
+					<div style="height:32px;float: center;">
+							<label>站名:</label>
+							<input id="stcd" type="hidden">
+						<input id="stnm" type="text" name="" class="form-control" 
+							readonly style="width: 80px;display:inline;">
+						<label>洪号:</label>
+						<input id="TAB_PCH" type="text" class="form-control"
+							style="width: 150px;display:inline;" readonly="readonly">
+						<label>流域面积(km²):</label>
+						<input id="lymj" type="text" class="form-control"
+							style="width: 100px;display:inline;">
+						<label>前期影响雨量Pa(mm):</label>
+						<input id="pa" type="text" class="form-control"
+							style="width: 100px;display:inline;">
+								<input type="button" onclick="reckon();" value="计算" class="btn">
+						<input type="button" onclick="saveStep5Result();" value="保存" class="btn">
+						<input type="button" onclick="cl_excel5()" id="chanliu_daochu5" style="margin-left: 20px;" value="导出到excel"  class="btn btn-primary" >
+					</div>
+						<br/><br/>	
+					<table class="layui-hide" id="hszlb_tab" lay-filter="hszlb_table"></table>
+				</div>
+			<br/><br/>			
+			<!-- <div id="test"></div>-->
+	<div>
+	<form id="step5from" name="" method="post">
+		<table border="1" id="table1"  align="left" style="margin-left: 10px;    margin-top: -55px;">
+			<thead id="stept5_table_thead">
+				<tr id="tr1">
+					<td rowspan="2" align="center">序号</td>
+					<td rowspan="2" align="center" style="width:150px" id="riqi">日期</td>
+					<td colspan="2" align="center" id="td1" class="addTd" style="width:100px">
+					<input	type="text" name="czmc"   id='getStnm_combox0'class="getStnm" placeholder="请输入测站名"  style="width:100%">
+						</td>
+					<td rowspan="2" align="center" style="width:100px">雨面量</td>
+					<td rowspan="2" align="center" style="width:100px">Em</td>
+					<td rowspan="2" align="center"style="width:100px">Pa</td>
+				</tr>
+				<tr align="center" id="tr2">
+					<td style='width:100px' id='qz'>权重</td>
+					<td id="td2" class="addTd2" align="center" style='width:100px'><input type="text"
+						style='width:100px' name="quanzhong" id="quanzhong"></td>
+				</tr>
+				</thead>
+				<tbody id="stept5_table_tbdody">
+			
+				</tbody>
+			</table>
+		
+			</form>
+	</div>
+<script type="text/javascript">
+$(function(){
+	$("#stnm").val(stnm);
+	$("#stcd").val(stcd);
+	$("#start").val(beginDate);
+	$("#end").val(endDate);
+	$("#jiange").val(interval);
+	$("#cols").val(ylz);
+	$("#TAB_PCH").val(hh);//洪号
+	$("#lymj").val(lymj);//流域面积
+	var json={
+			'pch':hh,
+			'stcd':stcd
+			};
+	init5(json) //初始化表格数据
+})
+function generStep5Table(){
+	 var start  = $("#start").val(); // 开始时间
+	 start=start!=null?$.trim(start):null;
+	 var end  = $("#end").val(); // 结束时间
+	 end = end!=null?$.trim(end):null;
+	 var jg =$("#jiange").val(); //时间间隔
+	 jg=jg!=null?$.trim(jg):null;
+	 var num = $("#cols").val();// 列数、
+	 num=num!=null?$.trim(num):null;
+	if(start==null||start.length<1){
+		alert("请选择开始时间！")
+		return false;
+	}
+	if(end==null || end.length<1){
+		alert("请选择结束时间！")
+		return false;
+	}
+	if(jg==null||jg.length<1){
+		alert("请输入时间间隔！")
+		return false;
+	}
+	if(num==null||num.length<1){
+		alert("请输入雨量站数量！")
+		return false;
+	}
+	var re = /^[1-9]+[0-9]*]*$/;
+	if(!re.test(jg)){
+		alert("时间间隔请输入正整数");
+		return false;
+	}
+	if(!re.test(num)){
+		alert("雨量站请输入整数")
+		return false;
+	}
+	$("#stept5_table_thead").empty();
+	var tr1=$("<tr id='tr1'></tr>");
+	tr1.append("<td rowspan='2' align='center'>序号</td>");
+	tr1.append("<td rowspan='2' align='center' style='width:190px' id='riqi'>日期</td>");
+	if(num>0){
+		for(var i=0;i<num;i++){
+			tr1.append("<td colspan='2' align='center' id='thead_tr1_td_"+i+"' class='addTd'><input type='text' name='czmc' id='getStnm_combox"+i+"'class='getStnm' placeholder='请输入测站名'  style='width:100%'></td>");
+		}
+	}
+	tr1.append("<td rowspan='2' align='center'>雨面量</td>");
+	tr1.append("<td rowspan='2' align='center'>Em</td>");
+	tr1.append("<td rowspan='2' align='center'>Pa</td>");
+	$("#stept5_table_thead").append(tr1);
+	var tr2=$("<tr align='center' id='tr2'></tr>");
+	if(num>0){
+		for(var i=0;i<num;i++){
+			tr2.append("<td style='width:100px' id='thead_tr2_td_"+i+"'>权重</td>");
+			tr2.append("<td style='width:100px' id='thead_tr2_td_qz_"+i+"' class='addTd2' align='center'><input style='width:100px' type='text'  name='quanzhong' id='quanzhong_"+i+"'></td>");
+		}
+	}
+	$("#stept5_table_thead").append(tr2);
+	$("#stept5_table_tbdody").empty();
+	var timeList = getTimeList();
+	if (timeList!=null && timeList.length > 0) { 
+		for(var i=0;i<timeList.length;i++){
+			var tr=$("<tr align='center' id='removeTr"+i+"'  ></tr>");
+			tr.append("<td style='text-align: center;'>"+(i+1)+"</td>");
+			tr.append("<td><input type='text' name='time' style='width:100%' value='"+timeList[i]+"'></td>");
+			if(num>0){
+				for(var j=0;j<num;j++){
+					var tdid="tr_"+timeStr(timeList[i])+"_"+j;
+					tr.append("<td colspan='2' class='addTd3' align='center'><input type='text' id='"+tdid+"' name='yu' align='center' style='width:100%' value='0'></td>");
+				}
+			}
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_myl' name='result' align='center' value='0' style='width:100%'></td>");
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_em' name='em' align='center' value='0' style='width:100%'></td>");
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_pa' name='paf' align='center' value='' style='width:100%'></td>");
+			$("#stept5_table_tbdody").append(tr);
+		}
+	}
+	if(num>0){
+		initHuiliuStep1StcdCombox(num);
+	}
+}
+function loadStep5TableData(dataList){
+				for(var i = 0; i < dataList.length; i++){
+					var dt=dataList[i].DATE;
+					dt=dt.substring(0,16);
+					var jyls=dataList[i].JYL.split(",");
+					if(jyls!=null && jyls.length>0){
+						for(var j=0;j<jyls.length;j++){
+							var tdid="tr_"+timeStr(dt)+"_"+j;
+							$("#"+tdid).val($.trim(jyls[j]));
+						}
+					}
+					$("#tr_"+timeStr(dt)+"_myl").val($.trim(dataList[i].YML));
+					$("#tr_"+timeStr(dt)+"_em").val($.trim(dataList[i].EM));
+					$("#tr_"+timeStr(dt)+"_pa").val($.trim(dataList[i].PA))
+				}
+}
+	function cl_excel5(){
+		var h=hh;
+		if(h==''){
+			confirm("产流计算", "请选择一条计算结果")
+			return false;
+		}
+		var url= basePath + "chanliu/chanliu!chanLiuExportExcel5.action?pch="+h+"&stcd="+stcd +"&beginDate="+beginDate+"&endDate="+endDate ;      
+		confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出到excel","您确定要导出到excel吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url;
+			   }
+			});
+	}
+	function saveStep5Result(){
+		var pa=$("#pa").val();
+		var inte=$("#jiange").val();
+		var czmc="";
+		$("input[name='czmc']").each(function(index,input){
+			if(index==0){
+				czmc=$(input).val();
+			}else{
+				czmc=czmc+","+$(input).val();
+			}
+		});
+		var qz="";
+		$("input[name='quanzhong']").each(function(index,input){
+			if(index==0){
+				qz=$(input).val();
+			}else{
+				qz=qz+","+$(input).val();
+			}
+		});
+		var yindex=2;
+		var vindex=2+qz.length;
+		var trList=$("#stept5_table_tbdody").find("tr");
+		var subdata=new Array();
+		var lastPa=0;
+		if(trList!=null && trList.length>0){
+			for(var i=0;i<trList.length;i++){
+				var data={};
+				var tr=trList[i];
+				var timeInputs=$(tr).find("input[name='time']");
+				if(timeInputs!=null && timeInputs.length>0){
+					data.DATE=$(timeInputs[0]).val();
+				}
+				var yuInputs=$(tr).find("input[name='yu']");
+				if(yuInputs!=null && yuInputs.length>0){
+					var yus="";
+					for(var j=0;j<yuInputs.length;j++){
+						if(j==0){
+							yus=$(yuInputs[j]).val();
+						}else{
+							yus=yus+","+$(yuInputs[j]).val();
+						}	
+					}
+					data.JYL=yus;
+				}
+				var resultInputs=$(tr).find("input[name='result']");
+				if(resultInputs!=null && resultInputs.length>0){
+					data.YML=$(resultInputs[0]).val();
+				}
+				var emInputs=$(tr).find("input[name='em']");
+				if(emInputs!=null && emInputs.length>0){
+					data.EM=$(emInputs[0]).val();
+				}
+				var pasInputs=$(tr).find("input[name='paf']");
+				if(pasInputs!=null && pasInputs.length>0){
+					data.PA=$(pasInputs[0]).val();
+				}
+				data.STCD=$("#stcd").val();
+				data.STNM=czmc;
+				data.QZ=qz;
+				data.INTERVAL=inte;
+				data.PCH=$("#TAB_PCH").val();
+				subdata.push(data);
+				if(i==trList.length-1){
+					lastPa=data.PA;
+				}
+			}
+		}
+		var json={inpa:pa,dataList:subdata,outpa:lastPa};
+		var url= basePath + "chanliu/chanliu!saveStep5Result.action"  ;     
+		 $.ajax({
+		        url : url,
+		        type : "post",
+		        dataType : "json",
+		        traditional: true,
+		        data : {stcd:$("#stcd").val(),pch:$("#TAB_PCH").val(),DATA:JSON.stringify(json)},
+		        success : function(response) {
+		        	if(response.reflag==1||response.reflag=="1"){
+		        		layer.msg("保存成功");
+		        	}else{
+		        		layer.msg(response.message);
+		        	}
+		        }
+		});
+	}
+//save
+function saveTabTitle(){
+	var pa=$("#pa").val();
+	var inte=$("#jiange").val();
+	var url= basePath + "chanliu/chanliu!saveStep5.action"  ;      
+	var json = $("#step5from").serialize();
+	json+="&pch="+hh+"&stcd="+stcd+"&pa="+pa+"&INTERVAL="+inte;
+
+		    $.ajax({
+		        url : url,
+		        type : "post",
+		        dataType : "json",
+		        async : false,
+		        traditional: true,
+		        data : json,
+		        success : function(response) {
+		        	if(response.state==1){
+		        		layer.msg("保存成功");
+		        	}
+		        }
+			});
+}
+//初始化第五步表格
+var stnmArr=[];
+var emArr=[];
+var paArr=[];
+function init5(json){
+	var url= basePath + "chanliu/chanliu!getStep5HistoryData.action";
+	$.ajax({
+		url:url,
+		type:"post",
+		data:json,
+		dataType:"json",
+		success:function(response){
+			if(response.rows.length>0){
+				var total=response.rows.length-1;
+				var start =response.rows[0].DATE; //开始时间赋值
+				var end=response.rows[total].DATE;//结束时间赋值
+				var pa=response.rows[0].PA1;
+				var jg=response.rows[0].INTERVAL;
+				$("#start").val(start); //开始时间
+				$("#end").val(end);//结束时间
+				$("#pa").val(pa);
+				$("#jiange").val(jg);
+				
+				generStep5Table();
+				
+				var stnmstr=response.rows[0].STNM; //测站名称
+				var qz=response.rows[0].QZ!=null?response.rows[0].QZ.split(","):[]; //权重分割
+				var stnms=stnmstr.split(",");
+				if(stnms!=null && stnms.length>0){
+					for(var i=0;i<stnms.length;i++){
+						$("#getStnm_combox"+i).val($.trim(stnms[i]));
+					}
+				}
+				if(qz!=null && qz.length>0){
+					for(var i=0;i<qz.length;i++){
+						$("#quanzhong_"+i).val($.trim(qz[i]));
+					}
+				}
+				loadStep5TableData(response.rows);
+			}
+		}
+	});               
+}
+
+var tm=[];
+var DRP=[];
+var Em=[];
+var DATA=[];
+var COEFDATA={"COEFDATA":[{"K":"1.2","B":"0.3","C":"0.1","im":"0.02","WM":"130","WUM":"0.2","WLM":"0.8","SM":"60","EX":"1.5","KG":"0.4","KI":"0.3"}]};
+var code=JSON.stringify(COEFDATA);
+//计算
+
+//计算雨面量 返回结果数组
+function yumianliang() {
+	// **校验权重----START------
+	var qz = document.getElementsByName("quanzhong");// 获取所有权重的Input，
+	var yu = document.getElementsByName("yu");// 获取所有降雨量的Input，
+	var y = 0;// 权重的和
+	var yuliang = 0;// 降雨量的和，累加
+	var arr1 = [];// 定义一个数组来接收雨量值,这个值可以是输入的也可以是查询的
+	for (var i = 0; i < qz.length; i++) {
+		if (isNaN(qz[i].value)) {
+			layer.msg("权重:请输入数字")
+			return false;
+		}
+		if (qz[i].value == '') {
+			layer.msg("权重不能为空")
+			return false;
+		}
+		y += Number(qz[i].value);
+	} // yuliang+=Number(qz[i].value)*Number(yu[i].value); //乘积之后求和
+	if (y > 1) { // 值超过1判断
+		layer.msg("权重值不能超过1")
+		return false;
+	}
+	if (y < 1) { // 值小于1判断
+		layer.msg("权重值不能小于1")
+		return false;
+	}
+	for (var j = 0; j < yu.length; j++) {
+		var he = Number(yu[j].value);
+		var c=yu[j].value.toString();
+		var f= isNaN(Number(he)); //雨量Input验证
+		if(f==true){
+			alert("降雨量不能为非数字")
+			return false;
+		}
+		arr1.push(he);
+	}
+	var yuliang2 = [];
+	var result = [];
+	var num = Number($("#cols").val());
+	if (arr1.length > 1) { // 加入判断，防止死循环崩溃
+		for (var i = 0, len = arr1.length; i < len; i += num) {
+			result.push(arr1.slice(i, i + num));
+		}
+	}
+	var zonghe = [];
+	// var re=0;//
+	for (var i = 0; i < result.length; i++) {
+		var re = 0;
+		for (var j = 0; j < result[i].length; j++) {
+
+			re = result[i][j] * Number(qz[j].value);// 量*权重 求和
+			zonghe.push(re);
+		}
+	}
+	// 将求和过后的数组在分割
+	var q = [];
+	for (var i = 0, len = zonghe.length; i < len; i += num) {
+		q.push(zonghe.slice(i, i + num));
+	}
+	var p = [];
+	for (var i = 0; i < q.length; i++) {
+		p.push(sum(q[i]));
+	}
+	return p;
+}
+
+//数组求和
+function sum(arr) {
+	var len = arr.length;
+	if (len == 0) {
+		return 0;
+	} else if (len == 1) {
+		return arr[0];
+	} else {
+		return arr[0] + sum(arr.slice(1));
+	}
+}
+function step5jisuan(){
+	//
+	var jg =$("#jiange").val(); //时间间隔
+	var num = $("#cols").val();// 列数
+	var f= Number.isInteger(Number(num)); //雨量站验证
+	var l= Number.isInteger(Number(jg)); 
+	if(f==false){
+		alert("雨量站请输入整数")
+		return false;
+	}
+	if(l==false){
+		alert("时间间隔请输入整数")
+		return false;
+	}
+	var qz = document.getElementsByName("quanzhong");// 获取所有权重的Input，
+	var yu = document.getElementsByName("yu");// 获取所有降雨量的Input，
+	var y = 0;// 权重的和
+	for (var i = 0; i < qz.length; i++) {
+		if (isNaN(qz[i].value)) {
+			layer.msg("权重:请输入数字")
+			return false;
+		}
+		if (qz[i].value == '') {
+			layer.msg("权重不能为空")
+			return false;
+		}
+		y += Number(qz[i].value);
+	} // yuliang+=Number(qz[i].value)*Number(yu[i].value); //乘积之后求和
+	if (y > 1) { // 值超过1判断
+		layer.msg("权重值不能超过1")
+		return false;
+	}
+	if (y < 1) { // 值小于1判断
+		layer.msg("权重值不能小于1")
+		return false;
+	}
+	for (var j = 0; j < yu.length; j++) {
+		var he = Number(yu[j].value);
+		var c=yu[j].value.toString();
+		var f= isNaN(Number(he)); //雨量Input验证
+		if(f==true){
+			alert("降雨量不能为非数字")
+			return false;
+		}
+	}
+	var yindex=2;
+	var vindex=2+qz.length;
+	var trList=$("#stept5_table_tbdody").find("tr");
+	if(trList!=null && trList.length>0){
+		for(var i=0;i<trList.length;i++){
+			var tr=trList[i];
+			var tdList = $(tr).find("td");
+			if(tdList!=null && tdList.length>0){
+				var yml=0;
+				for(var j=0;j<tdList.length;j++){
+					if(j>0){
+						var td=tdList[j];
+						var input=$(td).find("input");
+						input=input.length>0?input[0]:null;
+						if(j>=yindex && j<vindex){
+							if(input!=null){
+								var yl=$(input).val();
+								var qzi=$(qz[j-yindex]).val();
+								yml=yml+parseFloat(yl)*parseFloat(qzi);
+							}
+						}
+						if(j==vindex){
+							if(input!=null){
+								$(input).val(Number(yml).toFixed(1));
+								yml=0;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+//计算雨面量
+function jisuan() {
+	var jg =$("#jiange").val(); //时间间隔
+	var num = $("#cols").val();// 列数
+	var f= Number.isInteger(Number(num)); //雨量站验证
+	var l= Number.isInteger(Number(jg)); 
+	if(f==false){
+		alert("雨量站请输入整数")
+		return false;
+	}
+	if(l==false){
+		alert("时间间隔请输入整数")
+		return false;
+	}
+	
+	var arr = []; // 声明一个数组用来存储雨面量
+	arr = yumianliang();
+	var res = document.getElementsByName("result");
+	for (var i = 0; i < res.length; i++) {
+		   var y = String(arr[i]).indexOf(".") + 1;//获取小数点的位置
+		    var count = String(arr[i]).length - y;//获取小数点后的个数
+		    if(count>2){//如果超过2位小数，四舍五入
+		    	$("#yml"+i+"").val(arr[i].toFixed(1));
+		    }else{
+		    	$("#yml"+i+"").val(arr[i]);
+		    }
+		
+	}
+
+}
+function reckon(){//计算
+	step5jisuan();
+	var Pa=$("#pa").val();
+	if(Pa==""){
+		alert("Pa不能为空！")
+		return false;
+	}
+	var f= isNaN(Number(Pa)); //PAInput验证
+	if(f==true){
+		alert("Pa不能为非数字")
+		return false;
+	}
+	var DT=$("#jiange").val();
+	var tr=$(".removeTr");
+	 $("input[name='time']").each(//每一个时间的值都获取到附加到tm里  
+		function(){ 
+			tm.push($(this).val());
+		}  
+		)  
+		 $("input[name='result']").each(//每一个DRP的值都获取到附加到DRP里  
+		function(){ 
+			DRP.push($(this).val());
+		}  
+		) 
+		 $("input[name='em']").each(//每一个Em的值都获取到附加到Em里  
+		function(){ 
+			if($(this).val()==''){
+				alert("Em不能为空")
+				return false;
+			}
+			var f= isNaN(Number($(this).val())); //雨量Input验证
+			if(f==true){
+				alert("Em不能为非数字")
+				return false;
+			}
+			Em.push($(this).val());
+		}  
+		) 
+
+	 for(var i=0;i<tm.length;i++){ //这个循环组成新的数组
+			var d={};
+	 	    d.TM=tm[i];
+	 	    if(tm[i]==''){
+	 	    	tm[i]=0;
+	 	    }
+	 	    if(DRP[i]==''){
+	 	    	DRP[i]=0;
+	 	    }
+			d.DRP=DRP[i];
+			if(Em[i]==''){
+			
+				Em[i]=0;
+			}
+			d.EM=Em[i];
+			DATA.push(d);
+		} 
+		 var json = {
+			 	Pa:Pa, //PA
+	    		DT:interval, //shicha
+	    		DATA:{DATA:JSON.stringify(DATA)} ,
+	    		COEFDATA: JSON.stringify(COEFDATA)
+ 	    }
+	 console.log("datajson--------------"+JSON.stringify(json));
+	  json={ //调用的这个json
+			Pa:Pa,
+			DT:interval,
+			DATA:JSON.stringify({
+			//	DATA:[{'TM':'2018-6-11 11:00','DRP':'12','EM':'2'},{'TM':'2018-6-11 12:00','DRP':'14','EM':'5'}]
+				DATA:DATA
+			}),
+			COEFDATA:JSON.stringify({COEFDATA:[{'K':'1.2','B':'0.3','C':'0.1','im':'0.02','WM':'130','WUM':'0.2','WLM':'0.8','SM':'60','EX':'1.5','KG':'0.4','KI':'0.3'}]})
+	};  
+		/* var data={Pa:100,DT:60,} */
+	 //var url="http://113.240.224.29:8099/CHLService.asmx/getPa?Pa=100&DT=60&DATA={'DATA':}&COEFDATA= {'COEFDATA':}";
+		 console.log("datajson--------------"+JSON.stringify(json));
+	$.ajax({
+		data:json,
+		type:'post',
+		url:'http://113.240.224.29:8099/CHLService.asmx/getPa',
+		dataType:'json',
+		success:function(response){
+			 var paInputs=$("input[name='paf']");
+			 for(var i=0;i<response.DATA.length;i++){
+				 var pa=response.DATA[i].Pa;
+				  var y = String(pa).indexOf(".") + 1;//获取小数点的位置
+				    var count = String(pa).length - y;//获取小数点后的个数
+				    if(count>1){//如果超过1位小数，四舍五入
+				    	 var pabaoliu=	parseFloat(pa).toFixed(1);
+				    	 if(paInputs!=null && paInputs.length>i){
+				    	 	$(paInputs[i]).val(pabaoliu);
+				    	 }
+				    }else{
+				    	if(paInputs!=null && paInputs.length>i){
+				    	 	$(paInputs[i]).val(pa);
+				    	}
+				    }
+			 }
+			layer.msg("计算Pa成功!");
+		}
+	})
+}
+
+//arr转json
+function tojson(arr){ 
+	  if(!arr.length) return null; 
+	  var i = 0; 
+	  len = arr.length, 
+	  array = []; 
+	  for(;i<len;i++){ 
+	    array.push({"TM":arr[i][1],"DRP":arr[i][3],"EM":arr[i][5]}); 
+	  } 
+	  return JSON.stringify(array); 
+	}
+
+	window.onresize = "";
+	$(".form_datetime").datetimepicker({
+		format : " yyyy-mm-dd hh:ii",
+		autoclose : true,// 选择好自动关闭
+		language : 'zh-CN', // 汉化
+	});
+	
+    //移入移出效果  
+    $(".div_item").hover(function () {  
+        $(this).css('background-color', '#1C86EE').css('color', 'white');  
+    }, function () {  
+        $(this).css('background-color', 'white').css('color', 'black');  
+    });  
+    
+    var flag = true;
+    $("input[name='czmc']").on('compositionstart',function(){// compositionstart 在输入一段需要确认的文本如拼音to汉字、语音时会触发
+        flag = false;
+    })
+    $("input[name='czmc']").on('compositionend',function(){//compositionend  在拼音选词完成、语音输入完毕时会触发
+        flag = true;
+    })
+    $("input[name='czmc']").each(function(i){
+    	
+    }).on('input',function(){
+        var _this = this;
+        setTimeout(function(){
+            if(flag){
+                console.log($(_this).val());
+                var json = "mStbprpFormBean.mStbprpInfoBean.stnm="+$(_this).val();
+            	var url = basePath + "chanliu/chanliu!getStbprpMoHu.action"
+            	common_ajax(json, url, function(response) {
+            		var div="";
+            		for (var i = 0; i < response.rows.length; i++) {
+        			 div+="<div class='div_item' id='"+response.rows[i].STCD+"' onclick='on(this)''>"+response.rows[i].STNM+"</div>";
+        			}
+            		$("#div_items_txt").html(div);
+            		
+            	});
+            }
+        },1)
+    })
+
+
+
+//清空input
+function cle(shijian){
+ 	var date1 = new Date($("#start").val()); 
+	var date2 = date1.getTime();
+	var shu = Number($("#jiange").val()) * 60;// 分钟*秒
+	var haomiao = shu * 1000;
+	var num = $("#cols").val();
+	var addTime = 0;
+	for (var i = 0; i < shijian.length; i++) {// 下面的switch是生成时间都
+		switch (i) {
+		case 0:
+			for(var j=0;j<num;j++){
+				var x=2+j;
+				var d1=date1.getTime();
+				$("#"+d1+"").val("");
+				//$("#removeTr"+i+"").find("td:eq("+x+")").find("input").attr("id",d1+j);
+			}
+			break;
+		case 1:
+			for(var j=0;j<num;j++){
+				var x=2+j;
+				var d2=date2 + haomiao;
+				$("#"+d2+"").val("");
+			//	$("#removeTr"+i+"").find("td:eq("+x+")").find("input").attr("id",d2+j);
+			}
+			var t1 = formatDateTime(new Date(date2 + haomiao));
+			shijian[i].value = t1;
+			break;
+		default:
+			for(var j=0;j<num;j++){
+				var x=2+j;
+				var d3=date2 + addTime;
+				$("#"+d3+"").val("");
+				$("#removeTr"+i+"").find("td:eq("+x+")").find("input").attr("id",d3+j);
+			}
+			var t2 = formatDateTime(new Date(date2 + addTime));
+			shijian[i].value = t2;
+			;
+		}
+		addTime += haomiao;// 每次叠加1个时间段
+	}
+}
+
+//确定
+function queding5() {
+	generStep5Table();
+	var pch=hh;
+	pch=pch!=null?pch.replace(/\s+/g, ""):"";
+	if(pch!=null && pch.length>0){
+		queryStep5TableData(stcd,pch);
+	}
+}
+
+function generTable5(){
+
+	 stnm=$("#stnm").val();//测站名称
+	 beginDate  = $("#start").val(); // 开始时间
+	 endDate  = $("#end").val(); // 结束时间
+	 interval =$("#jiange").val(); //时间间隔
+	 var num = $("#cols").val();// 列数、
+	var f= Number.isInteger(Number(num)); //雨量站验证
+	var l= Number.isInteger(Number(interval)); //雨量站验证
+	if(f==false){
+		alert("雨量站请输入整数")
+		return false;
+	}
+	if(l==false){
+		alert("时间间隔请输入整数")
+		return false;
+	}
+	var d1 = $("#start").val().toString();
+	if(d1==""){
+		alert("请选择时间段！")
+		return false;
+	}
+	if(num==""){
+		alert("请输入雨量站个数！");
+		return false;
+	}
+	$("#stept5_table_thead").empty();
+	var tr1=$("<tr id='tr1'></tr>");
+	tr1.append("<td rowspan='2' align='center'>序号</td>");
+	tr1.append("<td rowspan='2' align='center' style='width:190px' id='riqi'>日期</td>");
+	if(num>0){
+		for(var i=0;i<num;i++){
+			tr1.append("<td colspan='2' align='center' id='thead_tr1_td_"+i+"' class='addTd'><input type='text' name='czmc' id='getStnm5_combox"+i+"'class='getStnm' placeholder='请输入测站名'  style='width:100%'></td>");
+		}
+	}
+	tr1.append("<td rowspan='2' align='center'>雨面量</td>");
+	tr1.append("<td rowspan='2' align='center'>Em</td>");
+	tr1.append("<td rowspan='2' align='center'>Pa</td>");
+	$("#stept5_table_thead").append(tr1);
+	var tr2=$("<tr align='center' id='tr2'></tr>");
+	if(num>0){
+		for(var i=0;i<num;i++){
+			tr2.append("<td style='width:100px' id='thead_tr2_td_"+i+"'>权重</td>");
+			tr2.append("<td style='width:100px' id='thead_tr2_td_qz_"+i+"' class='addTd2' align='center'><input style='width:100px' type='text'  name='quanzhong' id='quanzhong_"+i+"'></td>");
+		}
+	}
+	$("#stept5_table_thead").append(tr2);
+	$("#stept5_table_tbdody").empty();
+	var timeList = getTimeList();
+	if (timeList!=null && timeList.length > 0) { 
+		for(var i=0;i<timeList.length;i++){
+			var tr=$("<tr align='center' id='removeTr"+i+"'  ></tr>");
+			tr.append("<td style='text-align: center;'>"+(i+1)+"</td>");
+			tr.append("<td><input type='text' name='time' style='width:100%' value='"+timeList[i]+"'></td>");
+			if(num>0){
+				for(var j=0;j<num;j++){
+					var tdid="tr_"+timeStr(timeList[i])+"_"+j;
+					tr.append("<td colspan='2' class='addTd3' align='center'><input type='text' id='"+tdid+"' name='yu' align='center' style='width:100%' value='0'></td>");
+				}
+			}
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_yml' name='result' align='center' style='width:100%'></td>");
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_em' name='Em' align='center' style='width:100%'></td>");
+			tr.append("<td align='center' class='addTd4' ><input type='text' id='tr_"+timeStr(timeList[i])+"_pa' name='paf' align='center' style='width:100%'></td>");
+			$("#stept5_table_tbdody").append(tr);
+		}
+	}
+	if(num>0){
+		for(var i=0;i<num;i++){
+			$("#getStnm5_combox"+i+"").combox({
+				url:basePath + "chanliu/chanliu!getStbprpMoHu.action",
+				label:"STNM",
+				value:"STCD",
+				dataKey:"dataList",
+				height:'250px',
+				width:'150px',
+				isPager:false,
+				select:function(item){
+					
+				}
+			});
+		}
+	}
+}
+
+
+function queryStep5TableData(stcd,pch){
+	var json={
+			'pch':pch,
+			'stcd':stcd
+			};
+	var url= basePath + "chanliu/chanliu!getStep5HistoryData.action"               
+	$.ajax({
+		url:url,
+		type:"post",
+		data:json,
+		dataType:"json",
+		success:function(response){
+			if(response.rows.length>0){
+				var total=response.rows.length-1;
+				var start =response.rows[0].DATE; //开始时间赋值
+				var end=response.rows[total].DATE;//结束时间赋值
+				var pa=response.rows[0].PA1;
+				var jg=response.rows[0].INTERVAL;
+				var stnmstr=response.rows[0].STNM; //测站名称
+				var qz=response.rows[0].QZ!=null?response.rows[0].QZ.split(","):[]; //权重分割
+				var stnms=stnmstr.split(",");
+				if(stnms!=null && stnms.length>0){
+					for(var i=0;i<stnms.length;i++){
+						$("#getStnm_combox"+i).val($.trim(stnms[i]));
+					}
+				}
+				if(qz!=null && qz.length>0){
+					for(var i=0;i<qz.length;i++){
+						$("#quanzhong_"+i).val($.trim(qz[i]));
+					}
+				}
+				loadStep5TableData(response.rows);
+			}
+		}
+	});
+}
+</script>
+
+

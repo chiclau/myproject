@@ -1,0 +1,479 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.ResultThrid;
+import com.lyht.business.analysisCalculation.dao.ResultFourthDao;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResultThridDao;
+import com.lyht.business.analysisCalculation.formbean.ResultThridFormBean;
+import com.lyht.business.consumer.hydrologicalData.dao.RiverDao;
+import com.lyht.util.DateUtil;
+import com.lyht.util.ExcelUtils;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年6月4日 15:24:11
+ *说明:  产流计算结果service
+*/
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultThridService {
+	@Resource ResultThridDao resultThridDao;
+	@Resource RiverDao riverDao;
+	@Resource
+	private ResultSecondDao rsDao;
+	@Resource ResultFourthDao resultFourthDao;
+		/**
+		 * 保存计算结果
+		 */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public ResultThrid saveResultThrid(ResultThrid resultThrid) {
+		resultThridDao.saveResultThrid(resultThrid);
+		return resultThrid;
+	}
+	/**
+	 * 删除计算结果第三步
+	 * @param resultThrid
+	 * @return
+	 */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void delResultThrid(ResultThrid resultThrid) {
+		resultThridDao.delResultThrid(resultThrid);
+	}
+	//查询计算结果
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public ResultThrid getResultThridByTm(ResultThrid resultThrid) {
+		return resultThridDao.getResultThridByTm(resultThrid);
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public PageResults getStep3(ResultThridFormBean resultThrid) {
+		return resultThridDao.getStep3(resultThrid);
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public List  sumQ(ResultThridFormBean resultThrid) {
+		return resultThridDao.sumQ(resultThrid);
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public List  sumQT(ResultThridFormBean resultThrid) {
+		return resultThridDao.sumQT(resultThrid);
+	}
+	
+	/**
+	 * 第四步
+	 * @param resultThrid
+	 * @return
+	 */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public PageResults getStep4(ResultThridFormBean resultThrid ) {
+		return resultThridDao.getStep4(resultThrid);
+	}
+	@SuppressWarnings("rawtypes")
+	public Hashtable<String,Object> queryStep4LlEchartData(String stcd,String pch){
+		Hashtable<String,Object> table = new Hashtable<String,Object>();
+		List<Map> llechartDataList = resultThridDao.queryStepLlEchartData(stcd,pch);
+		table.put("llData", llechartDataList);
+		List<Map> fourResultList = resultThridDao.queryStep4ResultData(stcd, pch);
+		table.put("result", fourResultList);
+		List<Map> secondList = rsDao.querySecondByStcdAndPch(stcd, pch);
+		table.put("secondList", secondList);
+		return table;
+	}
+	
+	//最大值
+	public List  maxQ(ResultThridFormBean resultThrid) {
+		return resultThridDao.maxQ(resultThrid);
+	}
+	
+	//最小值
+		public List  minQ(ResultThridFormBean resultThrid) {
+			return resultThridDao.minQ(resultThrid);
+		}
+	public List  sd(ResultThridFormBean resultThrid,String name) {
+		return resultThridDao.sd(resultThrid, name);
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void exportHuiLiu1(List table,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="推理公式计算汇流参数m计算表";
+		String [] tab = {"序号","洪号","Q净(m³/s)","汇流时间t(小时)","地表净雨深R(mm)","流域面积F(km²)","L","J",
+				"J 1/3","L/ (J1/3*F)","Qm3/4","Qm3/4/R","汇流参数m"};
+		String [] val = {"PCH","QJLL","HLSJ","RG","LLMJ","L","J","J13","L3F","QM","QMR","M","TC"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.SellerStat2Excel(table, request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+	}
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void exportHuiLiu2(List data,List head,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="推理公式计算汇流参数m计算表";
+		List<String> listHead=new ArrayList<String>();
+		listHead.add("序号");
+		List<String> field=new ArrayList<String>();
+		List<?> headTab= (List<?>) head.get(0);
+		for(int i = 0; i < headTab.size(); i++) {
+			Map<?, ?> map = (Map<?, ?>) headTab.get(i);
+			String tit=(String) map.get("title");
+			String fieldString=(String) map.get("field");
+			listHead.add(tit);
+			field.add(fieldString);
+		}	
+		String[] strs1=(String[]) listHead.toArray(new String[listHead.size()]);//tab
+		String[] str2= (String[]) field.toArray(new String[field.size()]);//val
+		String [] tab = {"序号","洪号","Q净(m³/s)","汇流时间t(小时)","地表净雨深R(mm)","流域面积F(km²)","L","J",
+				"J 1/3","L/ (J1/3*F)","Qm3/4","Qm3/4/R","汇流参数m"};
+		String [] val = {"PCH","QJLL","HLSJ","RG","LLMJ","L","J","J13","L3F","QM","QMR","M","TC"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.SellerStat2Excel((List) data.get(0), request, replace,strs1,title,str2);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+	
+	
+
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void exportHuiLiu3(List data,List head,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="单站综合及误差统计";
+		if(head.isEmpty()) {//如果为空，第一个
+		}else {
+			title="单站综合及误差统计2";
+		}
+	/*	List<String> listHead=new ArrayList<String>();
+		listHead.add("序号");
+		List<String> field=new ArrayList<String>();
+		List<?> headTab= (List<?>) head.get(0);
+		for(int i = 0; i < headTab.size(); i++) {
+			Map<?, ?> map = (Map<?, ?>) headTab.get(i);
+			String tit=(String) map.get("title");
+			String fieldString=(String) map.get("field");
+			listHead.add(tit);
+			field.add(fieldString);
+		}	
+		String[] strs1=(String[]) listHead.toArray(new String[listHead.size()]);//tab
+		String[] str2= (String[]) field.toArray(new String[field.size()]);//val
+*/		String [] tab = {"洪号","R上/tc(毫米/小时)","m计","m查","(m计-m查)/ m计","是否合格"};
+		String [] val = {"PCH","ERET","MJ","MC","MS","SFHG"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.exportHuiliu2Excel((List) data.get(0), request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+		
+	
+
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void exportHlStep2(List data,String n,List head,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="推理峰量计算m值";
+		String [] tab = {"洪号","净峰流量Q净(m3/s)","R上(mm)","tc均(小时)","R上均(mm)","流域面积F(km2)"
+				,"L","J","τ=(0.278FR_上)/Qm","K","(R上均^n)/(tc均^0.4 )","Qm/K","汇流参数m"};
+		String [] val = {"PCH","Q","R","TJ","RJ","LLMJ","L","J","JS1","K","JS2","JS3","M"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.exportHlStep2( data, n,request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+		
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void jsm_export(List data,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="推理过程线计算m值";
+		String [] tab = {"序号","洪号","流域面积F","L","J","QM","M","QM/F"};
+		String [] val = {"pch","lymj","l","j","qm","m","qmf"};
+		//显示需要计算m的数据表格
+		Map map=this.beanToMap(data.get(0));
+		List list=new ArrayList();
+		list.add(map);
+		String file = ExcelUtils.SellerStat2Excel(list,request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void step3_export3(List data,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="单站综合及误差统计3";
+		String [] tab = {"洪号","Q/F(毫米/小时)","m计","m查","(m计-m查)/ m计","是否合格"};
+		String [] val = {"PCH","QF","MJ","MC","MS","SFHG"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.step3_export3((List)data.get(0), request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+		
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void shdwxf_export(List data,	String title,String [] t1,String [] v1,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String replace="";
+		String file = ExcelUtils.exportExcel((List)data.get(0), request, replace,t1,title,v1);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void shdwxf_export3(List data,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String title="单站综合及误差统计4";
+		String [] tab = {"洪号","n","k","m1","a>1/3amax","m1查","k计","M计","M查" ,"误差","是否合格" };
+		String [] val = {"PCH","N","K","M1","AM13","M1C","KJ","MJ","MC","MS" ,"SFHG"};
+		//显示需要计算m的数据表格
+		String file = ExcelUtils.step4_export3((List)data.get(0), request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void huiliu5_export(List data,String t,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="";
+		String [] tab1 =  {"洪号","Q净(m³/s)","汇流时间t(小时)","地表净雨深R(mm)","流域面积F(km²)","L","J",
+				"J 1/3","L/ (J1/3*F)","Qm3/4","Qm3/4/R","M计","M查","是否合格"};
+		String [] val1= {"PCH","Q","T","R","MJ","L","J","JS1","JS2","JS3","JS4","MJ","MC","MJMC"};
+		String [] tab2 ={"洪号","净峰流量Q净(m3/s)","R上(mm)","tc均(小时)","R上均(mm)","流域面积F(km2)"
+				,"L","J","τ=(0.278FR_上)/Qm","K","(R上均^n)/(tc均^0.4 )","Qm/K","M计","M查","是否合格"};
+		String [] val2=  {"PCH","Q","RS","TCJ","RSJ","LYMJ","L","J","JS1","K","JS2","JS3","MJ","MC","MJMC"};
+		String [] tab3 = {"洪号","Q净(m3/s)","汇流时间t(小时)","地表净雨深R(mm)","流域面积F(km²)"
+				,"L","J","J1/3","L/(J1/3*F)","Qm3/4","Qm3/4/R","M计","M查","是否合格" };
+		String [] val3= {"PCH","Q","T","R","MJ","L","J","JS1","JS2","JS3","JS4","MJ","MC","MJMC"};
+		String [] tab4 =  {"洪号","Q净(m3/s)","汇流时间t(小时)","地表净雨深R(mm)","流域面积F(km²)"
+				,"L","J","J1/3","L/(J1/3*F)","Qm3/4","Qm3/4/R","M计","M查","是否合格" };
+		String [] val4= {"PCH","Q","T","R","MJ","L","J","JS1","JS2","JS3","JS4","MJ","MC","MJMC"};
+		String file = null;
+		if(t.equals("1")) {
+			String title1="计算结果_推理公式法";
+			 file = ExcelUtils.exportExcel(data, request, replace,tab1,title1,val1);
+		}else if(t.equals("2")){
+			String title2="计算结果_推理峰量法";
+			String n="1.2";
+			 file = ExcelUtils.exportHlStep5t2(data,n, request, replace,tab2,title2,val2);
+		}else if(t.equals("3")){
+			String title3="计算结果_推理过程线法";
+			 file = ExcelUtils.exportExcel(data, request, replace,tab3,title3,val3);
+		}else if(t.equals("4")){
+			String title4="计算结果_瞬时单位线法";
+			 file = ExcelUtils.exportExcel(data, request, replace,tab4,title4,val4);
+		}
+		
+		//显示需要计算m的数据表格
+		
+		response.setContentType("multipart/form-data");  
+		
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+		}
+	
+	public static  Map<String, Object> beanToMap(Object bean){
+		 if(bean == null){  
+	            return null;  
+	        }          
+	        Map<String, Object> map = new HashMap<String, Object>();  
+	        try {  
+	            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());  
+	            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();  
+	            for (PropertyDescriptor property : propertyDescriptors) {  
+	                String key = property.getName();  
+	  
+	                // 过滤class属性  
+	                if (!key.equals("class")) {  
+	                    // 得到property对应的getter方法  
+	                    Method getter = property.getReadMethod();  
+	                    Object value = getter.invoke(bean);  
+	                    map.put(key, value);  
+	                }  
+	  
+	            }  
+	        } catch (Exception e) {  
+	            System.out.println("transBean2Map Error " + e);  
+	        }  
+	  
+	        return map;  
+	}
+
+}

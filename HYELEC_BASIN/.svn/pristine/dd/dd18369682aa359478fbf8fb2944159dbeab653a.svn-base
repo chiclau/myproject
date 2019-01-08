@@ -1,0 +1,819 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+	<div class="container-fluid">
+		<div class="row" style="width:100%;height:500px;">
+			<div id="wdrs_div" class="col-md-8" style="height:100%;">
+				<div style="float: left;">
+					<table>
+						<tr>
+							<td align="right"><label>测站名称:<input type="hidden" id="stcd">  </label></td>
+							<td>	<input id="stnm" type="text" name="" class="form-control" 
+												readonly style="width: 100px;display:inline;"></td>
+							<td> 		<label>&nbsp;  洪&nbsp;	&nbsp;	号:	<input type="hidden" id="start"><input type="hidden" id="end"></label> </td>
+							<td> 	<input id="TAB_PCH" type="text"  class="form-control"
+												style="width: 100px;display:inline;" > </td>
+						<td> 	<label> &nbsp; 流域面积(km²):</label>  </td>
+						<td>		<input id="lymj" type="text" class="form-control" style="width: 100px;display:inline;"></td> 
+						</tr>
+						<tr>
+							<td>		<label > 前期影响雨量Pa(mm):</label></td>
+							<td> 	<input id="step6_pa" type="text" name="pa" class="form-control" 
+											 style="width: 100px;display:inline;" value=""></td>
+							<td>				<label>&nbsp;  R&nbsp;	&nbsp;	实:</label> </td>
+							<td>		 	<input id="rs" type="text"  class="form-control"
+											style="width: 100px;display:inline;" value=""></td>
+							<td align="right">	<label>R&nbsp;	&nbsp;	下:</label> </td>
+							<td>		<input id="rx" type="text" class="form-control"
+											style="width: 100px;display:inline;" value=""> </td>
+						 </tr>
+					</table>
+			
+				</div>
+				<div style="height:32px;float: right;padding-top:30px;">
+						<input type="button" onclick="deleteStep6Result()" id="chanliu_daochu6" value="删除"  class="btn btn-primary" >
+						<input type="button" onclick="cl_excel6()" id="chanliu_daochu6" style="margin-left: 5px;" value="导出到excel"  class="btn btn-primary" >
+						<input type="button" onclick="calcStep6Data();" value="计算" class="btn">
+						<input type="button" onclick="saveStep6Result();" value="保存" class="btn">
+				</div>
+				<table class="layui-hide" id="wdrs_tab" lay-filter="hszlb_table"></table>
+			</div>
+			<div id="jyjl_div" class="col-md-4" style="height:100%;">
+				<div id="jyjl_chart" style="width: 100%;height:100%;"></div>
+			</div>
+		</div>
+	</div>
+<script>
+var _stepCalcResultTableHaveChange=false;//记录第六步计算结果中R查是否已手动修改
+$(function(){
+	$("#stnm").val(stnm);
+	$("#stcd").val(stcd);
+	$("#start").val(beginDate);
+	$("#end").val(endDate);
+	$("#jiange").val(interval);
+    $("#step6_pa").val(pa6);
+    $("#rs").val(rshi);
+    $("#rx").val(rxia);
+	$("#TAB_PCH").val(hh);//洪号
+	$("#lymj").val(lymj);//流域面积
+	initStep6Data();
+	//getwdrsTable("#wdrs_div","#wdrs_tab",basePath + "chanliu/chanliu!step6.action",{"stcd":stcd,"pch":hh,"start":beginDate, "end":endDate});
+	//getGxt("jyjl_chart","",stcd);
+	loadRrffEcharts();
+	//testEcharts();
+})
+	function cl_excel6(){
+		var h=hh;
+		if(h==''){
+			confirm("产流计算", "请选择一条计算结果")
+			return false;
+		}
+		var url= basePath + "chanliu/chanliu!chanLiuExportExcel6.action?pch="+hh+"&stcd="+stcd +"&start="+beginDate+"&end="+endDate ;      
+		confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出到excel","您确定要导出到excel吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url;
+			   }
+			});
+	}
+
+function deleteStep6Result(){
+	layer.confirm("确定要删除原有计算结果数据吗?", { title: "删除确认" }, function (index) {
+            layer.close(index);
+			var url= basePath + "chanliu/chanliu!deleteStep6Result.action" ;
+			$.ajax({
+				url:url,
+				type:"post",
+				data:{stcd:stcd,pch:hh},
+				dataType:"json",
+				success:function(response){
+					if(response.reflag==1 || response.reflag=="1"){
+						initStep6Data();
+					}else{
+						layer.msg(response.message);
+					}
+				}
+			});
+	});
+}
+
+//左边的pa，在右边的曲线不存在，那么判断左边的Pa介于哪两个Pa中间，然后
+var col=[];
+var col1={};
+//计算
+var pData=['0', '5', '10', '15', '20', '25', '30','35','40','45']; //Y周
+var p1Data="0, 0.5,1.5 ,3.5 , 6, 8, 10,12,14,16"; //Pa=10 X
+var p2Data="0, 1, 2.5, 5, 7.8, 10, 12,14,16,18"; //Pa=20 X
+var p3Data="0, 2, 4, 7, 10, 12.5, 15,17.5,20,22.5"; //Pa=30X
+var paData=[];
+var rData=[];
+var paLineList=new Array();
+var fcjg={};
+function testEcharts(){
+	var rx=4.07;
+	var fcslist=[18.91,17.00,14.53,12.82,12.49,12.04,11.73,7.62,7.62,7.55,7.54,6.59,6.44,5.40,4.90,4.75,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.20,2.24];
+	var fcjlist=new Array();
+	var fcolist=new Array();
+	var rjglist=new Array();
+	var len=fcslist.length;
+	for(var i=0;i<len;i++){
+		var fcs=fcslist[i]*60/interval;
+		fcolist.push([i,fcs]);
+		var rt=0;
+		var tc=0;
+		for(var j=len-1;j>-1;j--){
+			if(fcslist[j]<fcslist[i]){
+				rt=rt+fcslist[j];
+				tc=tc+interval;
+			}else{
+				break;
+			}
+		}
+		var fcj=(rx-rt)*60/tc;
+		fcjlist.push([i,fcj]);
+		rjglist.push([i,fcj-fcs]);
+	}
+	
+    			option = {
+                		title: {
+							text: 'test'
+					   	},
+            		    xAxis: {
+            		        name:'R(mm)',
+            		        type: 'value',
+            		        min:0,
+            		        max:32
+            		    },
+            		    tooltip: {
+            		        trigger: 'axis'
+            		    },
+            		    grid: {
+            		        left: '3%',
+            		        right: '50',
+            		        bottom: '3%',
+            		        containLabel: true
+            		    },
+            		    legend: {
+            		    	top:30,
+            		        data:["fcs","fcj","result"]
+            		    },
+            		    yAxis: {
+            		    	name:'P(mm)',
+            		        type: 'value',
+            		        boundaryGap: false,
+            		        min:0,
+            		        max:20
+            		    },
+            		    series: [
+            		      {
+			                "name":"fcs",
+			                type: 'line',
+							smooth:true,
+							smoothMonotone:'none',
+			                "lineStyle": {
+			                "normal":
+			                {
+			                "width": 1.5
+			                }
+			                },
+			                "data":fcolist
+			              },
+			              {
+			                "name":"fcj",
+			                type: 'line',
+							smooth:true,
+							smoothMonotone:'none',
+			                "lineStyle": {
+			                "normal":
+			                {
+			                "width": 1.5
+			                }
+			                },
+			                "data":fcjlist
+			              },
+			              {
+			                "name":"result",
+			                type: 'line',
+							smooth:true,
+							smoothMonotone:'none',
+			                "lineStyle": {
+			                "normal":
+			                {
+			                "width": 1.5
+			                }
+			                },
+			                "data":rjglist
+			              }
+			            ]
+            		    };	
+	            var monthLineChart = echarts.init(document.getElementById("jyjl_chart"));
+	            //清空画布，防止缓存
+	            monthLineChart.clear();
+	            monthLineChart.setOption(option); 
+}
+function initStep6Data(){
+	$.ajax({
+		url:basePath+"chanliu/chanliu!initLoadStep6Data.action",
+		type:"post",
+		data:{"stcd":stcd,"pch":hh,"start":beginDate, "end":endDate},
+		dataType:"json",
+		success:function(response){
+			if(response.reflag==1||response.reflag=="1"){
+				var second=response.secondData;
+				second=second!=null && second.length>0?second[0]:null;
+				if(second!=null){
+					$("#rs").val(second.RS);
+    				$("#rx").val(second.RX);
+    				$("#step6_pa").val(second.PA);
+    				loadStep6Table("#wdrs_div","#wdrs_tab",response.tableData);
+				}
+			}else{
+				alert(response.message)
+			}
+		}
+	});
+}
+function calcStep6Data(){
+	var pa=$("#step6_pa").val();
+	if(pa==null || $.trim(pa).length<1){
+		alert("Pa不能为空")
+		return false;
+	}
+	var rs=$("#rs").val();
+	if(rs==null || $.trim(rs).length<1){
+		alert("R实不能为空")
+		return false;
+	}
+	var rx=$("#rx").val();
+	if(rx==null || $.trim(rx).length<1){
+		alert("R下不能为空")
+		return false;
+	}
+	if( $("#step6_pa").val()==""){
+			alert("Pa不能为空")
+			return false;
+		}
+	if($("#rs").val()==""){
+		alert("R实不能为空")
+		return false;
+	}
+	if($("#rx").val()==""){
+		alert("R下不能为空")
+		return false;
+	}
+	var url= basePath + "chanliu/chanliu!calcStep6Data.action";
+	var calcData=col.data;
+	if(calcData!=null && calcData.length>0){
+		calcData.splice(calcData.length-1,1);
+	}
+ 	var json={
+			"czmc":$("#stnm").val(),
+			"stcd":$("#stcd").val(),
+			"pch":$("#TAB_PCH").val(),
+			"LYMJ":$("#TAB_LYMJ").val(),
+			"rs":rs,
+			"rx":rx,
+			"pa":pa,
+			"DATA":JSON.stringify({erisedit:(_stepCalcResultTableHaveChange?1:0),interval:interval,tabledata:calcData,echartdata:paLineList})
+    	}
+    $.ajax({
+        url : url,
+        type : "post",
+        dataType : "json",
+        async : false,
+        traditional: true,
+        data : json,
+        success : function(response) {
+        	if(response.reflag==1||response.reflag=="1"){
+        		layer.msg("计算结果成功");
+        		fcjg=response.FCJG?response.FCJG:{};
+        		console.log("-----------------table---------data------"+JSON.stringify(fcjg));
+        		loadStep6Table("#wdrs_div","#wdrs_tab",response.tableData); 
+        	}else{
+        		layer.msg(response.message);
+        	}
+        }
+    });
+}
+function saveStep6Result(){
+		var calcData=col.data;
+		if(calcData!=null && calcData.length>0){
+			calcData.splice(calcData.length-1,1);
+		}
+		var url= basePath + "chanliu/chanliu!saveStep6Result.action";
+		$.ajax({
+	        url : url,
+	        type : "post",
+	        dataType : "json",
+	        traditional: true,
+	        data : {stcd:$("#stcd").val(),pch:$("#TAB_PCH").val(),DATA:JSON.stringify({tableData:calcData,fcjg:fcjg})},
+	        success : function(response) {
+	        	if(response.reflag==1||response.reflag=="1"){
+	        		layer.msg("保存结果成功")
+	        	}else{
+	        		layer.msg(response.message);
+	        	}
+	        }
+	    });
+}
+//初始化统计图
+var myChart = echarts.init(document.getElementById('jyjl_chart'));
+function isNumber(val){
+    var regPos = /^\d+(\.\d+)?$/;
+    var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/; //负浮点数
+    if(regPos.test(val) || regNeg.test(val)){
+        return true;
+    }else{
+        return false;
+    }
+
+}
+function getHejiRowData(tableData){
+	if(tableData!=null && tableData.length>0){
+		var heji={};
+		var hjp=0,hje=0,hjsdr=0,hjrg=0,hjrgpx=0,hjerg=0;
+		for(var i=0;i<tableData.length;i++){
+			var p=tableData[i].P;
+			if(p!=null && isNumber(p)){
+				hjp=parseFloat(hjp)+parseFloat(p);
+			}
+			var e=tableData[i].E;
+			if(e!=null && isNumber(e)){
+				hje=parseFloat(hje)+parseFloat(e);
+			}
+			var sdrc=tableData[i].SDRC;
+			if(sdrc!=null && isNumber(sdrc)){
+				hjsdr=parseFloat(hjsdr)+parseFloat(sdrc);
+			}
+			var r=tableData[i].R;
+			if(r!=null && isNumber(r)){
+				hjrg=parseFloat(hjrg)+parseFloat(r);
+			}
+			var rgdx=tableData[i].RGDX;
+			if(rgdx!=null && isNumber(rgdx)){
+				hjrgpx=parseFloat(hjrgpx)+parseFloat(rgdx);
+			}
+			var er=tableData[i].ER;
+			if(er!=null && isNumber(er)){
+				hjerg=parseFloat(hjerg)+parseFloat(er);
+			}
+		}
+		hjp=Number(hjp).toFixed(1);
+		hje=Number(hje).toFixed(1);
+		hjsdr=Number(hjsdr).toFixed(2);
+		hjrg=Number(hjrg).toFixed(2);
+		hjrgpx=Number(hjrgpx).toFixed(2);
+		hjerg=Number(hjerg).toFixed(2);
+		heji={DATE:"合计",P:hjp,E:hje,SDRC:hjsdr,R:hjrg,RGDX:hjrgpx};
+		tableData.push(heji);
+	}
+	return tableData;
+}
+function loadStep6Table(chart, tab,dataList){
+		var height = $(chart).height();
+	    var width = $(chart).width();
+	    dataList=getHejiRowData(dataList);
+	    layui.use('table', function() {
+	        var table = layui.table;
+	        table.render({
+	            elem: tab,
+	            data: dataList,
+	            height: height,
+	            width: width,
+	            id:'cz',
+	            limit:dataList.length,
+	            cols: [
+	                [{
+	                    field: 'XH',
+	                    title: '序号',
+	                    templet:function(row){
+	                    	return (row.LAY_TABLE_INDEX+1);
+	                    }
+	                },{
+	                    field: 'DATE',
+	                    title: '日期',
+	                    width:'150'
+	                },{
+	                    field: 'P',
+	                    title: 'P',
+	                    width:'70'
+	                },{
+	                    field: 'E',
+	                    title: 'E雨',
+	                    edit: 'text',
+	                    width:'70'
+	                },{
+	                    field: 'PE',
+	                    title: 'P-E雨',
+	                    edit: 'text',
+	                    width:'70'
+	                },{
+	                    field: 'EPE',
+	                    title: '∑(P-E雨)',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'PAPE',
+	                    title: 'Pa+∑(P-E雨)',
+	                    edit: 'text',
+	                    width:'120'
+	                },{
+	                    field: 'ERC',
+	                    title: '∑R查',
+	                    edit: 'text',
+	                    width:'80'
+	                },{
+	                    field: 'SDRC',
+	                    title: '时段R查',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'R',
+	                    title: 'R改',
+	                    edit: 'text',
+	                    width:'80'
+	                },{
+	                    field: 'RGDX',
+	                    title: 'R改大→小',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'ER',
+	                    title: '∑R改',
+	                    edit: 'text',
+	                    width:'80'
+	                }]
+	            ],
+	            page: false,
+	            done: function(res, curr, count){
+	                //如果是异步请求数据方式，res即为你接口返回的信息。
+	                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+	                col=res;
+	                //得到当前页码
+	                //得到数据总量
+	          }
+	        });
+	        table.on('edit(hszlb_table)', function(obj){ 
+	          _stepCalcResultTableHaveChange=true;
+			});
+	    });
+}
+
+//测站列表数据表格
+	function getwdrsTable(chart, tab, url,data){
+	    var height = $(chart).height();
+	    var width = $(chart).width();
+	    layui.use('table', function() {
+	        var table = layui.table;
+	        table.render({
+	            elem: tab,
+	            url: url,
+	            where: data,
+	            height: height,
+	            width: width,
+	            id:'cz',
+	            request: {pageName: 'pageIndex' //页码的参数名称，默认：page
+	                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+	            },
+	            response: {
+	                statusName: 'CODE' //数据状态的字段名称，默认：code
+	                ,
+	                statusCode: 1 //成功的状态码，默认：0
+	                ,
+	                msgName: 'MESSAGE' //状态信息的字段名称，默认：msg
+	                ,
+	                countName: 'TOTALAMOUNT' //数据总数的字段名称，默认：count
+	                ,
+	                dataName: 'DATA'
+	            } //数据列表的字段名称，默认：data} //如果无需自定义数据响应名称，可不加该参数
+	            ,
+	            cols: [
+	                [{
+	                    field: 'XH',
+	                    title: '序号',
+	                    templet:function(row){
+	                    	return (row.LAY_TABLE_INDEX+1);
+	                    }
+	                },{
+	                    field: 'DATE',
+	                    title: '日期',
+	                    width:'150'
+	                },{
+	                    field: 'P',
+	                    title: 'P',
+	                    width:'60'
+	                },{
+	                    field: 'E',
+	                    title: 'E雨',
+	                    edit: 'text',
+	                    width:'60'
+	                },{
+	                    field: 'PE',
+	                    title: 'P-E雨',
+	                    edit: 'text',
+	                    width:'60'
+	                },{
+	                    field: 'EPE',
+	                    title: '∑(P-E雨)',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'PAPE',
+	                    title: 'Pa+∑(P-E雨)',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'ERC',
+	                    title: '∑R查',
+	                    edit: 'text',
+	                    width:'100'
+	                },{
+	                    field: 'SDRC',
+	                    title: '时段R查',
+	                    edit: 'text',
+	                    width:'60'
+	                },{
+	                    field: 'R',
+	                    title: 'R改',
+	                    edit: 'text',
+	                    width:'60'
+	                },{
+	                    field: 'RGDX',
+	                    title: 'R改大→小',
+	                    edit: 'text',
+	                    width:'60'
+	                },{
+	                    field: 'ER',
+	                    title: '∑R改',
+	                    edit: 'text',
+	                    width:'60'
+	                }]
+	            ],
+	            page: false,
+	            done: function(res, curr, count){
+	                //如果是异步请求数据方式，res即为你接口返回的信息。
+	                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+	                console.log(res);
+	                col=res;
+	                //得到当前页码
+	                console.log(curr);
+	                //得到数据总量
+	                console.log(count);
+	                }
+	        });
+	    });
+    }
+    function loadRrffEcharts(){
+    	var url= basePath + "chanliu/chanliu!queryRsffEchartsData.action";
+    	$.ajax({
+            url : url,
+            type : "post",
+            dataType : "JSON",
+            data:{stcd:$("#stcd").val()},
+            traditional: true,
+            success : function(response) {
+            	var leaged=new Array();
+            	var pa=0;
+            	var lineData=new Array();
+            	var lineEchart=new Array();
+            	var echartSerials=new Array();
+            	
+            	if(response!=null && response.length>0){
+            		for(var i=0;i<response.length;i++){
+            			if(i==0){
+            				pa=response[i].PA;
+            				leaged.push(pa.toString());
+            				lineData.push({x:response[i].R,y:response[i].P});
+            				lineEchart.push([response[i].R,response[i].P]);
+            			}else{
+            				if(response[i].PA==pa){
+            					lineData.push({x:response[i].R,y:response[i].P});
+            					lineEchart.push([response[i].R,response[i].P]);
+            				}else{
+            					paLineList.push({pa:pa,pointList:lineData});
+            					echartSerials.push(
+            					{
+		            		        name:pa.toString(),
+		            		        data: lineEchart,
+		            		        type: 'line'
+		            		    });
+            					pa=response[i].PA;
+            					leaged.push(pa.toString());
+            					lineData=new Array();
+            					lineEchart=new Array();
+            					lineData.push({x:response[i].R,y:response[i].P});
+            					lineEchart.push([response[i].R,response[i].P]);
+            				}
+            			}
+            		}
+            		if(lineData!=null && lineData.length>0){
+            			paLineList.push({pa:pa,pointList:lineData});
+            		}
+            		if(lineEchart!=null && lineEchart.length>0){
+            			echartSerials.push(
+            					{
+		            		        name:pa.toString(),
+		            		        data: lineEchart,
+		            		        type: 'line'
+		            		    });
+            		}
+            	}
+            	var myChart = echarts.init(document.getElementById('jyjl_chart'));
+                option = {
+                		title: {
+							text: '降雨径流折线图'
+					   	},
+            		    xAxis: {
+            		        name:'R(mm)',
+            		        type: 'category',
+            		        type: 'value'
+            		    },
+            		    tooltip: {
+            		        trigger: 'axis'
+            		    },
+            		    grid: {
+            		        left: '3%',
+            		        right: '50',
+            		        bottom: '3%',
+            		        containLabel: true
+            		    },
+            		    legend: {
+            		    	top:30,
+            		        data:leaged
+            		    },
+            		    yAxis: {
+            		    	name:'P(mm)',
+            		        type: 'value',
+            		        boundaryGap: false
+            		    },
+            		    series: echartSerials
+            		    };	
+	            var monthLineChart = echarts.init(document.getElementById("jyjl_chart"));
+	            //清空画布，防止缓存
+	            monthLineChart.clear();
+	            myChart.setOption(option); 
+            }
+        });
+    }
+    function getGxt(chart,url,data) {
+     	var Pa = [];
+    	var P = [];
+    	var R = [];
+		var index = [];
+        $.ajax({
+            url : basePath + "rrff/rrff!list.action?mRrffFormBean.mRrffInfoBean.stcd=" + stcd,
+            type : "get",
+            dataType : "JSON",
+            async : false,
+            traditional: true,
+            success : function(response) {
+                for(var i =0;i<response.rows.length;i++){
+                	Pa.push(response.rows[i].Pa);
+					P.push(response.rows[i].P);
+					R.push(response.rows[i].R);
+					index.push(i);
+				}
+                pData=P;
+                paData=Pa;
+            	var myChart = echarts.init(document.getElementById('jyjl_chart'));
+
+                option = {
+            		    xAxis: {
+            		        name:'R(mm)',
+            		        type: 'category',
+            		        type: 'value'
+            		    },
+            		    tooltip: {
+            		        trigger: 'axis'
+            		    },
+            		    grid: {
+            		        left: '3%',
+            		        right: '4%',
+            		        bottom: '3%',
+            		        containLabel: true
+            		    },
+            		    legend: {
+            		        data:['Pa10','Pa20','Pa30']
+            		    },
+            		    yAxis: {
+            		    	name:'P(mm)',
+            		        type: 'category',
+            		        boundaryGap: false,
+            		        data: ['0', '5', '10', '15', '20', '25', '30','35','40','45']
+            		    },
+            		    series: [{
+            		        name:'Pa10',
+            		        data: [0, 0.5,1.5 ,3.5 , 6, 8, 10,12,14,16],
+            		        type: 'line'
+            		    },{
+            		        name:'Pa20',
+            		        data: [0, 1, 2.5, 5, 7.8, 10, 12,14,16,18],
+            		        type: 'line'
+            		    },{
+            		        name:'Pa30',
+            		        data: [0, 2, 4, 7, 10, 12.5, 15,17.5,20,22.5],
+            		        type: 'line'
+            		    }
+            		]};	
+	            var monthLineChart = echarts.init(document.getElementById("jyjl_chart"));
+	            //清空画布，防止缓存
+	            monthLineChart.clear();
+	            myChart.setOption(option); 
+            }
+        });
+    }
+
+  //单Y轴
+    function getYAxis(){
+        var temp = {type: 'value'};
+        return temp;
+    }
+    function getSeries(data){
+        var temp = new Array();
+        for(var i = 0 ; i<data.length ;i++){
+            if(data[i].TYPE == "bar"){
+                temp[i] = {
+                    "name":data[i].NAME,
+                    "type":data[i].TYPE,
+                    "yAxisIndex":1,
+                    ' barCategoryGap':'10%'  ,
+                    "barWidth":10,
+                    "data":data[i].DATA
+                };
+            }else if(data[i].TYPE == "line"){
+                temp[i] = {
+                    "name":data[i].NAME,
+                    "type":data[i].TYPE,
+                    "showSymbol": false,
+                    "smooth": true,
+                    "lineStyle": {
+    	                "normal":{
+    	                	"width": 1.5
+    	                }
+                    },
+                    "data":data[i].DATA
+                };
+            }
+
+        }
+        return temp;
+    }
+    function getLegend_data(data) {
+        var temp = new Array(data.length);
+        for(var i = 0 ; i < data.length ; i < i++){
+            temp[i] = data[i].NAME;
+        }
+        return temp;
+    }
+//eChart宽高自适应
+var resizeWorldMapContainer = function () {
+	document.getElementById('jyjl_chart').style.width = document.getElementById('jyjl_div').innerWidth+'px';
+	document.getElementById('jyjl_chart').style.height = document.getElementById('jyjl_div').innerHeight+'px';
+};
+    
+resizeWorldMapContainer();
+window.onresize = function () {
+	$(".layui-border-box").width($("#wdrs_div").width() - 2);
+	//重置容器高宽
+    resizeWorldMapContainer();
+    myChart.resize();
+};
+
+
+//格式化时间
+function getFormatDate(date) {
+    var seperator1 = "/";
+    var seperator2 = ":";
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if(month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if(strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var hours="";
+    var minut="";
+    var seconds="";
+    if(date.getHours()<10){
+        hours="0"+date.getHours();
+    }else{
+        hours=date.getHours();
+    }
+
+    if(date.getMinutes()<10){
+        minut="0"+date.getMinutes();
+    }else{
+        minut=date.getMinutes();
+    }
+
+    if(date.getSeconds()<10){
+        seconds="0"+date.getSeconds();
+    }else{
+        seconds=date.getSeconds();
+    }
+    var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+        + " " + hours + seperator2 + minut
+        + seperator2 + seconds;
+    return currentdate;
+}
+</script>
+<!-- 不要改变以下引用顺序 -->

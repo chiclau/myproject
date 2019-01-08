@@ -1,0 +1,202 @@
+package com.lyht.business.consumer.hydrologicalData.service;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.consumer.hydrologicalData.bean.River;
+import com.lyht.business.consumer.hydrologicalData.dao.RiverDao;
+import com.lyht.business.consumer.hydrologicalData.dao.StbprpDao;
+import com.lyht.business.consumer.hydrologicalData.formbean.RiverFormBean;
+import com.lyht.util.DateUtil;
+import com.lyht.util.ExcelUtils;
+import com.lyht.util.ExcelVersionUtil;
+import com.lyht.util.ImportExeclUtil;
+
+@Service
+@Scope("prototype")
+@Transactional
+@SuppressWarnings("rawtypes")
+public class RiverService {
+
+	@Resource
+	private RiverDao mRiverDao;
+	@Resource
+	private StbprpDao mStbprpDao;
+	
+	/**
+	 * 获取河道水情列表数据
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public PageResults getRiverListData(RiverFormBean mRiverFormBean){
+		return mRiverDao.getRiverListData(mRiverFormBean);
+	}
+	
+	/**
+	 * 根据主键ID获取实体
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public River getRiverInfoById(RiverFormBean mRiverFormBean){
+		return mRiverDao.getRiverInfoById(mRiverFormBean);
+	}
+	
+	/**
+	 * 增加实体对象
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void create(River mRiver){
+		mRiverDao.saveRiverInfo(mRiver);
+	}
+	
+	/**
+	 * 修改实体对象
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void update(River mRiver){
+		mRiverDao.updateRiverInfo(mRiver);	
+	}
+	
+	/**
+	 * 根据主键ID获取 实体
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public PageResults getRiverInfoListByIds(String ids){
+		return mRiverDao.getRiverInfoListByIds(ids);
+	}
+	
+	/**
+	 * 根据主键ID删除 实体
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void deletRiverInfoByIds(RiverFormBean mRiverFormBean){
+		String[] idary=mRiverFormBean.getmRiverInfoBean().getStcd().split(",");
+		String[] idary_=mRiverFormBean.getmRiverInfoBean().getTm().split(",");
+		for(int i=0,j=0;i<idary.length&&j<idary_.length;i++,j++){
+			mRiverDao.deletRiverInfoByIds(idary[i],idary_[j]);
+		}
+	}
+	/**
+	 * 导出（湖）容曲线列表数据
+	 * */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void export(RiverFormBean mRiverFormBean,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+		String year = DateUtil.getYear();//年
+		String method = DateUtil.getMonth();//月
+		String day = DateUtil.getDay();//日
+		String replace="河道水情_"+year + "年" + method + "月" +day + "日";
+		String title="河道水情";
+		String [] tab = {"序号","测站编码","时间","水位","流量","河水特征码","水势","断面过水面积","断面平均流速","断面最大流速","测流方法","测积方法","测速方法"};
+		String [] val = {"STNM","TM","Z","Q","FLWCHRCD","WPTN","XSA","XSAVV","XSMXV","MSQMT","MSAMT","MSVMT"};
+		List result=mRiverDao.getRiverListData_export(mRiverFormBean).getResults();
+		String file = ExcelUtils.SellerStat2Excel(result, request, replace,tab,title,val);
+		response.setContentType("multipart/form-data");  
+		String path = request.getSession().getServletContext().getRealPath("/")+file;
+		response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;  
+        byte[] buffer = new byte[1024];  
+        while (b != -1){  
+            b = inputStream.read(buffer);  
+            //4.写到输出流(out)中  
+            out.write(buffer,0,b);  
+        }  
+        inputStream.close();  
+        out.close();  
+        out.flush();
+	}
+	
+	/**
+	 * 导入数据
+	 * @throws IOException 
+	 */
+	@SuppressWarnings("static-access")
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void importPptn(File[] file,String[] fileFileName) throws IOException{
+		File[] srcFiles = file;
+		InputStream in = null;
+		ExcelVersionUtil ev=new ExcelVersionUtil();
+		ImportExeclUtil importExeclUtil=new ImportExeclUtil();
+		for(int i = 0; i < srcFiles.length; i++){
+			in = new BufferedInputStream(new FileInputStream(srcFiles[i]));
+			boolean isExcel2003 = true;// 根据文件名判断文件是2003版本还是2007版本  
+            if (ev.isExcel2007(fileFileName[i])) {  
+                isExcel2003 = false;  
+            }
+            //通过工具栏ImportExeclUtil中的read方法解析excel
+            List<List<String>> dataLst =importExeclUtil.read(in,isExcel2003);
+            List<Map> stbprpList = mStbprpDao.getStbprpList(null);
+            for(int j=1;j<dataLst.size();j++){
+            	List<String> list=dataLst.get(j);
+            	River mRiver=new River();
+            	if(stbprpList!=null&&stbprpList.size()>0){
+            		for (int k = 0; k < stbprpList.size(); k++) {
+            			Map map = stbprpList.get(k);
+            			String stnm = (String) map.get("STNM");
+            			String stcds = (String) map.get("STCD");
+            			if(list.get(1).equals(stnm)){
+            				mRiver.setStcd(stcds);
+            			}
+					}
+            	}
+            	mRiver.setTm(list.get(2));
+            	mRiver.setZ(Double.parseDouble(list.get(3)));
+            	mRiver.setQ(Double.parseDouble(list.get(4)));
+            	String flwchrcd = list.get(5);
+            	if(flwchrcd.equals("干涸"))mRiver.setFlwchrcd("1");
+            	if(flwchrcd.equals("断流"))mRiver.setFlwchrcd("2");
+            	if(flwchrcd.equals("流向不定"))mRiver.setFlwchrcd("3");
+            	if(flwchrcd.equals("逆流"))mRiver.setFlwchrcd("4");
+            	if(flwchrcd.equals("起涨"))mRiver.setFlwchrcd("5");
+            	if(flwchrcd.equals("洪峰"))mRiver.setFlwchrcd("6");
+            	if(flwchrcd.equals("水电厂发电流量"))mRiver.setFlwchrcd("P");
+            	if(flwchrcd.equals("一般情况"))mRiver.setFlwchrcd(" ");
+            	String wptn = list.get(6);
+            	if(wptn.equals("落"))mRiver.setWptn("4");
+            	if(wptn.equals("涨"))mRiver.setWptn("5");
+            	if(wptn.equals("平"))mRiver.setWptn("6");
+            	String string = list.get(7);
+            	if(list.get(7)!=null&&!"".equals(list.get(7)))mRiver.setXsa(Double.parseDouble(list.get(7)));
+            	if(list.get(8)!=null&&!"".equals(list.get(8)))mRiver.setXsavv(Double.parseDouble(list.get(8)));
+            	if(list.get(9)!=null&&!"".equals(list.get(8)))mRiver.setXsmxv(Double.parseDouble(list.get(9)));
+            	String msqmt = list.get(10);
+            	if(msqmt.equals("水位流量关系曲线"))mRiver.setMsqmt("1");
+            	if(msqmt.equals("浮标及溶液测流法"))mRiver.setMsqmt("2");
+            	if(msqmt.equals("流速仪及量水建筑物"))mRiver.setMsqmt("3");
+            	if(msqmt.equals("估算法"))mRiver.setMsqmt("4");
+            	if(msqmt.equals("ADCP"))mRiver.setMsqmt("5");
+            	if(msqmt.equals("电功率反推法"))mRiver.setMsqmt("6");
+            	if(msqmt.equals("其它方法"))mRiver.setMsqmt("9");
+            	String msamt= list.get(11);
+            	if(msamt.equals("水位面积关系曲线"))mRiver.setMsvmt("1");
+            	if(msamt.equals("测深杆或测深锤、铅鱼"))mRiver.setMsvmt("2");
+            	if(msamt.equals("回声测深仪"))mRiver.setMsvmt("3");
+            	if(msamt.equals("其它方法"))mRiver.setMsvmt("9");
+            	String msvmt = list.get(12);
+            	if(msvmt.equals("流速仪"))mRiver.setMsvmt("1");
+            	if(msvmt.equals("浮标法"))mRiver.setMsvmt("2");
+            	if(msvmt.equals("声学法"))mRiver.setMsvmt("3");
+            	if(msvmt.equals("其它方法"))mRiver.setMsvmt("9");
+            	mRiverDao.saveRiverInfo(mRiver);
+            }
+		}
+	}
+}

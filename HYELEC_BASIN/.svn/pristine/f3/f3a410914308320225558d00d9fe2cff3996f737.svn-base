@@ -1,0 +1,263 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<style type="text/css">
+.clgl-13 {
+	width: 100%;
+	margin: 0 auto;
+}
+
+.clgl-14 {
+	float: left;
+	width: 40%;
+}
+
+.clgl-16 {
+	float: left;
+	width: 20%;
+	line-height: 35px;
+	text-align: center;
+}
+
+.clgl-15 {
+	float: left;
+	width: 40%;
+	padding-top: 20px;
+	line-height: 48px;
+	text-align: center;
+}
+
+#id1 {
+	font-size: 23px;
+}
+.form-horizontal .form-group>label {
+	position: relative;
+	top: -14px;
+	text-align: right;
+}
+
+.form-control {
+	position: relative;
+}
+.div_items {  
+            position: relative;  
+            width: 100%;  
+            height: 200px;  
+            border: 1px solid #66afe9;  
+            border-top: 0px;  
+            overflow: auto;  
+            display: none;  
+        }  
+        .div_item {  
+            width: 100%;  
+            height: 20px;  
+            margin-top: 1px;  
+            font-size: 13px;  
+            line-height: 20px;  
+        }  
+</style>
+<div class="container-fluid">
+	<form id="info_form_cjfa" name="info_form" class="form-horizontal"
+		autocomplete="off" method="post"
+		data-bv-message="This value is not valid"
+		data-bv-feedbackicons-valid="glyphicon glyphicon-ok"
+		data-bv-feedbackicons-invalid="glyphicon glyphicon-remove"
+		data-bv-feedbackicons-validating="glyphicon glyphicon-refresh">
+		<div class="clgl-13" style="border:0.5px solid #EBEBEB;height:370px;">
+			<div class="clgl-14" style="border:0.5px solid #EBEBEB;height:100%;">
+				<div style="margin-top: 10px;width:100%;font-size:20px;">
+					<div style="width:calc(100% - 120px);float:left;">
+						<label>
+							方案信息
+						</label>
+					</div>
+					<div style="width:120px;float:right;">
+						<button type="button" id="btn_cjfa_save" class="btn btn-primary"
+							onclick="btnSave()">
+							<i class="icon icon-download-alt"></i> 保存方案
+						</button>
+					</div>
+				</div>
+				<div style="width:100%;margin-top:20px;">
+					<div style="width:50%;float:left;line-height:30px;">
+						<div style="width:100px;float:left;text-align:right;">
+							<label>
+								<span class="text-danger">*&nbsp;</span> 方案名称：
+							</label>
+						</div>
+						<div style="width:calc(100% - 100px);float:right;">
+							<input type="text" class="form-control" id="progName_modelprogram"
+								name="modelprogramFormBean.modelprogramFormBean.progName"
+								value=""
+								data-bv-group=".rowGroup" required maxlength="25"
+								data-bv-notempty-message="方案名称不能为空" data-bv-stringlength-max="50"
+								data-bv-stringlength-message="不能超过25个字" placeholder="请输入方案名称"
+								>
+						</div>
+					</div>
+					<div style="width:50%;float:right;line-height:30px;">
+						<div style="width:100px;float:left;text-align:right;">
+							<label><input type="hidden" id="stcd_cjfa" name="modelprogramFormBean.modelprogramFormBean.stcd">
+								<span class="text-danger">*&nbsp;</span> 站点名称：
+							</label><input type='hidden' id='cjfa_jd' ><input type='hidden' id='cjfa_wd' >
+							
+						</div>
+						<div style="width:calc(100% - 100px);float:right;">
+							<input type="text" class="form-control" id="zd"
+								data-bv-group=".rowGroup" required maxlength="25"
+								data-bv-notempty-message="站点名称不能为空" data-bv-stringlength-max="50"
+								data-bv-stringlength-message="不能超过25个字" placeholder="请输入站点名称"
+								>
+						</div>
+					</div>
+				</div>
+				<div style="width:100%;">
+					<div style="width:50%;float:left;line-height:30px;">
+						<div style="width:100px;float:left;text-align:right;">
+							<label>
+								<span class="text-danger">&nbsp;</span> 创建人：
+							</label>
+							<input type="hidden" id="modeCode"
+						name="modelprogramFormBean.modelprogramFormBean.modelCode">
+						</div>
+						<div style="width:calc(100% - 100px);float:right;">
+							<input type="text" id="createStaff_modelprogram"
+							class="form-control"
+							name="modelprogramFormBean.modelprogramFormBean.createStaff"
+							readonly="readonly">
+						</div>
+					</div>
+					<div style="width:50%;float:right;line-height:30px;">
+						<div style="width:100px;float:left;text-align:right;">
+							<label>
+								<span class="text-danger">&nbsp;</span> 创建时间：
+							</label>
+						</div>
+						<div style="width:calc(100% - 100px);float:right;">
+							<a class='date' style="width:100%"> 
+								<input type="text" id="createTime_modelprogram"
+								class="form-control laydate" value=""
+								name="modelprogramFormBean.modelprogramFormBean.createTime"
+								style="width:100%;">
+							</a>
+						</div>
+					</div>
+				</div>
+				<div style="width:100%;">
+					<div style="width:100%;line-height:30px;">
+						<div style="width:100px;float:left;text-align:right;">
+							<label>
+								<span class="text-danger">&nbsp;</span> 描述：
+							</label>
+						</div>
+						<div style="width:calc(100% - 100px);float:right;">
+							<textarea rows="4" class="form-control" id="remark_modelprogram"
+								name="modelprogramFormBean.modelprogramFormBean.remark"
+								data-bv-group=".rowGroup" required maxlength="25"
+								data-bv-notempty-message="备注不能为空" data-bv-stringlength-max="50"
+								data-bv-stringlength-message="不能超过25个字" placeholder="请输入备注"
+								></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="clgl-16" style="height:100%;">
+				<ul id="ztree" class="ztree" style="width: 260px; overflow: auto;">
+
+				</ul>
+			</div>
+			<div class="clgl-15" style="border:0.5px solid #EBEBEB;height:100%;">
+				<div style="margin-top: 10px;height:50px;">
+						<div style="width:calc(100% - 120px);float:left;">
+							<label id="id1">
+								输入参数
+							</label>
+						</div>
+						<div style="width:120px;float:right;">
+						</div>
+				</div>
+				<div id="clg"></div>
+			</div>
+			<div class="modal fade" id="cjfa_fxjs">
+				<div class="modal-dialog modal-lg" style="width:600px">
+					<div class="modal-content">
+						<div class="modal-header" style="height: 40px">
+							<button type="button" class="btn btn-link close"
+								data-dismiss="modal">
+								<span aria-hidden="true"><i class="icon icon-times"></i></span><span
+									class="sr-only">关闭</span>
+							</button>
+							<h4 class="modal-title" style="line-height: 15px;">
+								<i class='icon icon-plus'></i>新增测站信息
+							</h4>
+						</div>
+
+						<div class="modal-body" style="padding-top: 8px;">
+							<div class="flag" style="margin-top: 10px;margin-left: -70px;">
+								<div id="cjfa_main" class="className"
+									style="width:600px;height:300px;margin-left: 60px;"></div>
+							</div>
+						</div>
+						<div class="modal-footer" style="height: 40px;">
+							<button type="reset" class="btn btn-large" data-dismiss="modal"
+								style="margin-top: -14px; margin-right: -5px;">
+								<i class="icon icon-times"></i> 取消
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+<!-- maincontent -->
+<!-- 不要改变以下引用顺序 -->
+<%@include file="edit.jsp"%>
+<script src="../business/consumer/analysisjs/cjfa/query.js"></script>
+<script src="../business/consumer/analysisjs/cjfa/tree.js"></script>
+<script src="../business/consumer/analysisjs/cjfa/list.js"></script>
+<script type="text/javascript">
+	$(function(){
+		getCjfaStnm();
+		$("#createTime_modelprogram").each(function(i,obj){
+			laydate({
+	            elem: obj,
+	            format: 'YYYY-MM-DD'
+	        });
+		});
+	});
+	
+	function getCjfaStnm(){//下拉模糊匹配组件在\common\js\combox\combox.js
+		$("#zd").combox({
+			url:	 basePath + "chanliu/chanliu!getStbprpMoHu.action",
+			label:"STNM",
+			value:"STCD",
+			dataKey:"dataList",
+			height:'250px',
+			width:'150px',
+			isPager:false,
+			select:function(item){
+				$("#stcd_cjfa").val(item.STCD);//stcd回显
+				$("#cjfa_jd").val(item.LGTD1);
+				$("#cjfa_wd").val(item.LTTD1);
+				
+				dingwei(item.LGTD1,item.LTTD1,item.STNM);//定位
+			}
+		});
+	}
+	//选择测站之后定位的方法
+	function dingwei(x,y,name){
+			var opt={
+					"STCD":	$("#stcd_cjfa").val()
+			}
+		//  var marker = L.marker([datas[i].LTTD1,datas[i].LGTD1],datas[i]);
+			var mar ={
+					options:opt
+			};
+			// cezhanchaxun(mak);
+			// marker.bindPopup("<b>"+name+"</b>").openPopup();
+		/* 	 cezhanchaxun(mak);
+			 mak.bindPopup("<b>"+name+"</b>").openPopup(); */
+			 //panTo( <LatLng> latlng, <pan options> options? )
+		dingweiPoint(x,y)
+			//map. panTo(x,y)
+	}
+</script>

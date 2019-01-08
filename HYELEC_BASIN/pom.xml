@@ -243,12 +243,12 @@
 	
 	
 	<!-- shaobing jdbc -->
-	<dependency>
+	<!-- <dependency>
 	  <groupId>lm.tools</groupId>
 	  <artifactId>jdbc-tool</artifactId>
 	  <version>1.0.3</version>
 	</dependency>
-	
+	 -->
 	
   </dependencies>
   

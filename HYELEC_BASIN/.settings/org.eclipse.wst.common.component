@@ -4,12 +4,6 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <dependent-module archiveName="sqljdbc4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/HYELEC_BASIN/src/main/webapp/WEB-INF/lib/sqljdbc4.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="lyht_base.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/HYELEC_BASIN/src/main/webapp/WEB-INF/lib/lyht_base.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="HYELEC_BASIN"/>
         <property name="java-output-path" value="/HYELEC_BASIN/target/classes"/>
     </wb-module>

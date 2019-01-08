@@ -1,0 +1,644 @@
+package com.lyht.business.analysisCalculation.action;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.lyht.RetMessage;
+import com.lyht.business.analysisCalculation.bean.HResultThrid;
+import com.lyht.business.analysisCalculation.control.ResultFourthControl;
+import com.lyht.business.analysisCalculation.control.ResultThridControl;
+import com.lyht.business.analysisCalculation.formbean.HuiliuFormBean;
+import com.lyht.business.analysisCalculation.service.HresultService;
+import com.lyht.business.analysisCalculation.service.ResultFourthService;
+import com.lyht.business.analysisCalculation.service.ResultThridService;
+import com.lyht.util.BaseLyhtAction;
+import com.lyht.util.CommonFunction;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+/**
+ * 汇流计算Action
+ * @author 刘魁
+ *@时间  2018/6/27    9:43
+ */
+@Namespace("/huiliu")
+@Controller
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+@Action("/huiliu")
+public class HuiLiuAction   extends BaseLyhtAction{
+	private static final long serialVersionUID = 1L;
+	private static Logger log = Logger.getLogger("HuiLiuAction");
+	@Resource  
+	private ResultThridControl  resultThridControl;//第三步的control
+	@Resource  
+	private ResultFourthControl resultFourthControl;//第四步的control
+	@Resource private ResultThridService resultThridService;//第三步
+	@Resource private ResultFourthService resultFourthService; //第四步
+	@Resource private HresultService hresultService;
+	private HuiliuFormBean huiliuFormBean = new HuiliuFormBean();
+	public HuiliuFormBean getHuiliuFormBean() {
+		return huiliuFormBean;
+	}
+	public void setHuiliuFormBean(HuiliuFormBean huiliuFormBean) {
+		this.huiliuFormBean = huiliuFormBean;
+	}
+	
+	public String queryStep5Table1Data(){
+		String stcd = this.getRequest().getParameter("stcd");
+		String pch = this.getRequest().getParameter("pch");
+		List<Map> table1Data = this.hresultService.queryHuiliuStep5Table1(stcd, pch);
+		CommonFunction.writeResponse(getResponse(), JSONArray.fromObject(table1Data).toString());
+		return null;
+	}
+	public String queryStep5Table2Data(){
+		String stcd = this.getRequest().getParameter("stcd");
+		String pch = this.getRequest().getParameter("pch");
+		List<Map> table2Data = this.hresultService.queryHuiliuStep5Table2(stcd, pch);
+		CommonFunction.writeResponse(getResponse(), JSONArray.fromObject(table2Data).toString());
+		return null;
+	}
+	public String queryStep5Table3Data(){
+		String stcd = this.getRequest().getParameter("stcd");
+		String pch = this.getRequest().getParameter("pch");
+		List<Map> table3Data = this.hresultService.queryHuiliuStep5Table3(stcd, pch);
+		CommonFunction.writeResponse(getResponse(), JSONArray.fromObject(table3Data).toString());
+		return null;
+	}
+	public String queryStep5Table4Data(){
+		String stcd = this.getRequest().getParameter("stcd");
+		String pch = this.getRequest().getParameter("pch");
+		List<Map> table4Data = this.hresultService.queryHuiliuStep5Table4(stcd, pch);
+		CommonFunction.writeResponse(getResponse(), JSONArray.fromObject(table4Data).toString());
+		return null;
+	}
+	/**
+	 * 查询第三步表1和表2数据
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String calcStep3Table2AndTable3(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			String tj = this.getRequest().getParameter("TJ");
+			String rj = this.getRequest().getParameter("RJ");
+			table = this.resultFourthService.calcStep3Table1AndTable2(stcd, pch, tj, rj);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "第三步表2，表3数据查询出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 计算m值和表格3数据
+	 * @return
+	 */
+	public String calcStep3MandTable3(){
+		JSONObject table = new JSONObject();
+		try {
+			String data = this.getRequest().getParameter("data");
+			table = this.resultFourthService.calcStep3MAandTable3(data);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询第二步表格2计算出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), table);
+		return null;
+	}
+	/**
+	 * 第四步综合查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep4Search(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			table = this.resultFourthService.huiliuStep4Search(stcd);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "第二步综合查询出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 第三步综合查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep3Search(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			table = this.resultFourthService.huiliuStep3Search(stcd);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "第二步综合查询出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	
+	/**
+	 * 第二步综合查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep2Search(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			table = this.resultFourthService.huiliuStep2Search(stcd);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "第二步综合查询出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 第二步计算m值
+	 * @return
+	 */
+	public String calcStep2Table2(){
+		JSONObject table = new JSONObject();
+		try {
+			String data = this.getRequest().getParameter("data");
+			table = this.resultFourthService.calcHuiliuStep2Table2(data);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询第二步表格2计算出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), table);
+		return null;
+	}
+	/**
+	 * 第二步第一个表格计算
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String calcStep2Table1(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			String rj = this.getRequest().getParameter("RJ");
+			String tj = this.getRequest().getParameter("TJ");
+			table = resultFourthService.calcHuiliuStep2Table1(stcd,pch,rj,tj);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询第二步表格1计算出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	public String saveHuiliuStep3Result(){
+		Hashtable<String, Object> table = new Hashtable<String, Object>();
+		String stcd = this.getRequest().getParameter("stcd");
+		String pch = this.getRequest().getParameter("pch");
+		String l = this.getRequest().getParameter("l");
+		String j = this.getRequest().getParameter("j");
+		String lymj = this.getRequest().getParameter("lymj");
+		String m = this.getRequest().getParameter("m");
+		String m3 = this.getRequest().getParameter("m3");
+		String jsjg = this.getRequest().getParameter("jsjg");
+		String rsj = this.getRequest().getParameter("rsj");
+		String tcj = this.getRequest().getParameter("tcj");
+		String qm = this.getRequest().getParameter("qm");
+		String qmf = this.getRequest().getParameter("qmf");
+		String qmsj=this.getRequest().getParameter("qmsj");
+		String qms=this.getRequest().getParameter("qms");
+		HResultThrid resultThird = new HResultThrid();
+		resultThird.setStcd(stcd);
+		resultThird.setPch(pch);
+		resultThird.setJ(Double.valueOf(j).doubleValue());
+		resultThird.setL(Double.valueOf(l).doubleValue());
+		resultThird.setLymj(Double.valueOf(lymj).doubleValue());
+		resultThird.setM(Double.valueOf(m).doubleValue());
+		resultThird.setM3(Double.valueOf(m3).doubleValue());
+		resultThird.setJsjg(jsjg);
+		resultThird.setRsj(Double.valueOf(rsj).doubleValue());
+		resultThird.setTcj(Double.valueOf(tcj).doubleValue());
+		resultThird.setQm(Double.valueOf(qm).doubleValue());
+		resultThird.setQmf(Double.valueOf(qmf).doubleValue());
+		resultThird.setQmsj(Double.valueOf(qmsj).doubleValue());
+		resultThird.setQms(Double.valueOf(qms).doubleValue());
+		table = resultFourthService.saveHuiliuStep3Result(resultThird);
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 查询汇流计算第二步结果作为第三步的第一个表格数据
+	 * @return
+	 */
+	public String queryInitHuiliuStep3Data(){
+		String stcd = this.getRequest().getParameter("STCD");
+		String pch = this.getRequest().getParameter("PCH");
+		Hashtable table = new Hashtable();
+		table=resultFourthService.queryHuiliuStep2InitData(stcd,pch);
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	public String calcHuiliuStep4Save(){
+		String data=this.getRequest().getParameter("data");
+		Hashtable<String,Object> table = this.hresultService.calcHuiliuStep4AndSave(data);
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 查询第四步初始化数据
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String queryInitHuiliuStep4Data(){
+		String stcd = this.getRequest().getParameter("STCD");
+		String pch = this.getRequest().getParameter("PCH");
+		Hashtable table = new Hashtable();
+		try {
+			table=hresultService.queryHuiliuStep4InitData(stcd,pch);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "查询初始化数据出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 查询汇流第二步第一个表格数据
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep2Table1(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			table = resultFourthService.queryHuiliuStep2Data(stcd,pch);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询第二步表格1数据出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 查询汇流计算第二步的测站自动补全下拉数据
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep2StcdSelect(){
+		Hashtable table = new Hashtable();
+		String searchName = this.getRequest().getParameter("searchText");
+		List<Map> stcdList = resultFourthService.getHuiliuStep2StcdSelect(searchName);
+		table.put("dataList", stcdList);
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 查询汇流计算第二步的选中测站后的批次号下拉数据
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep2PchSelect(){
+		Hashtable table = new Hashtable();
+		String stcd = this.getRequest().getParameter("stcd");
+		List<Map> pchList = resultFourthService.getHuiliuStep2PchSelect(stcd);
+		table.put("dataList", pchList);
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 汇流计算第二步的洪号和测站下拉数据查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep2Select(){
+		Hashtable table = new Hashtable();
+		try {
+			table = resultFourthService.getHuiliuStep2Select();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询下拉框数据出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 汇流计算第一步的洪号和测站下拉数据查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep1Select(){
+		Hashtable table = new Hashtable();
+		try {
+			table = resultFourthService.getHuiliuStep1Select();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "查询下拉框数据出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 第一步综合查询
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String huiliuStep1Search(){
+		Hashtable table = new Hashtable();
+		try {
+			String stcd = this.getRequest().getParameter("STCD");
+			table = this.resultFourthService.huiliuStep1Search(stcd);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	/**
+	 * 计算第一步最终结果，并显示echart图形
+	 * @return
+	 */
+	public String calcStep1Total(){
+		JSONObject table = new JSONObject();
+		try {
+			String data = this.getRequest().getParameter("data");
+			table = this.resultFourthService.calcHuiliuStep1Result(data);
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "汇流计算模型推理公式计算表格2出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), table);
+		return null;
+	}
+	/**
+	 * 汇流计算第一步查询
+	 * @return
+	 */
+	public String huiliuStep1() {
+		Hashtable table = new Hashtable();
+		try {
+			table = this.resultFourthService.getHuiLiuStep1(huiliuFormBean.getStcd(),huiliuFormBean.getPch());
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_SUCCESS);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put(RetMessage.AJAX_RETFLAG, RetMessage.RETFLAG_ERROR);
+			table.put("reflag", "0");
+			table.put("message", "汇流计算模型推理公式计算查询出错!");
+		}
+		CommonFunction.writeResponse(getResponse(), JSONObject.fromObject(table));
+		return null;
+	}
+	
+	/**
+	 * 导出到excel
+	 */
+	public String huiliuExcel1() {
+		log.info("HuiLiuAction=汇流推理公式计算,汇流参数m计算表数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			Hashtable table = new Hashtable();
+			table = this.resultFourthService.getHuiLiuStep1(huiliuFormBean.getStcd(),huiliuFormBean.getPch());
+			List list=new ArrayList();
+			list.add(table.get("table2Data"));
+			this.resultThridService.exportHuiLiu1(list, req, res);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String huiliuExcel2() {
+		log.info("HuiLiuAction=汇流推理公式计算,汇流参数求和计算表数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			Hashtable table = new Hashtable();
+			table = this.resultFourthService.getHuiLiuStep1(huiliuFormBean.getStcd(),huiliuFormBean.getPch());
+			List list=new ArrayList();
+			List tab=new ArrayList();
+			list.add(table.get("table3Data"));
+			tab.add(table.get("columnList"));
+			this.resultThridService.exportHuiLiu2(list,tab, req, res);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String huiliuExcel3() {
+		log.info("HuiLiuAction=1单站综合及误差统计计算表数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			Hashtable table = new Hashtable();
+			String stcd = this.getRequest().getParameter("STCD");
+			table = this.resultFourthService.huiliuStep1Search(stcd);
+			List list=new ArrayList();
+			List tab=new ArrayList();
+			list.add(table.get("cxDataList"));
+			this.resultThridService.exportHuiLiu3(list,tab, req, res);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public String tlfl_export1() {
+		log.info("HuiLiuAction=推理峰量计算m值表数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			Hashtable table = new Hashtable();
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			String n = this.getRequest().getParameter("N");
+			table = resultFourthService.queryHuiliuStep2Data(stcd,pch);
+			List list=new ArrayList();
+			List tab=new ArrayList();
+			list.add(table.get("table2Data"));
+			this.resultThridService.exportHlStep2(list,n,tab, req, res);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	//汇流第二步
+	public String tlfl_export2() {
+		log.info("HuiLiuAction=汇流第二步，单站综合及误差统计计算表数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			Hashtable table = new Hashtable();
+			String stcd = this.getRequest().getParameter("STCD");
+			table = resultFourthService.huiliuStep2Search(stcd);
+			List list=new ArrayList();
+			List tab=new ArrayList();
+			list.add(table.get("cxDataList"));
+			tab.add("2");
+			this.resultThridService.exportHuiLiu3(list,tab, req, res);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	//汇流第3步,计算M
+	public String jsm_export() {
+		log.info("HuiLiuAction=汇流第3步，计算m数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			Hashtable table = new Hashtable();
+			table=resultFourthService.queryHuiliuStep2InitData(stcd,pch);
+			List list=new ArrayList();
+			list.add(table.get("table1Data"));
+			this.resultThridService.jsm_export(list, req, res);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//汇流第3步,计算M
+	public String step3_export3() {
+		log.info("HuiLiuAction=汇流第3步，单站综合及误差统计数据导出到excel");
+		try {
+			HttpServletRequest req = getRequest();
+			HttpServletResponse res =getResponse();
+			String stcd = this.getRequest().getParameter("STCD");
+			String pch = this.getRequest().getParameter("PCH");
+			Hashtable table = new Hashtable();
+			table = this.resultFourthService.huiliuStep3Search(stcd);
+			List list=new ArrayList();
+			list.add(table.get("cxDataList"));
+			this.resultThridService.step3_export3(list, req, res);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//汇流第4步,shdwxf_export
+		public String shdwxf_export() {
+			try {
+				HttpServletRequest req = getRequest();
+				HttpServletResponse res =getResponse();
+				Hashtable table = new Hashtable();
+				String stcd = this.getRequest().getParameter("STCD");
+				String pch = this.getRequest().getParameter("PCH");
+				String t = this.getRequest().getParameter("table");
+				table=hresultService.queryHuiliuStep4InitData(stcd,pch);
+				List list=new ArrayList();
+				String [] tab = {"时间","Ii","mi","Mi²","Iimi","IiMi²"};
+				String [] val = {"DT","II","MI","MI2","IIMI","IIMI2"};
+				String [] tab2= {"时间","Q实","Q基","Q实-Q基","Q","Mi","Mi²","MiQ","MiQi"};
+				String [] val2= {"DT","QS","QJ","QSQJ","QPJ","MI","MI2","MIQPJ","MIQI"};
+				String title1="瞬时单位线净雨过程及净雨的矩计算表";
+				String title2="瞬时单位线流量过程及流量矩计算表";
+				if(t.equals("1")) {
+					log.info("HuiLiuAction=汇流第4步，瞬时单位线净雨过程及净雨的矩计算表数据导出到excel");
+					list.add(table.get("elist"));
+					this.resultThridService.shdwxf_export(list, title1,tab,val,req, res);//表1
+				}else {
+					log.info("HuiLiuAction=汇流第4步，瞬时单位线流量过程及流量矩计算表数据导出到excel");
+					list.add(table.get("qlist"));
+					this.resultThridService.shdwxf_export(list, title2,tab2,val2,req, res);//表2
+				}
+			
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	
+}

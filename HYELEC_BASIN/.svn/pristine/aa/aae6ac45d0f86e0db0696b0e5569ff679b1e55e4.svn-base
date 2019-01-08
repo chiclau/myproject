@@ -1,0 +1,28 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.analysisCalculation.bean.HresultFourthq;
+
+@Repository
+@Scope("prototype")
+public class HresultFourthqDao extends HibernateBaseDao<HresultFourthq> {
+
+	public void deleteHresultFourthqByStcdAndPch(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("DELETE FROM H_RESULT_FOURTH_Q WHERE STCD='"+stcd+"' and PCH='"+pch+"'" );
+		this.excuteSql(sql.toString(), new Object[]{});
+	}
+	public List<Map> queryHresultForthqByStcdAndPch(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT A.*,CONVERT(CHAR(16),  A.TM, 120) AS DT FROM H_RESULT_FOURTH_Q A WHERE A.STCD='"+stcd+"' and A.PCH='"+pch+"' order by A.TM ASC" );
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryCresultStep3Result(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT A.STCD,A.PCH,A.Q AS QS,NULL AS QJ,NULL AS QSQJ,NULL AS QPJ,NULL AS MI,NULL AS MI2,NULL AS MIQPJ,NULL AS MI2QI,CONVERT(CHAR(16),  A.TM, 120) AS DT FROM C_RESULT_THRID A WHERE A.STCD='"+stcd+"' and A.PCH='"+pch+"' order by A.TM ASC" );
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+}

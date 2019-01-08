@@ -1,6 +1,4 @@
 <%@ page language="java" pageEncoding="UTF-8"%>
-<link href="../../../../common/zui/lib/uploader/zui.uploader.min.css" rel="stylesheet">
-<script src="../../../../common/zui/lib/uploader/zui.uploader.min.js"></script>
 <style>
 .file-list .file[data-status=uploading] .file-status>.text, .uploader-files .file[data-status=uploading] .file-status>.text{
 	display:none;

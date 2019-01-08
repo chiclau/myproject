@@ -1,0 +1,308 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<style type="text/css">
+.clgl-13 {
+	width: 100%;
+	margin: 0 auto;
+}
+
+.clgl-14 {
+	float: left;
+	width: 20%;
+	padding-top: 20px;
+	line-height: 35px;
+	text-align: center;
+}
+
+.clgl-16 {
+	float: left;
+	width: 80%;
+	padding-top: 20px;
+	line-height: 35px;
+	text-align: center;
+}
+.layui-table-cell {
+    text-align: center;
+}
+</style>
+	<div class="container-fluid" style="position: relative;">
+		<div id="body-step1-content" style="bottom: 0px;width: 100%;height: calc(100% - 40px);min-height:500px;">
+			<div id="body-step1-content-top" style="width:100%;height:50px;">
+				<div class="btn-group">
+				  <button id="step_one" onClick="nextStep1(1)" class="btn btn-success">第一步</button>
+				  <button id="step_two" onClick="nextStep1(2)" class="btn">第二步</button>
+				  <button id="step_three" onClick="nextStep1(3)" class="btn">第三步</button>
+				  <button id="step_four" onClick="nextStep1(4)" class="btn">第四步</button>
+				  <button id="step_five" onClick="nextStep1(5)" class="btn">第五步</button>
+				  <button id="step_six" onClick="nextStep1(6)" class="btn">第六步</button>
+				  <button id="step_seven" onClick="nextStep1(7)" class="btn">计算结果</button>
+				</div>
+			</div>
+			<div id="body-step1-content-bottom"  style="width:100%;height:calc(100% - 50px);"></div>
+		</div>
+	</div>
+<!-- 不要改变以下引用顺序 -->
+<script type="text/javascript" src="../business/consumer/analysisjs/chanliujs/chanliu.js"></script>
+<script type="text/javascript">
+	var stcd= ""; // 测站编码
+	var stnm= "";//测站名称
+	var beginDate = ""; // 开始时间
+	var endDate = ""; // 结束时间
+	var interval = ""; //时间间隔
+	var hh="";//洪号
+	var staffName=""; //当前用户
+	var staffCode="";//当前用户code
+	var lymj="";
+	var pa6="";//第六步的Pa
+	var rshi="";
+	var rxia="";
+ var ylz="";//雨量站个数
+	$(".form_datetime").datetimepicker({
+		format : " yyyy-mm-dd hh:ii:ss"
+	});
+	$("#body-step1-content-bottom").load(basePath+"business/consumer/analysisjs/chanliujs/mainList.jsp");
+	
+	function nextStep1(num){
+		//$("#step_one").addClass("active");("btn btn-success");
+		if(stcd != null && stcd.length > 0 && hh!=null && hh.length>0){
+				if(beginDate != "" && beginDate.length > 0){
+					if(endDate != "" && endDate.length > 0){
+						if(interval != "" ){
+							var tempUrl = "";
+							if (num == 1){
+								$("#step_one").addClass("btn-success")
+									$("#step_two").removeClass("btn-success")
+										$("#step_three").removeClass("btn-success")
+											$("#step_four").removeClass("btn-success")
+												$("#step_five").removeClass("btn-success")
+													$("#step_six").removeClass("btn-success")
+														$("#step_seven").removeClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList.jsp";
+// 								var json={
+// 										'pch':hh,
+// 										'stcd':stcd,
+// 										'stnm':stnm
+// 										};
+// 								init(json,stnm) //初始化表格数据
+							}else if (num == 2){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").addClass("btn-success")
+									$("#step_three").removeClass("btn-success")
+										$("#step_four").removeClass("btn-success")
+											$("#step_five").removeClass("btn-success")
+												$("#step_six").removeClass("btn-success")
+													$("#step_seven").removeClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList2.jsp";
+							}else if (num == 3){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").removeClass("btn-success")
+									$("#step_three").addClass("btn-success")
+										$("#step_four").removeClass("btn-success")
+											$("#step_five").removeClass("btn-success")
+												$("#step_six").removeClass("btn-success")
+													$("#step_seven").removeClass("btn-success")
+								if(lymj==null){
+									layer.msg("请先在第二步保存流域面积");
+									return false;
+								}
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList3.jsp";
+							}else if (num == 4){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").removeClass("btn-success")
+									$("#step_three").removeClass("btn-success")
+										$("#step_four").addClass("btn-success")
+											$("#step_five").removeClass("btn-success")
+												$("#step_six").removeClass("btn-success")
+													$("#step_seven").removeClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList4.jsp";
+							}else if (num == 5){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").removeClass("btn-success")
+									$("#step_three").removeClass("btn-success")
+										$("#step_four").removeClass("btn-success")
+											$("#step_five").addClass("btn-success")
+												$("#step_six").removeClass("btn-success")
+													$("#step_seven").removeClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList5.jsp";
+							}else if (num == 6){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").removeClass("btn-success")
+									$("#step_three").removeClass("btn-success")
+										$("#step_four").removeClass("btn-success")
+											$("#step_five").removeClass("btn-success")
+												$("#step_six").addClass("btn-success")
+													$("#step_seven").removeClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList6.jsp";
+							}else if (num == 7){
+								$("#step_one").removeClass("btn-success")
+								$("#step_two").removeClass("btn-success")
+									$("#step_three").removeClass("btn-success")
+										$("#step_four").removeClass("btn-success")
+											$("#step_five").removeClass("btn-success")
+												$("#step_six").removeClass("btn-success")
+													$("#step_seven").addClass("btn-success")
+								tempUrl = basePath+"business/consumer/analysisjs/chanliujs/mainList7.jsp";
+							}
+							$("#body-step1-content-bottom").load(tempUrl);
+						}else{
+							layer.msg("时间间隔不能为空");
+						}
+					}else{
+						layer.msg("结束时间不能为空");
+					}
+				}else{
+					layer.msg("开始时间不能为空");
+				}
+			
+		}else{
+			layer.msg("测站代码或洪号不能为空");
+		}
+	}
+	
+	function init(json,stnm){
+		var url= basePath + "chanliu/chanliu!getHistory.action"               
+		common_ajax(json, url, function(response) {
+			lymj=response.rows[0].LYMJ;
+			$("#cols").val(ylz);
+			var total=response.rows.length-1;
+			$("#start").val(response.rows[0].DATE); //开始时间
+			$("#end").val(response.rows[total].DATE);//结束时间
+			$("#stnm1").val(stnm)
+			$("#jiange").val(interval);
+					getHh();//获取洪号信息
+					initTable();
+		})
+	}
+	
+function initTable(){
+var value=hh;
+var json={
+		'pch':value,
+		'stcd':stcd
+		};
+var url= basePath + "chanliu/chanliu!getHistory.action"               
+common_ajax(json, url, function(response) {
+	$("#table1_tbdody").empty();
+	$(".add").remove();
+	$(".getStnm").val("")
+	$("#quanzhong").val("")
+	if(response.rows.length>0){
+		stn=response.rows[0].STNM; //测站名称
+		var num=stn.split(","); //测站名分割
+		var qz=response.rows[0].QZ.split(","); //权重分割
+		hh=response.rows[0].PCH;
+		lymj=response.rows[0].LYMJ;
+	
+		ylz=response.ylz;
+			for(var j=0;j<num.length;j++){//这个循环处理的是thead内容
+				if(num.length==1){//1个测站直接赋值
+					$(".getStnm").val(stnm)
+					$("#quanzhong").val(qz)
+				}else{
+					if(j==0){//当第一个值，不创建新的td直接赋值
+						$(".getStnm").val(num[j])//测站第j=0个
+						$("#quanzhong").val(qz[j])//权重第j=0个
+					}else{//否则创建td并赋值
+						var td = "<td colspan='2' class='add' align='center'><input  style='width:100%' type='text' value='"+num[j].replace(/^\s+|\s+$/g,"")+"'  class='getStnm'name='czmc'  placeholder='请输入测站名'>" +
+						"</td>";
+					var td2 = "<td  class='add'  style='width:100px'>权重</td><td  class='add'  style='width:100px'><input type='text'  style='width:100px' name='quanzhong'  value='"+qz[j].replace(/^\s+|\s+$/g,"")+"'></td>";
+				$(".addTd").after(td);
+				$(".addTd2").after(td2);
+					}
+				}
+			}
+		$("#cols").val(ylz);//雨量站个数赋值
+		var total=response.rows.length-1;
+		$("#start").val(response.rows[0].DATE); //开始时间
+		$("#end").val(response.rows[total].DATE);//结束时间 
+		 beginDate =response.rows[0].DATE; //开始时间赋值
+			endDate=response.rows[total].DATE;//结束时间赋值
+			interval=response.rows[0].SJJG;//时间间隔赋值
+			$("#jiange").val(interval);
+			stcd=response.rows[0].STCD;
+		for (var i = 0; i < response.rows.length; i++) {//循环遍历输出tbody内容
+					var jyl=response.rows[i].JYL.split(",");
+					var tr="<tr align='center' id='removeTr"+i+"'  >"+
+					"<td style='text-align: center;'>"+(i+1)+"</td>"+
+					"<td><input type='text' name='time' value='"+response.rows[i].DATE+" 'style='width:100%'></td>";
+					for( var j=0;j<num.length;j++){//拼接字符串
+						tr =tr+"<td colspan='2' id='td4' class='addTd3' align='center'><input type='text' name='yu' value='"+jyl[j].replace(/^\s+|\s+$/g,"")+"' align='center' style='width:100%' value='0'></td>";
+					}
+					tr=tr+"<td  align='center' class='addTd4' ><input type='text' name='result' value='"+response.rows[i].YML+"'align='center' style='width:100%'></td></tr>";
+					$("#table1_tbdody").append(tr); //添加行的函数
+			jylarr.push(response.rows[i].JYL);
+			datearr.push(response.rows[i].DATE)
+			ymlarr.push(response.rows[i].YML)
+		}
+	}
+	//$(".add").remove()
+});
+}
+	//获取洪号
+	function getHh() {
+		$("#honghao").val(hh);
+		var json = $("#info_form_cjfa").serialize();
+		var stnm=$("#stnm1").val();
+		if(stnm==''){
+			confirm("产流计算", "请输入测站名称")
+			return false;
+		}
+		var url = basePath + "chanliu/chanliu!getStbprp.action"
+		common_ajax(json, url, function(response) {
+			
+			staffName=	response.mSysStaff.staffName;
+			staffCode=	response.mSysStaff.staffCode;
+			// 如果total是0，则该测站名称不存在
+			if (response.total == 0) {
+				$("#m").show();// 提示
+				$("#zhanming").empty();
+				$("#stcd").val("");
+				$("#show_result").hide(); //计算结果
+			} else {
+				//$("#show_result").empty();
+				var json={'stcd':response.rows[0].STCD};
+				var url= basePath + "chanliu/chanliu!getSelect.action";
+				common_ajax(json, url, function(response) {
+					$("#selectResult").empty();
+					if (response.total == 0) {
+						//$("#selectResult").append("<option > --请选择--</option>")
+						$("#selectResult").empty();
+					} else {
+						$("#selectResult").append("<option value=''> --请选择--</option>")
+						for (var i = 0; i < response.rows.length; i++) {
+							if(response.rows[i].PCH==hh){
+								$("#selectResult").append("<option value='"+response.rows[i].PCH+"'  selected> "+response.rows[i].PCH+"</option>")
+							}else{
+								$("#selectResult").append("<option value='"+response.rows[i].PCH+"'  > "+response.rows[i].PCH+"</option>")
+							}
+							
+						}
+					}
+				});
+				$("#show_result").show();
+				for (var i = 0; i < response.rows.length; i++) {
+					// alert(response.rows[i].STNM);
+					$("#zhanming").html(response.rows[i].STNM);
+					$("#stcd").val(response.rows[i].STCD);// 测站编码赋值
+				}
+				$("#zhanming").show();
+				$("#m").hide();// 不提示
+			}
+		});
+	}
+	
+	var i = 0;
+	$("#hide_show").click(function(){
+	if(i == 0){
+	$("#body-step1-content-bottom").hide();
+	$("#body-step1-content").css("height","32px");
+	$("#body-step1-content").css("min-height","32px");
+	i = 1;
+	}else{
+	$("#body-step1-content-bottom").show();
+	$("#body-step1-content").css("height","50%");
+	$("#body-step1-content").css("min-height","500px");
+	i = 0;
+	}
+	});
+</script>

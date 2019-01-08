@@ -1,0 +1,38 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.analysisCalculation.bean.ResultSixthResult;
+
+@Repository
+@Scope("prototype")
+public class ResultSixthResultDao extends HibernateBaseDao<ResultSixthResult> {
+
+	public List<ResultSixthResult> queryResultSixthResultByStcd(String stcd){
+		StringBuffer hql = new StringBuffer(" from ResultSixthResult where stcd=? order by fc asc ");
+		return this.getListByHQL(hql.toString(), new Object[]{stcd});
+	}
+	
+	public int deleteByStcd(String stcd){
+		StringBuffer sql = new StringBuffer("delete from C_RESULT_SIXTH_RESULT where stcd=?");
+		return this.excuteSql(sql.toString(), new Object[]{stcd});
+	}
+	
+	public ResultSixthResult queryByStcdAndPch(String stcd,String pch){
+		StringBuffer hql = new StringBuffer(" from ResultSixthResult where stcd=? and pch=?");
+		List<ResultSixthResult> relist = this.getListByHQL(hql.toString(), new Object[]{stcd,pch});
+		if(relist!=null && relist.size()>0){
+			return relist.get(0);
+		}
+		return new ResultSixthResult();
+	}
+	
+	public int deleteTableData(String tablename,String stcd,String pchs){
+		StringBuffer sql = new StringBuffer("delete from "+tablename+" where stcd=? and PCH IN ("+pchs+")");
+		return this.excuteSql(sql.toString(), new Object[]{stcd});
+	}
+}

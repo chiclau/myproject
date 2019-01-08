@@ -1,0 +1,194 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.math.BigDecimal;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.business.analysisCalculation.bean.HresultFourth;
+import com.lyht.business.analysisCalculation.bean.HresultFourthe;
+import com.lyht.business.analysisCalculation.bean.HresultFourthq;
+import com.lyht.business.analysisCalculation.dao.HresultFourthDao;
+import com.lyht.business.analysisCalculation.dao.HresultFourthZhcxDao;
+import com.lyht.business.analysisCalculation.dao.HresultFourtheDao;
+import com.lyht.business.analysisCalculation.dao.HresultFourthqDao;
+import com.lyht.business.analysisCalculation.dao.HresultSecondZhcxDao;
+import com.lyht.business.analysisCalculation.dao.HresultThirdZhcxDao;
+import com.lyht.business.analysisCalculation.dao.HresultZhcxDao;
+import com.lyht.business.analysisCalculation.dao.ResultFourthDao;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Service
+@Scope("prototype")
+@Transactional
+public class HresultService {
+
+	@Resource HresultFourthqDao hresultFourthqDao;
+	@Resource HresultFourtheDao hresultFourtheDao;
+	@Resource HresultFourthDao hresultFourthDao;
+	@Resource ResultFourthDao resultFourthDao;
+	@Resource HresultZhcxDao hresultZhcxDao;
+	@Resource HresultSecondZhcxDao hresultSecondZhcxDao;
+	@Resource HresultThirdZhcxDao hresultThirdZhcxDao;
+	@Resource HresultFourthZhcxDao hresultFourthZhcxDao;
+	
+	public List<Map> queryHuiliuStep5Table1(String stcd,String pch){
+		return hresultZhcxDao.queryStep5Table1Data(stcd, pch);
+	}
+	public List<Map> queryHuiliuStep5Table2(String stcd,String pch){
+		return hresultSecondZhcxDao.queryStep5Table2Data(stcd, pch);
+	}
+	public List<Map> queryHuiliuStep5Table3(String stcd,String pch){
+		return hresultThirdZhcxDao.queryStep5Table3Data(stcd, pch);
+	}
+	public List<Map> queryHuiliuStep5Table4(String stcd,String pch){
+		return hresultFourthZhcxDao.queryStep5Table4Data(stcd, pch);
+	}
+	public Hashtable<String,Object> calcHuiliuStep4AndSave(String data){
+		Hashtable<String,Object> table = new Hashtable<String,Object>();
+		try {
+			JSONObject dataJson=JSONObject.fromObject(data);
+			double k=dataJson.getDouble("k");
+			double n=dataJson.getDouble("n");
+			double m=dataJson.getDouble("m");
+			double mi=dataJson.getDouble("mi");
+			double qpj=dataJson.getDouble("qpj");
+			double qi=dataJson.getDouble("qi");
+			double a=dataJson.getDouble("a");
+			double am=dataJson.getDouble("am");
+			double kj=dataJson.getDouble("kj");
+			double m1=dataJson.getDouble("m1");
+			double mj=dataJson.getDouble("mj");
+			
+			String stcd=dataJson.getString("stcd");
+			String pch=dataJson.getString("pch");
+			JSONArray table1Data=dataJson.getJSONArray("table1Data");
+			JSONArray table2Data=dataJson.getJSONArray("table2Data");
+			this.hresultFourtheDao.deleteHresultFortheByStcdAndPch(stcd, pch);
+			this.hresultFourthqDao.deleteHresultFourthqByStcdAndPch(stcd, pch);
+			this.hresultFourthDao.deleteHresultFourthqByStcdAndPch(stcd, pch);
+			if(table1Data!=null && table1Data.size()>0){
+				for(int i=0;i<table1Data.size();i++){
+					HresultFourthe ebean=new HresultFourthe();
+					JSONObject td1=table1Data.getJSONObject(i);
+					String dt=td1.getString("DT");
+					dt=dt.replace("-", "");
+					dt=dt.replace(" ", "");
+					dt=dt.replace(":", "");
+					String nm=stcd+pch+dt;
+					ebean.setNm(nm);
+					ebean.setStcd(stcd);
+					ebean.setPch(pch);
+					ebean.setTm(td1.getString("DT"));
+					double ii=td1.getDouble("II");
+					ebean.setIi(ii);
+					double tmi=mi;
+					ebean.setMi(tmi);
+					td1.put("MI", tmi);
+					double mi2=tmi*tmi;
+					mi2=new BigDecimal(mi2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td1.put("MI2", mi2);
+					ebean.setMi2(mi2);
+					double iimi=ii*tmi;
+					iimi=new BigDecimal(iimi).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td1.put("IIMI", iimi);
+					ebean.setIimi(iimi);
+					double iimi2=ii*tmi*tmi;
+					iimi2=new BigDecimal(iimi2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td1.put("IIMI2", iimi2);
+					ebean.setIimi2(iimi2);
+					this.hresultFourtheDao.save(ebean);
+				}
+			}
+			if(table2Data!=null && table2Data.size()>0){
+				for(int i=0;i<table2Data.size();i++){
+					HresultFourthq qbean=new HresultFourthq();
+					JSONObject td2=table2Data.getJSONObject(i);
+					String dt=td2.getString("DT");
+					dt=dt.replace("-", "");
+					dt=dt.replace(" ", "");
+					dt=dt.replace(":", "");
+					String nm=stcd+pch+dt;
+					qbean.setNm(nm);
+					qbean.setStcd(stcd);
+					qbean.setPch(pch);
+					qbean.setTm(td2.getString("DT"));
+					double qs=td2.getDouble("QS");
+					qbean.setQs(qs);
+					double qj=td2.getDouble("QJ");
+					qbean.setQj(qj);
+					double qsqj=qs-qj;
+					qsqj=new BigDecimal(qsqj).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("QSQJ", qsqj);
+					qbean.setQsqj(qsqj);
+					double tqpj=qpj;
+					tqpj=new BigDecimal(tqpj).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("QPJ", tqpj);
+					qbean.setQpj(tqpj);
+					double tmi=mi;
+					tmi=new BigDecimal(tmi).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("MI", tmi);
+					qbean.setMi(tmi);
+					double mi2=tmi*tmi;
+					mi2=new BigDecimal(mi2).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("MI2", mi2);
+					qbean.setMi2(mi2);
+					double miqpj=tmi*qpj;
+					miqpj=new BigDecimal(miqpj).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("MIQPJ", miqpj);
+					qbean.setMiqpj(miqpj);
+					double mi2qi=tmi*tmi*qi;
+					mi2qi=new BigDecimal(mi2qi).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();//保留2位小数
+					td2.put("MI2QI", mi2qi);
+					qbean.setMi2qi(mi2qi);
+					this.hresultFourthqDao.save(qbean);
+				}
+			}
+			HresultFourth rf=new HresultFourth();
+			rf.setNm(stcd+pch);
+			rf.setK(k);
+			rf.setA(a);
+			rf.setAm(am);
+			rf.setKj(kj);
+			rf.setM1(m1);
+			rf.setMj(mj);
+			rf.setN(n);
+			rf.setStcd(stcd);
+			rf.setPch(pch);
+			this.hresultFourthDao.save(rf);
+			table.put("reflag", "1");
+			table.put("elist", table1Data);
+			table.put("qlist", table2Data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "计算保存出错!");
+		}
+		return table;
+	}
+	public Hashtable queryHuiliuStep4InitData(String stcd,String pch){
+		Hashtable table = new Hashtable();
+		List<Map> fourthEList = hresultFourtheDao.queryHresultFortheByStcdAndPch(stcd, pch);
+		if(fourthEList==null || fourthEList.size()<1){
+			fourthEList=hresultFourtheDao.queryCresultStep6Result(stcd, pch);
+		}
+		table.put("elist", fourthEList);
+		List<Map> fourthQList = hresultFourthqDao.queryHresultForthqByStcdAndPch(stcd, pch);
+		if(fourthQList==null || fourthQList.size()<1){
+			fourthQList=hresultFourthqDao.queryCresultStep3Result(stcd, pch);
+		}
+		table.put("qlist", fourthQList);
+		List<Map> subData=this.resultFourthDao.queryHuiliuStep3SubmitData(stcd, pch);
+		table.put("rtlist", subData);
+		return table;
+	}
+}

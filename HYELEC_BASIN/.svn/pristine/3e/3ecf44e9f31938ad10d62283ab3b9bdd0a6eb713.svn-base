@@ -1,0 +1,76 @@
+package com.lyht.business.analysisCalculation.bean;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.sun.org.glassfish.gmbal.Description;
+
+/**
+ * 时间间隔表
+ * @author 刘魁
+ *@时间 2018/7/11
+ */
+@Entity
+@Table(name = "C_RESULT_JG")
+public class ResultJg implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
+
+	@Description(key="primary",value="STCD")
+	private String STCD;
+	
+	@Description(key="primary",value="时间间隔")
+	private Integer SJJG;
+	
+	@Description(key="primary",value="PCH")
+	private String pch;
+	
+	@Description(key="primary",value="ID")
+	private String id;
+	@Column(name = "STCD",length=50 )
+	public String getSTCD() {
+		return STCD;
+	}
+
+	public void setSTCD(String sTCD) {
+		STCD = sTCD;
+	}
+	@Column(name = "SJJG",length=50 )
+	public Integer getSJJG() {
+		return SJJG;
+	}
+
+	public void setSJJG(Integer sJJG) {
+		SJJG = sJJG;
+	}
+	@Column(name = "PCH",length=50 )
+	public String getPch() {
+		return pch;
+	}
+
+	public void setPch(String pch) {
+		this.pch = pch;
+	}
+	@Id
+	@Column(name = "ID",length=50 )
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public  ResultJg() {
+		this.id="";
+		this.pch="";
+		this.SJJG=0;
+		this.STCD="";
+		
+	}
+
+}

@@ -1,0 +1,73 @@
+.combox-box{
+	border:1px solid #d8d8d8;
+	position: absolute;
+	background-color:#ffffff;
+	z-index:10;
+	display:none;
+}
+.combox-item-list{
+	overflow:auto;
+}
+.combox-item.active{
+	background-color:#0000AA;
+	color:#ffffff;
+}
+.combox-page-left,.combox-page-right{
+	width:54px;
+	height:100%;
+}
+.combox-page-left{
+	float:left;
+}
+.combox-page-center{
+	width:calc(100% - 108px);
+}
+.combox-page-right{
+	float:right;
+}
+.combox-page-left-left,.combox-page-left-right,.combox-page-right-left,.combox-page-right-right{
+	width:20px;
+	height:100%;
+}
+.combox-page-left-left,.combox-page-right-left{
+	float:left;
+}
+.combox-page-left-right,.combox-page-right-right{
+	float:right;
+}
+.combox-page-left-left{
+	margin-left:5px;
+	background: url(./images/leftend.png); 
+}
+.combox-page-left-right{
+	margin-left:5px;
+	background: url(./images/left.png); 
+}
+.combox-page-right-left{
+	margin-right:5px;
+	background: url(./images/right.png); 
+}
+.combox-page-right-right{
+	margin-right:5px;
+	background: url(./images/rightend.png); 
+}
+.combox-page-left-left.disabled{
+	margin-left:5px;
+	background: url(./images/leftenddisabled.png); 
+}
+.combox-page-left-right.disabled{
+	margin-left:5px;
+	background: url(./images/leftdisabled.png); 
+}
+.combox-page-right-left.disabled{
+	margin-right:5px;
+	background: url(./images/rightdisabled.png); 
+}
+.combox-page-right-right.disabled{
+	margin-right:5px;
+	background: url(./images/rightenddisabled.png); 
+}
+.combox-page{
+	height:20px;
+	border-top:1px solid #d8d8d8;
+}

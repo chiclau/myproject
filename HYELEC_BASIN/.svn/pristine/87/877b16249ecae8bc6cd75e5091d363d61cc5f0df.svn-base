@@ -1,0 +1,36 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.analysisCalculation.bean.ResultSecondQl;
+import com.lyht.util.CommonUtil;
+
+@Repository
+@Scope("prototype")
+public class ResultSecondQlDao extends HibernateBaseDao<ResultSecondQl> {
+
+	public List<Map> queryStep2InitData(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT CONVERT(CHAR(16),  TM, 120) as DATE,YML AS JYL,Q AS LL,STCD,PCH FROM C_RESULT_SECOND_QL WHERE STCD='"+stcd+"' and PCH='"+pch+"' order by TM ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryStep2InitData(String stcd,String pch,String start,String end,int interval){
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT A.TM AS DATE,ISNULL(C.YML,0) AS JYL,ISNULL(R.Q, 0 ) LL"
+				+ " FROM (SELECT CONVERT(VARCHAR(16), "
+				+ " DateAdd(mi,number*"+interval+",'"+start+"'),120) AS TM,'"+stcd+"' as STCD FROM master..spt_values "
+						+ " WHERE type = 'p' AND number <= DateDiff(mi,'"+start+"','"+end+"')/"+interval+") A "
+				+ "LEFT JOIN ST_RIVER_R R ON A.STCD=R.STCD AND A.TM=R.TM "
+				+ " LEFT JOIN (select * from C_RESULT where pch='"+pch+"') C ON A.TM=C.YML_TIME AND A.STCD=C.STCD where 1=1 ");
+		sql.append("  ORDER BY A.TM ASC  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public int deleteStep2Data(String stcd,String pch){
+		StringBuffer sql = new StringBuffer(" delete from C_RESULT_SECOND_QL where STCD=? AND PCH=? ");
+		return this.excuteSql(sql.toString(), new Object[]{stcd,pch});
+	}
+}

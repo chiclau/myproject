@@ -1,0 +1,449 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.Result;
+import com.lyht.business.analysisCalculation.formbean.ResultFormBean;
+import com.lyht.business.consumer.hydrologicalData.formbean.TsqxFormBean;
+import com.lyht.util.CommonUtil;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年6月4日 15:24:11
+ *说明:  产流计算结果Dao
+*/
+@Repository
+@Scope("prototype")
+public class ResultDao extends HibernateBaseDao<Result> {
+	
+	public List<Map> queryStep1Jyl(String stcd,String start,String end){
+		StringBuffer sql = new StringBuffer("SELECT R.*,CONVERT(CHAR(16),  R.TM, 120) AS DT FROM ST_PPTN_R R WHERE R.STCD='"+stcd+"'"
+				+ " and CONVERT(CHAR(16),  R.TM, 120)>='"+start+"' and CONVERT(CHAR(16),  R.TM, 120)<='"+end+"'");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+		/**
+		 * 保存计算结果
+		 */
+	public void saveResult(Result result) {
+		StringBuilder sql=new StringBuilder();
+		Date  date=new Date();
+		 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+		 String dateString = formatter.format(date);
+		sql.append("INSERT INTO C_RESULT (YML,CREATE_TIME,YML_TIME,CREATE_STAFF,PCH,STCD,STNM,QZ,JYL,ID) ");
+		sql.append("VALUES('"+result.getYml()+"','"+dateString+"','"+result.getYmlTime()+"',");
+		sql.append("'"+result.getCreateStaff()+"','"+result.getPch()+"','"+result.getStcd()+"','"+result.getStnm()+"','"+result.getQz()+"', '"+result.getJyl()+"',");
+		sql.append("'"+result.getId()+"')");
+		this.exectueSQL(sql.toString());
+	}
+	
+	/**
+	 * 根据id删除
+	 */
+	public void delResult(Result result) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM C_RESULT WHERE PCH ='"+result.getPch()+"' AND STCD='"+result.getStcd()+"' ");
+			
+		this.exectueSQL(sql.toString());
+	}
+	
+	/**
+	 * 查询历史记录
+	 */
+	public PageResults getSelect(ResultFormBean resultFormBean){
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT PCH FROM C_RESULT WHERE CREATE_STAFF ='"+resultFormBean.getResultBean().getCreateStaff()+"' ");
+		sql.append("AND STCD='"+resultFormBean.getResultBean().getStcd()+"'	GROUP  BY  PCH");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+	
+	/**
+	 * 根据批次号查询
+	 */
+	public PageResults getHistory(ResultFormBean resultFormBean){
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT DISTINCT J.SJJG,  S.LYMJ ,CONVERT(CHAR(16),  C.YML_TIME, 120)DATE, C.* FROM C_RESULT  C   ");
+		sql.append("LEFT JOIN C_RESULT_JG  J ON C.STCD=J.STCD   ");
+		sql.append("LEFT JOIN C_RESULT_SECOND S ON C.STCD=S.STCD  ");
+		sql.append("WHERE C.PCH='"+resultFormBean.getResultBean().getPch()+"' AND C.STCD='"+resultFormBean.getResultBean().getStcd()+"'  ORDER BY C.YML_TIME ASC");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+	public List<Map> queryStep1History(String stcd,String pch){
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT C.STCD,C.PCH,G.SJJG AS INTERVAL,C.STNM,C.QZ,C.JYL,CONVERT(CHAR(16),  C.YML_TIME, 120) AS DATE,0 as EM,null as PA1,null as PA,C.YML FROM C_RESULT C "
+				+ " left join C_RESULT_JG G ON C.STCD=G.STCD AND C.PCH=G.PCH WHERE C.STCD='"+stcd+"' and C.PCH='"+pch+"' order by C.YML_TIME ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryStep5History(String stcd,String pch){
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT C.STCD,C.PCH,C.INTERVAL,C.STNM,C.QZ,C.JYL,CONVERT(CHAR(16),  C.DATE, 120) AS DATE,C.EM,C.PA,P.PA AS PA1,C.YML FROM C_RESULT_FIFTH C"
+				+ " left join C_FIFTH_PA P ON C.STCD=P.STCD AND C.PCH=P.PCH WHERE C.STCD='"+stcd+"' and C.PCH='"+pch+"' order by C.DATE ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 步骤2查询
+	 * @param resultFormBean
+	 * @return
+	 */
+	public PageResults step2(ResultFormBean resultFormBean,String start,String end) {
+		StringBuffer  sql=new StringBuffer ();
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		sql.append("SELECT 	CONVERT(CHAR(16),  R.TM, 120)DATE, C.YML JYL,ISNULL(R.Q, 0 ) LL FROM ST_RIVER_R R "
+				+ " LEFT JOIN (select * from C_RESULT where pch='"+pch+"') C ON C.YML_TIME=R.TM AND C.STCD=R.STCD where 1=1 ");
+		if(CommonUtil.trim(start).length()>0 && CommonUtil.trim(end).length()>0) {
+			sql.append(" and R.TM BETWEEN '"+start+"' AND '"+end+"' ");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append(" AND R.STCD='"+stcd+"'");
+		}
+		sql.append("  ORDER BY R.TM ASC  ");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+
+	public List<Map> getSecondQl(ResultFormBean resultFormBean) {
+		StringBuffer  sql=new StringBuffer ();
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		sql.append("SELECT C.* ,C.Q LL,C.YML JYL,C.TM DATE FROM C_RESULT_SECOND_QL  C WHERE 1=1 ");
+		if(stcd!=null||!stcd.equals("")) {
+			sql.append(" AND C.STCD='"+stcd+"'");
+		}
+		if(pch!=null||!pch.equals("")) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	
+
+	public List<Map> queryChanliuStep2Liuliang(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT CONVERT(CHAR(16),  TM, 120)DATE, ISNULL(Q, 0 ) LL FROM C_RESULT_SECOND_QL WHERE STCD='"+stcd+"' and PCH='"+pch+"' order by TM ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	public List<Map> getLiuLiang(String stcd,String pch,String start,String end ) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT 	CONVERT(CHAR(16),  C.YML_TIME, 120)DATE, ISNULL(R.Q, 0 ) LL FROM C_RESULT C LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM  AND C.STCD=R.STCD  where 1=1 ");
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	
+	public List<Map> getCResultThird(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("select A.*,CONVERT(CHAR(16),  A.TM, 120) AS DT from C_RESULT_THRID A where A.stcd='"+stcd+"' and pch='"+pch+"' order by A.TM ASC");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 根据时间查询流量
+	 */
+	public PageResults getLiuLiang(ResultFormBean resultFormBean,String start,String end ) {
+		StringBuffer  sql=new StringBuffer ();
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		sql.append("SELECT 	CONVERT(CHAR(16),  C.YML_TIME, 120)DATE, ISNULL(R.Q, 0 ) LL FROM C_RESULT C LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM  AND C.STCD=R.STCD  where 1=1 ");
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+	
+	/**
+	 * 根据时间查询降雨量
+	 */
+	public PageResults getyml(ResultFormBean resultFormBean,String start,String end ) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT 	CONVERT(CHAR(16),  C.YML_TIME, 120)DATE, ISNULL(C.YML, 0 )  JYL  FROM C_RESULT C LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM  AND C.STCD=R.STCD where 1=1 ");
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+	public List<Map> queryChanliuStep2Jyl(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT CONVERT(CHAR(16),  TM, 120)DATE, ISNULL(YML, 0 )  JYL FROM C_RESULT_SECOND_QL WHERE STCD='"+stcd+"' and PCH='"+pch+"' order by TM ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 根据时间查询降雨量
+	 */
+	@SuppressWarnings("rawtypes")
+	public List<Map> getyml(String stcd,String pch,String start,String end ) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT 	CONVERT(CHAR(16),  C.YML_TIME, 120)DATE, ISNULL(C.YML, 0 )  JYL  FROM C_RESULT C LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM  AND C.STCD=R.STCD where 1=1 ");
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	/**
+	 * 修改步骤2table中的降雨量
+	 * @param resultFormBean
+	 */
+	public void updateTableData(ResultFormBean resultFormBean) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("UPDATE C_RESULT SET YML='"+resultFormBean.getResultBean().getYml()+"' WHERE YML_TIME='"+resultFormBean.getResultBean().getYmlTime()+"'  ");
+		this.exectueSQL(sql.toString());
+	}
+	public List<Map> queryChanliuStep2MaxLl(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT MAX(Q) AS maxLL,MIN(Q) AS minLL FROM C_RESULT_SECOND_QL WHERE STCD='"+stcd+"' and PCH='"+pch+"'");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> maxLL(String stcd,String pch,String start,String end){
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT 	MAX(R.Q) as maxLL,MIN(R.Q) AS minLL FROM C_RESULT C "
+				+ "LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM AND C.STCD=R.STCD where 1=1 ");
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 流量最大值
+	 * @return
+	 */
+	public List maxLL(ResultFormBean resultFormBean,String start,String end) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT 	MAX(R.Q) as maxLL,MIN(R.Q) AS minLL FROM C_RESULT C "
+				+ "LEFT JOIN ST_RIVER_R R  ON C.YML_TIME=R.TM AND C.STCD=R.STCD where 1=1 ");
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	/**
+	 * 降雨量最大值
+	 * @return
+	 */
+	public List maxYml(ResultFormBean resultFormBean,String start,String end) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT MAX(YML) JYL FROM C_RESULT C where 1=1 ");
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryChanliuStep2MaxJyl(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT MAX(YML) AS JYL FROM C_RESULT_SECOND_QL WHERE STCD='"+stcd+"' and PCH='"+pch+"'");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 降雨量最大值
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public List<Map> maxYml(String stcd,String pch,String start,String end) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT MAX(YML) JYL FROM C_RESULT C where 1=1 ");
+		if(CommonUtil.trim(start).length()>0){
+			sql.append(" and C.YML_TIME >= '"+start+"'");
+		}
+		if(CommonUtil.trim(end).length()>0) {
+			sql.append(" and C.YML_TIME <= '"+end+"'");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append("  AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	/**
+	 * 退水曲线洪峰个数统计，用来生成json用
+	 */
+	public List numHongFeng(ResultFormBean resultFormBean) {
+		String stcd=resultFormBean.getResultBean().getStcd();
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT B.QM,MAX(B.Q) AS MAXQ,MIN(B.Q) AS MINQ FROM  ST_TSQX_B B WHERE B.STCD='"+stcd+"'   GROUP BY B.QM");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 退水曲线洪峰个数统计，用来生成json用
+	 */
+	@SuppressWarnings("rawtypes")
+	public List<Map> numHongFeng(String stcd) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT B.QM,MAX(B.Q) AS MAXQ,MIN(B.Q) AS MINQ FROM  ST_TSQX_B B WHERE B.STCD='"+stcd+"'   GROUP BY B.QM");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	/**
+	 * 退水曲线x,y轴对应的时段和流浪查询
+	 */
+	public PageResults getTsqx(ResultFormBean resultFormBean,TsqxFormBean mTsqxFormBean) {
+		String stcd=resultFormBean.getResultBean().getStcd();
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT B.T,B.Q,B.QM FROM  ST_TSQX_B B WHERE B.STCD='"+stcd+"'  GROUP BY B.QM,B.T,B.Q");
+		return this.findPageByFetchedSql(sql.toString(), null
+				,mTsqxFormBean.getPageBean().getOffset()
+				,mTsqxFormBean.getPageBean().getLimit()
+				,null);
+	}
+	/**
+	 * 退水曲线x,y轴对应的时段和流浪查询
+	 */
+	public List<Map> getTsqx(String stcd) {
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT B.T,B.Q,B.QM FROM  ST_TSQX_B B WHERE B.STCD='"+stcd+"'  GROUP BY B.QM,B.T,B.Q");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public int deleteStep6Result(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("delete from C_RESULT_SIXTH WHERE STCD=? AND PCH=? ");
+		return this.excuteSql(sql.toString(), new Object[]{stcd,pch});
+	}
+	public List<Map> queryStep6ResultData(String stcd,String pch){
+		StringBuffer sql = new StringBuffer("SELECT C.*,CONVERT(CHAR(16),  C.TM, 120) AS DATE FROM C_RESULT_SIXTH C WHERE C.STCD='"+stcd+"' and C.PCH='"+pch+"' order by C.TM ASC");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryStep7ResultData(String stcd){
+		StringBuffer sql = new StringBuffer("select A.STCD,A.PCH,CONVERT(CHAR(16),  MIN(A.TM), 120) AS BTM,"
+				+ " CONVERT(CHAR(16),  MAX(A.TM), 120) AS ETM,MAX(B.Q) AS Q,SUM(A.P) AS P,MAX(D.PA) AS PA,"
+				+ " SUM(A.E) AS E,MAX(D.RS) AS RS, SUM(SDRC) AS ERC,max(D.FC) as FC,MAX(D.TC) AS TC,MAX(D.RC) AS RC "
+				+ " from C_RESULT_SIXTH A "
+				+ " LEFT JOIN ST_RIVER_R B ON A.STCD=B.STCD "
+				+ " AND CONVERT(CHAR(16),  A.TM, 120)=CONVERT(CHAR(16),  B.TM, 120) "
+				+ " LEFT JOIN C_RESULT_SECOND D ON A.STCD=D.STCD AND A.PCH=D.PCH"
+				+ " WHERE A.STCD='"+stcd+"' GROUP BY A.STCD,A.PCH"
+						+ " ORDER BY A.PCH ASC ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public PageResults queryStep7startEnd(ResultFormBean resultFormBean){
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		StringBuffer sql = new StringBuffer("SELECT T. *,CONVERT(CHAR(16),  T.TM, 120) DATE FROM C_RESULT_THRID  T WHERE ");
+		sql.append("T.STCD='"+stcd+"'  AND T.PCH='"+pch+"'  ORDER BY T.TM ASC");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+	
+	public List<Map> queryStep6InitData(String stcd,String pch,String start,String end){
+		StringBuffer  sql=new StringBuffer ();
+		sql.append("SELECT CONVERT(CHAR(16),  C.YML_TIME, 120)DATE ,C.YML as P,ISNULL(F.EM,0) as E,"
+				+ " Round((ISNULL(C.YML,0)- ISNULL(F.EM,0)),2) PE,ISNULL(F.PA,0) AS PA FROM C_RESULT C"
+				+ " LEFT JOIN C_RESULT_FIFTH F ON C.STCD=F.STCD AND C.PCH=F.PCH"
+				+ " AND CONVERT(CHAR(16),  C.YML_TIME, 120)=CONVERT(CHAR(16),  F.DATE, 120)"
+				+ " WHERE 1=1 ");
+		if(CommonUtil.trim(start).length()>0 && CommonUtil.trim(end).length()>0){
+			sql.append(" AND C.YML_TIME BETWEEN '"+start+"' AND '"+end+"' ");
+		}
+		if(CommonUtil.trim(stcd).length()>0) {
+			sql.append(" AND C.STCD='"+stcd+"'");
+		}
+		if(CommonUtil.trim(pch).length()>0) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> queryStep6RrffEcharts(String stcd){
+		StringBuffer sql = new StringBuffer("select STCD,PA,P,R from ST_JYJLXGT_B where stcd='"+stcd+"' order by pa asc,r asc ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 步骤6查询方法
+	 */
+	public  PageResults getStep6(ResultFormBean resultFormBean,String start,String end) {
+		StringBuffer  sql=new StringBuffer ();
+		String stcd=resultFormBean.getResultBean().getStcd();
+		String pch=resultFormBean.getResultBean().getPch();
+		sql.append("SELECT 	CONVERT(CHAR(16),  C.YML_TIME, 120)DATE ,ISNULL(C.YML, 0 ) P, ISNULL(F.EM, 0 ) E, (ISNULL(C.YML, 0 )- ISNULL(F.EM, 0 ) ) PE  ");
+		sql.append("FROM C_RESULT C  LEFT JOIN C_RESULT_FIFTH F ON C.STCD=F.STCD  AND C.YML=F.YML " );
+		sql.append("AND C.YML_TIME=F.DATE ");
+		if(start!=null||end!=null) {
+			sql.append(" WHERE C.YML_TIME BETWEEN '"+start+"' AND '"+end+"' ");
+		}
+		if(stcd!=null||!stcd.equals("")) {
+			sql.append(" AND C.STCD='"+stcd+"'");
+		}
+		if(pch!=null||!pch.equals("")) {
+			sql.append(" AND C.PCH='"+pch+"'");
+		}
+		sql.append("  ORDER BY C.YML_TIME ASC  ");
+		return this.findPageByFetchedSql(sql.toString(), null, resultFormBean.getPageBean().getOffset(),resultFormBean.getPageBean().getLimit(), null);
+	}
+		
+}

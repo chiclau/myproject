@@ -1,0 +1,182 @@
+package com.lyht.business.analysisCalculation.bean;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.sun.org.glassfish.gmbal.Description;
+
+/**
+ * 第二部保存的表
+ * @author 刘魁
+ * @时间 2018/7/11
+ */
+@Entity
+@Table(name = "C_RESULT_THRID")
+public class ResultSecond implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	@Description(key="primary",value="STCD")
+	private String STCD;
+	
+	@Description(key="primary",value="流域面积")
+	private Integer LLMJ;
+	
+	@Description(key="primary",value="PCH")
+	private String pch;
+	
+	@Description(key="primary",value="ID")
+	private String id;
+	@Description(key="primary",value="PA")
+	private double pa;
+	
+	@Column(name="RC")
+	public double getRc() {
+		return rc;
+	}
+
+	public void setRc(double rc) {
+		this.rc = rc;
+	}
+
+	@Description(key="primary",value="RS")
+	private double rs;
+	@Description(key="primary",value="RX")
+	private double rx;
+	private double sqt3;
+	private double sqt4;
+	private double rc;//第六步计算tc时的r和
+	
+	@Column(name="FCJ")
+	public double getFcj() {
+		return fcj;
+	}
+
+	public void setFcj(double fcj) {
+		this.fcj = fcj;
+	}
+
+	@Column(name="FCS")
+	public double getFcs() {
+		return fcs;
+	}
+
+	public void setFcs(double fcs) {
+		this.fcs = fcs;
+	}
+
+	@Column(name="FC")
+	public double getFc() {
+		return fc;
+	}
+
+	public void setFc(double fc) {
+		this.fc = fc;
+	}
+
+	@Column(name="TC")
+	public double getTc() {
+		return tc;
+	}
+
+	public void setTc(double tc) {
+		this.tc = tc;
+	}
+
+	private double fcj;//fc计算
+	
+	private double fcs;//fc试算
+	
+	private double fc;//fc
+	
+	private double tc;
+	
+	@Column(name = "STCD",length=50 )
+	public String getSTCD() {
+		return STCD;
+	}
+
+	public void setSTCD(String sTCD) {
+		STCD = sTCD;
+	}
+	@Column(name = "LYMJ",length=50 )
+	public Integer getLLMJ() {
+		return LLMJ;
+	}
+
+	public void setLLMJ(Integer lLMJ) {
+		LLMJ = lLMJ;
+	}
+	@Column(name = "PCH",length=50 )
+	public String getPch() {
+		return pch;
+	}
+
+	public void setPch(String pch) {
+		this.pch = pch;
+	}
+	@Id
+	@Column(name = "ID",length=50 )
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+	@Column(name = "PA",length=50 )
+	public double getPa() {
+		return pa;
+	}
+
+	public void setPa(double pa) {
+		this.pa = pa;
+	}
+	@Column(name = "RS",length=50 )
+	public double getRs() {
+		return rs;
+	}
+
+	public void setRs(double rs) {
+		this.rs = rs;
+	}
+	@Column(name = "RX",length=50 )
+	public double getRx() {
+		return rx;
+	}
+
+	public void setRx(double rx) {
+		this.rx = rx;
+	}
+	
+	@Column(name="SQT3")
+	public double getSqt3() {
+		return sqt3;
+	}
+
+	public void setSqt3(double sqt3) {
+		this.sqt3 = sqt3;
+	}
+	@Column(name="SQT4")
+	public double getSqt4() {
+		return sqt4;
+	}
+
+	public void setSqt4(double sqt4) {
+		this.sqt4 = sqt4;
+	}
+
+	public ResultSecond() {
+		this.id="";
+		this.LLMJ=0;
+		this.pch="";
+		this.STCD="";
+	}
+	
+	
+	
+}

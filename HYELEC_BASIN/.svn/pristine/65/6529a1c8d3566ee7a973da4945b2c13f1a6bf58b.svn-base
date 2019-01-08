@@ -1,0 +1,953 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.Result;
+import com.lyht.business.analysisCalculation.bean.ResultFifth;
+import com.lyht.business.analysisCalculation.bean.ResultFourth;
+import com.lyht.business.analysisCalculation.bean.ResultJg;
+import com.lyht.business.analysisCalculation.bean.ResultSixthResult;
+import com.lyht.business.analysisCalculation.dao.ResultDao;
+import com.lyht.business.analysisCalculation.dao.ResultFifthDao;
+import com.lyht.business.analysisCalculation.dao.ResultFourthDao;
+import com.lyht.business.analysisCalculation.dao.ResultJgDao;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResultSecondQlDao;
+import com.lyht.business.analysisCalculation.dao.ResultSixthDao;
+import com.lyht.business.analysisCalculation.dao.ResultSixthResultDao;
+import com.lyht.business.analysisCalculation.dao.ResultThridDao;
+import com.lyht.business.analysisCalculation.formbean.ResultFifthFormBean;
+import com.lyht.business.analysisCalculation.formbean.ResultFormBean;
+import com.lyht.business.analysisCalculation.formbean.ResultFourthFormBean;
+import com.lyht.business.analysisCalculation.formbean.ResultThridFormBean;
+import com.lyht.business.consumer.hydrologicalData.bean.River;
+import com.lyht.business.consumer.hydrologicalData.dao.RiverDao;
+import com.lyht.business.consumer.hydrologicalData.formbean.RiverFormBean;
+import com.lyht.business.consumer.hydrologicalData.formbean.TsqxFormBean;
+import com.lyht.util.CommonUtil;
+import com.lyht.util.DateUtil;
+import com.lyht.util.ExcelUtils;
+import com.lyht.util.Line;
+import com.lyht.util.LineDifference;
+import com.lyht.util.Point;
+import com.lyht.util.Randomizer;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+/**
+ *作者： 刘魁
+ *脚本日期:2018年6月4日 15:24:11
+ *说明:  产流计算结果service
+*/
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultService {
+	@Resource ResultDao resuldDao;
+	@Resource RiverDao riverDao;
+	@Resource ResultJgDao rjDao;
+	@Resource ResultThridDao resultThridDao;
+	@Resource ResultFourthDao resultFourthDao;
+	@Resource
+	private ResultSixthDao rxDao;
+	@Resource
+	private ResultFifthDao rfDao;
+	@Resource
+	private ResultSecondDao rsDao;
+	@Resource 
+	private ResultSecondQlDao resultSecondQlDao;
+	@Resource 
+	private ResultSixthResultDao resultSixthResultDao;
+	
+		public List<Map> queryStep1Jyl(String stcd,String start,String end){
+			return this.resuldDao.queryStep1Jyl(stcd, start, end);
+		}
+		/**
+		 * 保存计算结果
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public Result saveResult(Result result,Result result1,String result11,String INTERVAL) {
+			resuldDao.delResult(result);//先删除这一批次号
+			String [] jyl=result.getJyl().split(",");
+			String [] yml=result11.split(",");
+			String [] ymlTime=result.getYmlTime().split(",");
+			String [] stnm=result.getStnm().split(",");
+			String [] qz=result.getQz().split(",");
+			Object [] arr=splitAry(jyl, qz.length); //切割后的降雨量
+			ResultJg t=new ResultJg();  //ResultJg save
+			t.setId(Randomizer.nextNumber("JG", 6)); //ID
+			t.setPch(result.getPch());	 //PCH
+			t.setSTCD(result.getStcd()); 	//STCD
+			t.setSJJG(Integer.parseInt(INTERVAL)); // SJJG 
+			rjDao.saveResultJg(t);
+			try {
+				 ArrayList<String> jyList=new    ArrayList<String>();
+					for(Object obj: arr){//打印输出结果  
+						   String[] aryItem = (String[]) obj;  
+							ArrayList<String> list=new    ArrayList<String>();
+							   for(int i=0;i<aryItem.length;i++) {
+								    list.add(aryItem[i].toString());
+							   }
+							   jyList.add(list.toString());
+						  }  
+					String staffCode=result.getCreateStaff();
+							for(int i=0;i<ymlTime.length;i++) {
+									String id=Randomizer.nextNumber("r", 7);
+									Result result2=new Result();
+									String jString=jyList.get(i).replace("[", "").trim();
+									String  jString2=jString.replace("]", "").trim();
+									result2.setJyl(jString2.trim()); //降雨量
+									result2.setQz(result.getQz());//权重
+									result2.setStnm(result.getStnm());//测站名称
+									result2.setYml(Double.parseDouble(yml[i].trim()));//雨面量
+									result2.setYmlTime(ymlTime[i].trim());//雨面量时间
+									result2.setId(id); //ID
+									result2.setCreateStaff(staffCode); //用户编码
+									result2.setStcd(result.getStcd());
+									result2.setPch(result.getPch());//批次号
+							resuldDao.saveResult(result2);
+						}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return result1;
+		}
+		/**
+		 * 导出到excel
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export(ResultFormBean resultFormBean,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算"+resultFormBean.getResultBean().getPch();
+			String [] tab = {"序号","日期"};
+			String [] val = {"YML_TIME","JYL","YML"};
+			String[] yStrings= {"雨面量"};
+		
+			List <HashMap<String, Object>> result=resuldDao.getHistory(resultFormBean).getResults();
+			ResultFifthFormBean resultFormBean1=new ResultFifthFormBean();
+			ResultFifth rf=new ResultFifth();
+			rf.setPch(resultFormBean.getResultBean().getPch());
+			rf.setStcd(resultFormBean.getResultBean().getStcd());
+			resultFormBean1.setResultFifthFormBean(rf);
+			List <HashMap<String, Object>> result2=rfDao.getFif(resultFormBean1).getResults();
+				 String name=(String) result.get(0).get("STNM");
+				 String qz=(String) result.get(0).get("QZ");//权重
+				 String[] nStrings	 =name.split(",");//测站名称
+				 String[] qzArr=qz.split(",");
+				 
+				   List list = new ArrayList(Arrays.asList(nStrings));
+			        list.addAll(Arrays.asList(yStrings));
+			        Object [] c =  list.toArray();//后半部tab
+			        String file =null;
+			        List <HashMap<String, Object>>list2 = new ArrayList<HashMap<String, Object>>();
+			        if(resultFormBean.getResultBean().getId().equals("5")) {//5s
+			        	for(int i=0;i<result2.size();i++) {
+			        		HashMap<String, Object> map=result2.get(i);
+			        		list2.add(map);
+			        	}
+						String [] val5 = {"DT","JYL","YML","EM","PA"};
+						String[] yStrings5= {"雨面量","Em","Pa"};
+						  list.addAll(Arrays.asList(yStrings5));
+						  title="产流计算第五步"+resultFormBean.getResultBean().getPch();
+						 file = ExcelUtils.exportChanLiuExcel5(list2,c,qzArr, request, replace,tab,title,val5);//第五步导出
+					}else {
+						 file = ExcelUtils.exportChanLiuExcel(result,c,qzArr, request, replace,tab,title,val);//第一步导出
+					}
+			
+			
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export2(ResultFormBean resultFormBean,String s,String end,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算第二步"+resultFormBean.getResultBean().getPch();
+			String [] tab = {"序号","日期","降雨量","流量"};
+			String [] val = {"DATE","JYL","LL"};
+			List list=resuldDao.getSecondQl(resultFormBean);//先查询C_RESULT_SECOND_QL
+			String file=null;
+			if(list.size()>0) {//如果有数据
+				file= ExcelUtils.SellerStat2Excel(list, request, replace,tab,title,val);
+			}else {//没有数据
+				List <HashMap<String, Object>> result=resuldDao.step2(resultFormBean,s,end).getResults();
+				 file = ExcelUtils.SellerStat2Excel(result, request, replace,tab,title,val);
+			}
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export3(ResultThridFormBean resultThrid,String s,String end,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算第三步"+resultThrid.getResultThrid().getPch();
+			String [] tab = {"序号","日期","时差(分钟)","流量(m³/s)","Q*T(m³)"};
+			String [] val = {"DATE","SC","LL","QT"};
+			List <HashMap<String, Object>> result=resultThridDao.getStep3(resultThrid).getResults();
+			String file = ExcelUtils.SellerStat2Excel(result, request, replace,tab,title,val);
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export4(ResultFourth rFourth,String s,String end,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算第四步"+ rFourth.getPch();
+			String [] tab = {"序号","日期","时差(分钟)","流量(地下)","Q*T"};
+			String [] val = {"DATE","SC","LL","QT"};
+			ResultFourthFormBean resultFourth=new ResultFourthFormBean ();
+			resultFourth.setResultFourth(rFourth);
+			List <HashMap<String, Object>> result=resultFourthDao.getStep4Table(resultFourth).getResults();
+			String file = ExcelUtils.SellerStat2Excel(result, request, replace,tab,title,val);
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export6(String stcd,String pch,String start,String end,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算第六步"+pch;
+			String [] tab = {"序号","日期","P","E雨","∑(P-E雨)","Pa+∑(P-E雨)","∑R查","时段R查","R改","R改大→小","∑R改"};
+			String [] val = {"DATE","P","E","EPE","PAPE","ERC","SDRC","R","RGDX","ER"};
+			List<Map> table1Data=resuldDao.queryStep6ResultData(stcd, pch);
+			String file = ExcelUtils.SellerStat2Excel(table1Data, request, replace,tab,title,val);
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void export7(String stcd,String pch,String start,String end,PageResults prs,HttpServletRequest request,HttpServletResponse response) throws IOException{
+			String year = DateUtil.getYear();//年
+			String method = DateUtil.getMonth();//月
+			String day = DateUtil.getDay();//日
+			String replace="";
+			String title="产流计算结果"+pch;
+			String [] tab = {"序号","洪号","开始时间","结束时间","Q","P","Pa","E雨",
+					"Pa+P-E雨","R实","R查","△R","△R/R实","合格否","tc","Rc","Rc/tc","Fc","Fc查","(Fc-Fc查)/Fc" ,"合格否"};
+			String [] val = {"PCH","BTM","ETM","Q","P","PA","E","","RS","ERC","FC","TC","RC"};
+			List<Map> table1Data=resuldDao.queryStep7ResultData(stcd);
+			String file = ExcelUtils.SellerStat2Excel7(table1Data, request, replace,tab,title,val);
+			response.setContentType("multipart/form-data");  
+			String path = request.getSession().getServletContext().getRealPath("/")+file;
+			response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+	        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+	        File files = new File(path);
+	        FileInputStream inputStream = new FileInputStream(files);
+	        ServletOutputStream out= response.getOutputStream();
+	        int b = 0;  
+	        byte[] buffer = new byte[1024];  
+	        while (b != -1){  
+	            b = inputStream.read(buffer);  
+	            //4.写到输出流(out)中  
+	            out.write(buffer,0,b);  
+	        }  
+	        inputStream.close();  
+	        out.close();  
+	        out.flush();
+		}
+		
+		/**
+		 * 根据id删除
+		 */
+		public void delResult(Result result) {
+			resuldDao.delResult(result);
+		}
+		
+		/**
+		 * 获取计算历史记录条数
+		 * @param resultFormBean
+		 * @return
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public  PageResults getSelect(ResultFormBean resultFormBean){
+			return resuldDao.getSelect(resultFormBean);
+		}
+		
+		/**
+		 * 查询计算历史
+		 * @param resultFormBean
+		 * @return
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public  PageResults getHistory(ResultFormBean resultFormBean){
+			return resuldDao.getHistory(resultFormBean);
+		}
+		@SuppressWarnings("rawtypes")
+		public List<Map> queryStep5HistoryData(String stcd,String pch){
+			List<Map> step5List = resuldDao.queryStep5History(stcd, pch);
+			if(step5List==null || step5List.size()<1){
+				step5List = resuldDao.queryStep1History(stcd, pch);
+			}
+			return step5List;
+		}
+		public List<Map> queryStep2InitData(String stcd,String pch,String start,String end,String interval){
+			List<Map> step2DataList = this.resultSecondQlDao.queryStep2InitData(stcd, pch);
+			if(step2DataList==null || step2DataList.size()<1){
+				step2DataList = this.resultSecondQlDao.queryStep2InitData(stcd, pch, start, end,Integer.valueOf(interval).intValue());
+			}
+			return step2DataList;
+		}
+		public int deleteChanliuStep2Data(String stcd,String pch){
+			return resultSecondQlDao.deleteStep2Data(stcd, pch);
+		}
+		/**
+		 * 步骤2入口
+		 * @param resultFormBean
+		 * @param start
+		 * @param end
+		 * @return
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public PageResults step2(ResultFormBean resultFormBean,String start,String end) {
+			return resuldDao.step2(resultFormBean,start,end);
+		}
+		//获得流量数据
+		@Transactional(propagation=Propagation.REQUIRED)
+		public PageResults getLiuLiang(ResultFormBean resultFormBean,String start,String end ) {
+			return resuldDao.getLiuLiang(resultFormBean, start, end);
+		}
+		
+		//获得降雨量数据
+		@Transactional(propagation=Propagation.REQUIRED)
+		public PageResults getyml(ResultFormBean resultFormBean,String start,String end ) {
+			return resuldDao.getyml(resultFormBean, start, end);
+		}
+		
+		/**
+		 * 修改降雨量/雨面量
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public void updateTableData(ResultFormBean resultFormBean,RiverFormBean mRiverFormBean) {
+			if(resultFormBean.getResultBean().getYml()==0) {
+				//如果没有修改的降雨量就不修改
+			}else {//否则修改
+				 resuldDao.updateTableData(resultFormBean);//修改降雨量
+			}
+			 River mRiver=riverDao.getRiverInfoById(mRiverFormBean);
+			// if(mRiverFormBean.getmRiverInfoBean().getQ()
+			if(mRiver.getStcd()==null||mRiver.getStcd().equals("")|| mRiver.getTm()==null||mRiver.getTm().equals("")) {
+				//新增 河道水清-流量
+				riverDao.saveRiverInfo(mRiverFormBean.getmRiverInfoBean());
+			}else if(mRiverFormBean.getmRiverInfoBean().getQ()==0){	
+				riverDao.updateRiverInfo(mRiverFormBean.getmRiverInfoBean());
+			}else {//修改 河道水清-流量
+				riverDao.updateRiverInfo(mRiverFormBean.getmRiverInfoBean());
+			}
+		}
+		
+		
+		/**
+		 * 步骤三，退水曲线
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public PageResults getTsqx(ResultFormBean resultFormBean,TsqxFormBean mTsqxFormBean) {
+		return resuldDao.getTsqx(resultFormBean, mTsqxFormBean) ;
+		}
+		/**
+		 * 流量最大值
+		 * @return
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public List maxLL(ResultFormBean resultFormBean,String start,String end) {
+			return  resuldDao.maxLL(resultFormBean,start,end);
+		}
+		
+		@SuppressWarnings("rawtypes")
+		public Hashtable<String,Object> queryChanliuStep3EchartData(String stcd,String pch,String start,String end,String user){
+			Hashtable<String,Object> echartTable=new Hashtable<String,Object>();
+			List list=resuldDao.queryChanliuStep2MaxLl(stcd,pch);//流量最大值查询接口
+			if(list==null || list.size()<1){
+				list = resuldDao.maxLL(stcd, pch, start, end);
+			}
+			HashMap<String, Object> maxMin= list!=null && list.size()>0?(HashMap<String, Object>) list.get(0):null;
+			Object max=  maxMin!=null?maxMin.get("maxLL"):null;
+			Object min=  maxMin!=null?maxMin.get("minLL"):null;
+			double llmax=max!=null?Double.parseDouble(max.toString()):0;
+			double llmin=min!=null?Double.parseDouble(min.toString()):0;
+			echartTable.put("maxLL", llmax);
+			echartTable.put("minLL", llmin);
+			List<Map> liuLiangList=	resuldDao.queryChanliuStep2Liuliang(stcd,pch);//获得流量的list去遍历封装数据
+			if(liuLiangList==null || liuLiangList.size()<1){
+				liuLiangList=resuldDao.getLiuLiang(stcd, pch, start, end);
+			}
+			HashMap<String, Object> liuLiangmap=new HashMap<String, Object>();
+			List<Object[]> newList=new ArrayList<Object[]>();//流量数据的list
+			for(int i=0;i<liuLiangList.size();i++) {
+				liuLiangmap.put((String) liuLiangList.get(i).get("DATE"), liuLiangList.get(i).get("LL"));//这个map键是时间，值对应的就是流量
+				Object [] ma=new Object [2];
+				ma[0]=liuLiangList.get(i).get("DATE");//时间
+				ma[1]=liuLiangList.get(i).get("LL");//流量
+				newList.add(ma);//添加数据
+			}
+			Object[] array =newList.toArray();
+			echartTable.put("llData", array); //流量
+			//查询以前切点保存数据
+			List<Map> thirdResult=resuldDao.getCResultThird(stcd,pch);	
+			echartTable.put("thirdResult", thirdResult);
+			//降雨量
+			List ymllist=resuldDao.queryChanliuStep2MaxJyl(stcd,pch);
+			if(ymllist==null || ymllist.size()<1){
+				ymllist=resuldDao.maxYml(stcd, pch, start, end);
+			}
+			HashMap<String, Object> ymllistmax= ymllist!=null && ymllist.size()>0?(HashMap<String, Object>) ymllist.get(0):null;
+			Object JYL=  ymllistmax!=null?ymllistmax.get("JYL"):null;
+			double maxJyl=JYL!=null?Double.parseDouble(JYL.toString()):0;
+			echartTable.put("maxJYL", maxJyl);
+			
+			List<Map> jList= resuldDao.queryChanliuStep2Jyl(stcd,pch);//降雨量
+			if(jList==null || jList.size()<1){
+				jList=resuldDao.getyml(stcd, pch, start, end);
+			}
+			HashMap<String, Object> jyLmap=new HashMap<String, Object>();
+			List<Object[]> newList1=new ArrayList<Object[]>();
+			for(int i=0;i<jList.size();i++) {
+				jyLmap.put((String) jList.get(i).get("DATE"), jList.get(i).get("JYL"));
+				Object [] jy=new Object [2];
+				jy[0]=jList.get(i).get("DATE");//时间
+				jy[1]=jList.get(i).get("JYL");//降雨量
+				newList1.add(jy);
+			}
+			//JSONObject json2 = JSONObject.fromObject(jyLmap);
+			Object[]  strArray = newList1.toArray();
+			echartTable.put("jylData", strArray);//降雨量
+			//end
+			
+			//退水曲线
+			TsqxFormBean mTsqxFormBean=new TsqxFormBean ();
+			List<Map> tsqxlist=resuldDao.numHongFeng(stcd);//得到洪峰的值，去重
+			List<Map> list2=resuldDao.getTsqx(stcd);//查询退水曲线
+			double maxTsqx=0;
+			double minTsqx=0;
+			List<Map> tsqxDataList = new ArrayList<Map>();
+			for(int i=0;i<tsqxlist.size();i++) {//退水曲线的洪峰，遍历之后去结果去匹配
+				HashMap< String, Object> dataMap=new HashMap< String, Object>();
+				dataMap.put("NAME", tsqxlist.get(i).get("QM"));
+				Double qm=(Double) tsqxlist.get(i).get("QM"); //得到洪峰
+				Double maxQ=(Double) tsqxlist.get(i).get("MAXQ"); 
+				Double minQ=(Double) tsqxlist.get(i).get("MINQ"); 
+				if(i==0){
+					maxTsqx=maxQ.doubleValue();
+					minTsqx=minQ.doubleValue();
+				}else{
+					if(maxQ.doubleValue()>maxTsqx){
+						maxTsqx=maxQ.doubleValue();
+					}
+					if(minQ.doubleValue()<minTsqx){
+						minTsqx=minQ.doubleValue();
+					}
+				}
+				List list3=new ArrayList();
+				for(int j=0;j<list2.size();j++) {
+					Double list2qm= (Double) list2.get(j).get("QM");
+					if(qm.equals(list2qm)) {//如果洪峰相等 那么就添加相应的流量和时间段到集合里，这个集合是json数组的数据来源
+						Object [] data=new Object [2];
+						data[0]=list2.get(j).get("T");
+						data[1]=list2.get(j).get("Q");
+						Double Q = (Double)data[1];
+						list3.add(data); //添加到list里
+					}
+				}
+				dataMap.put("DATA", list3);//DATA的数据是list3就是上面添加的T和Q
+				tsqxDataList.add(dataMap);
+			}
+			Object[]  tsqxArray = tsqxDataList.toArray();//list转JSON
+			echartTable.put("tsqxData", tsqxArray);//将拼装好的Object数组添加到map里
+			List<Double> tlist1=new ArrayList<Double>();
+			List<Map> tlist=resultThridDao.sd(stcd,user);
+			for(int i=0;i<tlist.size();i++) {
+			 double t=(double) tlist.get(i).get("T");
+			 tlist1.add(t);
+			}
+			List<Map> secondList = rsDao.querySecondByStcdAndPch(stcd, pch);
+			echartTable.put("tsqxXdata", tlist1.toArray());
+			echartTable.put("tsqxMax", maxTsqx);
+			echartTable.put("tsqxMin", minTsqx);
+			echartTable.put("secondList", secondList);
+			
+			//end
+			return echartTable;
+		}
+		/**
+		 * JYL最大值
+		 * @return
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public List maxYml(ResultFormBean resultFormBean,String start,String end) {
+			return  resuldDao.maxYml(resultFormBean,start,end);
+		}
+		/**
+		 * 退水曲线洪峰个数统计，用来生成json用
+		 */
+		@Transactional(propagation=Propagation.REQUIRED)
+		public List numHongFeng(ResultFormBean resultFormBean) {
+			return resuldDao.numHongFeng(resultFormBean);
+		}
+		public List<Map> queryStep7ResultData(String stcd,String pch){
+			return resuldDao.queryStep6ResultData(stcd, pch);
+		}
+		public List<Map> queryStep7ResultData(String stcd){
+			return resuldDao.queryStep7ResultData(stcd);
+		}
+	public List<HashMap<String, Object>> queryStep7startEnd(String stcd,String pch) {
+		ResultFormBean resultFormBean =new ResultFormBean ();
+		resultFormBean.getResultBean().setStcd(stcd);
+		resultFormBean.getResultBean().setPch(pch);
+		List<Map> secondData=rsDao.querySecondByStcdAndPch(stcd, pch);
+		Object paString=secondData.get(0).get("PA");
+		Object rsString=secondData.get(0).get("RS");
+		PageResults p=	resuldDao.queryStep7startEnd(resultFormBean);//查询第三步开始时间，结束时间
+		List<HashMap<String, Object>> pList=p.getResults();
+		pList.get(0).put("PA", paString);
+		pList.get(0).put("RS", rsString);
+			return pList;
+		}
+
+		public int deleteStep6Result(String stcd,String pch){
+			return resuldDao.deleteStep6Result(stcd, pch);
+		}
+		public Hashtable<String,Object> queryStep6InitData(String stcd,String pch,String start,String end){
+			Hashtable<String,Object> table = new Hashtable<String,Object>();
+			List<Map> table1Data=resuldDao.queryStep6ResultData(stcd, pch);
+			if(table1Data==null||table1Data.size()<1){
+				table1Data=resuldDao.queryStep6InitData(stcd, pch, start, end);
+			}
+			table.put("tableData", table1Data);
+			List<Map> secondData=rsDao.querySecondByStcdAndPch(stcd, pch);
+			table.put("secondData", secondData);
+			ResultSixthResult resultBean=this.resultSixthResultDao.queryByStcdAndPch(stcd, pch);
+			resultBean.setStcd(stcd);
+			resultBean.setPch(pch);
+			table.put("resultBean", resultBean);
+			return table;
+		}
+		@Transactional(propagation=Propagation.REQUIRED)
+		public  PageResults getStep6(ResultFormBean resultFormBean,String start,String end) {
+			return resuldDao.getStep6(resultFormBean, start, end);
+		}
+		private boolean isChange(int rowIdex,String field,JSONArray editData){
+			if(editData!=null && editData.size()>0){
+				for(int i=0;i<editData.size();i++){
+					JSONObject change = editData.getJSONObject(i);
+					int id=change.getInt("rowIndex");
+					String f=change.getString("field");
+					if(id==rowIdex && CommonUtil.trim(f).equals(CommonUtil.trim(field))){
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		private void clearZeroData(JSONArray tableData,List<Map> rgmapList,int zlen,double ezvalues){
+			rgmapList.clear();
+			double pj=ezvalues/zlen;
+			int num=0;
+			double total=0;
+			for(int i=0;i<tableData.size();i++){
+				JSONObject trdata = tableData.getJSONObject(i);
+				double r = trdata.getDouble("R");
+				if(r>0){
+					r=r+pj;
+					r = new BigDecimal(r).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+					if(r>0){
+						num++;
+					}else{
+						total=total+r;
+						r=0;
+					}
+				}
+				trdata.put("R", r);
+				Map map = new HashMap();
+				map.put("DATE", trdata.getString("DATE"));
+				map.put("SDRC", trdata.getDouble("SDRC"));
+				map.put("RGDX", r);
+				rgmapList.add(map);
+			}
+			if(num>0 && total<0){
+				clearZeroData(tableData,rgmapList,num,total);
+			}
+		}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Hashtable<String, Object> caclStep6Data(String stcd, String pch, String rs, String rx, String pa,
+			String lymj, String data) {
+		Hashtable<String, Object> table = new Hashtable<String, Object>();
+		try {
+			JSONObject dataJson = JSONObject.fromObject(data);
+			int interval = dataJson.getInt("interval");
+			int erisedit = dataJson.getInt("erisedit");
+			JSONArray tableData = dataJson.getJSONArray("tabledata");
+			JSONArray echartData = dataJson.getJSONArray("echartdata");
+			JSONArray editData = dataJson.getJSONArray("editData");
+			List<Line> lineList = new ArrayList<Line>();
+			if (echartData != null && echartData.size() > 0) {
+				for (int i = 0; i < echartData.size(); i++) {
+					JSONObject lineJson = echartData.getJSONObject(i);
+					JSONArray pointJson = lineJson.getJSONArray("pointList");
+					Line l = new Line();
+					l.setPa(lineJson.getDouble("pa"));
+					List<Point> plist = JSONArray.toList(pointJson, Point.class);
+					l.setPointList(plist);
+					lineList.add(l);
+				}
+			}
+			if (tableData != null && tableData.size() > 0) {
+				double epe = 0;
+				int zlen = 0;
+				for (int i = 0; i < tableData.size(); i++) {
+					JSONObject trdata = tableData.getJSONObject(i);
+					// 计算EPE
+					double p = trdata.getDouble("P");
+					double e = trdata.getDouble("E");
+					double pe = p - e;
+					pe = new BigDecimal(pe).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					trdata.put("PE", pe);
+					if (i == 0) {
+						epe = pe;
+					} else {
+						epe = epe + pe;
+					}
+					epe = new BigDecimal(epe).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					trdata.put("EPE", epe);
+					// 计算PAPE
+					double pape = Double.valueOf(pa).doubleValue() + epe;
+					pape = new BigDecimal(pape).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					trdata.put("PAPE", pape);
+					// 计算ER查
+					double erc = 0;
+					if (erisedit == 1 && isChange(i, "ERC", editData)) {
+						erc = trdata.getDouble("ERC");
+					} else {
+						double sdpa = Double.valueOf(pa).doubleValue();
+						erc = LineDifference.getX(lineList, sdpa, epe);
+						erc = new BigDecimal(erc).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+						trdata.put("ERC", erc);
+					}
+					// 计算SDRC
+					double sdrc = erc;
+					if (i > 0) {
+						double qerc = tableData.getJSONObject(i - 1).getDouble("ERC");
+						sdrc = erc - qerc;
+					}
+					if (sdrc > 0) {
+						zlen++;
+					}
+					sdrc = new BigDecimal(sdrc).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					trdata.put("SDRC", sdrc);
+				}
+				// 计算R修正值
+				double inrs = Double.valueOf(rs).doubleValue();
+				JSONObject lastTr = tableData.getJSONObject(tableData.size() - 1);
+				double lastErc = lastTr.getDouble("ERC");
+				double rxzz = zlen != 0 ? (inrs - lastErc) / zlen : 0;
+				rxzz = new BigDecimal(rxzz).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+				//
+				// 计算R改
+				List<Map> rgmapList = new ArrayList<Map>();
+				int zrglen=0;
+				double zrgval=0;
+				for (int i = 0; i < tableData.size(); i++) {
+					JSONObject trdata = tableData.getJSONObject(i);
+					double sdrc = trdata.getDouble("SDRC");
+					double rz = sdrc + rxzz;
+					rz = new BigDecimal(rz).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+					if(rz>0){
+						zrglen++;
+					}else{
+						zrgval=zrgval+rz;
+						rz=0;
+					}
+					trdata.put("R", rz);
+					// 获取计算R改值的list集合
+					Map map = new HashMap();
+					map.put("DATE", trdata.getString("DATE"));
+					map.put("SDRC", sdrc);
+					map.put("RGDX", rz);
+					rgmapList.add(map);
+					//
+				}
+				if(zrgval<0 && zrglen>0){
+					clearZeroData(tableData,rgmapList,zrglen,zrgval);
+				}
+				Collections.sort(rgmapList, new Comparator<Map>() {
+					@Override
+					public int compare(Map o1, Map o2) {
+						double v1 = Double.valueOf(o1.get("RGDX").toString()).doubleValue();
+						double v2 = Double.valueOf(o2.get("RGDX").toString()).doubleValue();
+						return v1 > v2 ? -1 : 1;
+					}
+				});
+				System.out.println("---paixu----" + JSONArray.fromObject(rgmapList).toString());
+				// 计算ER
+				double er = 0;
+				for (int i = 0; i < rgmapList.size(); i++) {
+					Map mm = rgmapList.get(i);
+					double rg = Double.valueOf(mm.get("RGDX").toString()).doubleValue();
+					if (i == 0) {
+						er = rg;
+					} else {
+						er = er + rg;
+					}
+					er = new BigDecimal(er).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();
+					mm.put("ER", er);
+					if (i < tableData.size()) {
+						tableData.getJSONObject(i).put("RGDX", rg);
+						tableData.getJSONObject(i).put("ER", er);
+					}
+				}
+			}
+			if (tableData != null && tableData.size() > 0) {
+				if (Double.valueOf(rx) > 0) {
+					Map map = calcFcAndTc(tableData, interval, Double.valueOf(rx).doubleValue());
+					if (map != null) {
+						map.put("STCD", stcd);
+						map.put("PCH", pch);
+						table.put("FCJG", map);
+					} else {
+						map=new HashMap();
+						map.put("STCD", stcd);
+						map.put("PCH", pch);
+						table.put("FCJG", map);
+					}
+				}
+			}
+			table.put("tableData", tableData);
+			table.put("reflag", "1");
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "计算出错!");
+		}
+		return table;
+	}
+		//[18.91,17.00,14.53,12.82,12.49,12.04,11.73,7.62,7.62,7.55,7.54,6.59,6.44,5.40,4.90,4.75,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.20,2.24
+		
+//		private Map calcFcAndTcTest(double[] rg,int interval){
+//			double[] rlist={18.91,17.00,14.53,12.82,12.49,12.04,11.73,7.62,7.62,7.55,7.54,6.59,6.44,5.40,4.90,4.75,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.99,3.20,2.24};
+//			double fc=19;
+//			double fcj=4.07;
+//			
+//		}
+		//FC计算小—>TC小；∑_(fc>R改大→小)▒R也小，FC试算大
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		private Map calcFcAndTc(JSONArray tableData,double interval,double rx){
+			List<Map> relist = new ArrayList<Map>();
+			int len = tableData.size();
+			double erx=0;
+			double tc=0;
+			for(int i=len-1;i>0;i--){
+				JSONObject data = tableData.getJSONObject(i);
+				double rg=data.getDouble("RGDX");
+				erx=erx+rg;
+				tc=tc+interval;
+				int n=len-i;
+				double fcj=(rx-erx)*60/((len-n)*interval);
+				data.put("FCJ", fcj);
+				double nrg=0;
+				if(i>0){
+					nrg=tableData.getJSONObject(i-1).getDouble("RGDX");
+				}
+				System.out.println("---------rg----="+rg+"---------fcj----="+fcj+"-----------len-n----"+i);
+				if(fcj>rg){
+					double wc=0;
+					double fc=fcj;
+					if(i>0 && fcj<nrg){
+						wc=0;
+						fc=fcj;
+					}else if(i>0 && fcj>=nrg){
+						wc=fcj-nrg;
+						fc=nrg;
+					}else if(i==0){
+						wc=0;
+						fc=fcj;
+					}
+					Map map = new HashMap();
+					map.put("FCJ", fcj);
+					map.put("FCS", fcj);
+					map.put("FC", fc);
+					map.put("WC", wc);
+					map.put("N", i);
+					double th=tc/60;
+					th=new BigDecimal(th).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					map.put("TC", th);
+					map.put("RC", erx);
+					double rctc=tc!=0?erx*60/tc:0;
+					rctc=new BigDecimal(rctc).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					map.put("RCTC", rctc);
+					relist.add(map);
+				}
+			}
+			if(relist!=null && relist.size()>1){
+				Collections.sort(relist, new Comparator<Map>(){
+					@Override
+					public int compare(Map o1, Map o2) {
+						if(Double.valueOf(o1.get("WC").toString()).doubleValue()>Double.valueOf(o2.get("WC").toString())){
+							return 1;
+						}else if(Double.valueOf(o1.get("WC").toString()).doubleValue()<Double.valueOf(o2.get("WC").toString())){
+							return -1;
+						}else{
+							return 0;
+						}
+					}
+				});
+				return relist.get(0);
+			}
+			return null;
+		}
+		public List<Map> queryStep6RrffEcharts(String stcd){
+			return resuldDao.queryStep6RrffEcharts(stcd);
+		}
+		
+		
+		
+		
+		   /**
+	     * splitAry方法<br>
+	     * @param ary 要分割的数组
+	     * @param subSize 分割的块大小
+	     * @return
+	     *
+	     */
+	    private static Object[] splitAry(String[] ary, int subSize) {
+	         int count = ary.length % subSize == 0 ? ary.length / subSize: ary.length / subSize + 1;
+	 
+	         List<List<String>> subAryList = new ArrayList<List<String>>();
+	 
+	         for (int i = 0; i < count; i++) {
+	          int index = i * subSize;
+	          List<String> list = new ArrayList<String>();
+	          int j = 0;
+	              while (j < subSize && index < ary.length) {
+	                  list.add(ary[index++]);
+	                  j++;
+	              }
+	          subAryList.add(list);
+	         }
+	          
+	         Object[] subAry = new Object[subAryList.size()];
+	          
+	         for(int i = 0; i < subAryList.size(); i++){
+	              List<String> subList = subAryList.get(i);
+	              String[] subAryItem = new String[subList.size()];
+	              for(int j = 0; j < subList.size(); j++){
+	                  subAryItem[j] = subList.get(j);
+	              }
+	              subAry[i] = subAryItem;
+	         }
+	          
+	         return subAry;
+	         }
+	
+}

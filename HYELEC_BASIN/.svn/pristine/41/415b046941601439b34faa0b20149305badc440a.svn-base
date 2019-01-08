@@ -1,0 +1,116 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.analysisCalculation.bean.ResultFifPa;
+import com.lyht.business.analysisCalculation.bean.ResultFifth;
+import com.lyht.business.analysisCalculation.bean.ResultSecond;
+import com.lyht.business.analysisCalculation.dao.ResultFifthDao;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResutFifPaDao;
+import com.lyht.business.analysisCalculation.formbean.ResultFifthFormBean;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+/**
+ * 第五步serviece
+ * @author 刘魁
+ *
+ */
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultFifthService {
+	@Resource
+	private ResultFifthDao rfDao;
+	@Resource
+	private ResutFifPaDao rfPaDao;//PaDao
+	@Resource
+	private ResultSecondDao rsDao;
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public Hashtable<String,Object> saveStep5Result(String stcd,String pch,String data){
+		Hashtable<String,Object> table = new Hashtable<String,Object>();
+		try {
+			JSONObject dataJson = JSONObject.fromObject(data);
+			double inpa = dataJson.getDouble("inpa");
+			double outpa = dataJson.getDouble("outpa");
+			JSONArray dataList = dataJson.getJSONArray("dataList");
+			rfDao.deleteByStcdAndPch(stcd,pch);
+			if(dataList!=null && dataList.size()>0){
+				for(int i=0;i<dataList.size();i++){
+					JSONObject beanJson = dataList.getJSONObject(i);
+					ResultFifth resultFifth=new ResultFifth();
+					resultFifth.setStcd(beanJson.getString("STCD"));
+					resultFifth.setDate(beanJson.getString("DATE"));
+					resultFifth.setEm(beanJson.getDouble("EM"));
+					resultFifth.setPa(beanJson.getDouble("PA"));
+					resultFifth.setPch(beanJson.getString("PCH"));
+					resultFifth.setQz(beanJson.getString("QZ"));//权重
+					resultFifth.setStnm(beanJson.getString("STNM"));//测站名称
+					resultFifth.setJyl(beanJson.getString("JYL"));//每个测站下面的降雨量
+					resultFifth.setInterval(beanJson.getString("INTERVAL"));//时间间隔
+					resultFifth.setYml(beanJson.getDouble("YML"));
+					rfDao.saveResutFifth(resultFifth);
+				}
+			}
+			ResultSecond rSecond=new ResultSecond();
+			rSecond.setPch(pch);
+			rSecond.setSTCD(stcd);
+			rSecond.setPa(outpa);
+			List<Map> secondList=rsDao.querySecondByStcdAndPch(stcd, pch);
+			 if(secondList!=null && secondList.size()>0) {
+				 rsDao.updateSecondPa(rSecond);
+			 }else {
+				 rsDao.saveResultSecond(rSecond);//新增
+			}
+			ResultFifPa rfPa=new ResultFifPa();
+			rfPa.setPa(inpa);
+			rfPa.setStcd(stcd);
+			rfPa.setPch(pch);
+			rfPaDao.delfPa(rfPa);
+			rfPaDao.saveResutFifthPa(rfPa);
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "保存失败!");
+		}
+		return table;
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void saveResutFifth(ResultFifth rf) {
+		rfDao.delf(rf);//删除
+		rfDao.saveResutFifth(rf);
+	}
+	//保存Pa
+	@Transactional(propagation=Propagation.REQUIRED)
+	public void savePa(ResultFifPa rfPa) {
+		rfPaDao.delfPa(rfPa);
+		rfPaDao.saveResutFifthPa(rfPa);
+	}
+	
+	/**
+	 * 查询计算历史
+	 * @param resultFormBean
+	 * @return
+	 */
+	@Transactional(propagation=Propagation.REQUIRED)
+	public  PageResults getFif(ResultFifth rf){
+		ResultFifthFormBean resultFormBean=new ResultFifthFormBean();
+		resultFormBean.setResultFifthFormBean(rf);
+		return rfDao.getFif(resultFormBean);
+	}
+}

@@ -1,0 +1,33 @@
+package com.lyht.business.analysisCalculation.dao;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.analysisCalculation.bean.ResultFifPa;
+import com.lyht.business.analysisCalculation.bean.ResultFifth;
+import com.lyht.util.CommonUtil;
+import com.lyht.util.Randomizer;
+/**
+ * 第五步PaDao
+ * @author 刘魁
+ *
+ */
+@Repository
+@Scope("prototype")
+public class ResutFifPaDao extends  HibernateBaseDao<ResultFifPa> {
+	public void saveResutFifthPa(ResultFifPa rf) {
+		StringBuilder sql=new StringBuilder();
+			String id=java.util.UUID.randomUUID().toString();
+		sql.append("INSERT INTO C_FIFTH_PA (ID,STCD,PA,PCH) ");
+		sql.append("VALUES('"+id+"','"+rf.getStcd()+"',"+rf.getPa()+",'"+rf.getPch()+"')");
+		this.exectueSQL(sql.toString());
+	}
+	
+	public void  delfPa(ResultFifPa rf) {
+		StringBuilder sql=new StringBuilder();
+		sql.append("DELETE FROM C_FIFTH_PA ");
+		sql.append("WHERE STCD='"+rf.getStcd()+"' AND PCH='"+rf.getPch()+"'");
+		this.exectueSQL(sql.toString());
+	}
+}

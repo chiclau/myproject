@@ -1,0 +1,470 @@
+(function($) {
+	$.DayPrecipitation_Query = function(option) {
+		//option自定义参数覆盖
+		//A、界面控件变量
+		var opt_control={
+			query_table_dayprecipitation 	:$('#query_table_dayprecipitation')		//页面BootStrapTable的ID
+			,query_searchName_pptn		:$('#query_searchName_daypptn')	//页面模糊查询input
+			,query_startTime_pptn		:$('#startTime_daypptn')	//页面查询起始时间
+			,query_endTime_pptn			:$('#endTime_daypptn')	//页面查询结束时间
+			,query_stcd_pptn			:$('#stcd_daypptn')	//页面查询根据测站名称
+			,query_info_dayprecipitation	:$("#query_info_dayprecipitation")	//双击事件窗口id
+			,query_ref					:$("#query_ref_daypred")		//模糊查询
+			,select_engineerCode		:$("#engineerCode")		//查询条件供货厂商
+			,edit_dialog_dayprecipitation	:$("#edit_dialog_dayprecipitation")		//添加编辑窗口
+			,query_add_dayprecipitation	:$("#query_add_dayprecipitation")//添加按钮
+			,btn_del_dayprecipitation		:$("#btn_del_dayprecipitation")//批量删除按钮
+			,info_form_dayprecipitation	:$("#info_form_dayprecipitation")//添加编辑的表单
+			,engineerCode				:$('#engineerCode') //编辑页工程编码
+			,info_upload				:$("#dayprecipitation_info_upload")	//文件上传模态框
+			,btn_into_pptn				:$("#btn_into_daypre")	//导入按钮
+			,btn_outAll_pptn			:$('#btn_outAll_pptn') //导出全部按钮
+			,btn_outPage_pptn			:$('#btn_outPage_pptn') //导出当前页按钮
+			,btn_stcd_pptn				:$('#stcd_daypptn_list')		//测站下拉框
+			,btn_muban_pptn				:$('#btn_muban_day_pptn')		//测站下拉框
+		}
+		//B、请求地址URL
+		var opt_url={
+			url_list			:basePath + "business/stpptndayr!list.action"//查询数据URL
+			,url_save			:basePath + "business/stpptndayr!save.action"//添加或修改保存主合同URL
+			,url_remove			:basePath + "business/stpptndayr!removeids.action"//删除URL
+			,url_edit			:basePath + "business/stpptndayr!edit.action"//修改查询数据
+			,url_import			:basePath + "business/stpptndayr!importPptn.action"//查询物料详细信息
+			,url_export			:basePath + "business/stpptndayr!export.action"//查询物料详细信息
+			,url_engineer		:basePath + "contInfo/contInfo!queryAllEngineer.action"//所属工程下拉数据
+			,url_upstcd_Stbprp  :basePath + "stbprp/stbprp!upstcd_Stbprp.action"//下拉列表
+		}
+		//全部变量，自定义的覆盖默认变量
+		var opt_all=($.extend(opt_control,opt_url,option));
+	    //////////////////////////////////////////////////////////////////////////////////////////////////
+		var TableQueryParams;
+		this.InitData=function(opt){
+			opt_all=$.extend(opt_all,opt);   
+			opt_all.query_table_dayprecipitation.bootstrapTable($.extend(g_bootstrapTable_Options,
+				{
+				     url			 	:opt_all.url_list   // 请求后台的URL（*）
+			         ,queryParams	  	:queryParams		// 传递参数（*）
+			         ,onDblClickRow 	:onDblClickRow		// 行双击事件
+			         ,onSort			:onSort             // 排序事件
+		             ,rowStyle			:comm_rowStyle		//行样式，可自定义
+		             ,onLoadSuccess		:comm_onLoadSuccess //数据加载错误
+		             ,onCheckAll 		:onCheckAll   //全选
+		             ,onCheck  			:onCheck   //单选
+		             ,onUncheck  		:onUncheck   //不选
+		             ,onUncheckAll 		:onUncheckAll  //全不选
+		             ,singleSelect		:false
+		             ,uniqueId			:"NM"
+		             ,pageSize:15
+				}));
+			//选中多行改变表格背景色
+			   function onCheckAll(rows){
+			    for(var i=0;i<rows.length;i++){
+			    	commRowStyle(i);
+			    }
+			   }
+			   //循环改变所有行颜色
+			   function commRowStyle(i){
+			    $("#query_table_dayprecipitation tbody tr[data-index="+i+"]").addClass("success");
+			   }
+			   //全不选时颜色恢复
+			   function onUncheckAll(){
+			    $("#query_table_dayprecipitation tbody tr").removeClass("success");
+			   }
+			   //选中一行改变表格背景色
+			   function onCheck(rows){
+			    $("#query_table_dayprecipitation tbody tr[data-uniqueid="+rows.id+"]").addClass("success");
+			   }
+			   //不选中时颜色恢复
+			   function onUncheck(rows){
+			    $("#query_table_dayprecipitation tbody tr[data-uniqueid="+rows.id+"]").removeClass("success");
+			   }
+			// 提交查询函数
+			function queryParams(params) {  // 配置参数
+				TableQueryParams = params;
+				//查询条件
+				var opt_parms={
+						"stPptnDayRFormBean.searchName"			:opt_control.query_searchName_pptn.val()// 查询关键字
+					   ,"stPptnDayRFormBean.startTime"			:opt_control.query_startTime_pptn.val()// 查询关键字
+					   ,"stPptnDayRFormBean.endTime"				:opt_control.query_endTime_pptn.val() // 查询关键字
+					   ,"stPptnDayRFormBean.stcd"				:opt_control.btn_stcd_pptn.val()// 查询关键字
+				};
+			    var temp = {   // 这里的键的名字和控制器的变量名必须一直，这边改动，控制器也需要改成一样的
+			       "stPptnDayRFormBean.pageBean.limit"			: params.limit   // 页面大小
+			      ,"stPptnDayRFormBean.pageBean.offset"			: params.offset  // 当前记录偏移条数
+			      ,"stPptnDayRFormBean.pageBean.sort"			: params.sort  	  // 排序列名
+			      ,"stPptnDayRFormBean.pageBean.sortOrder" 		: params.order   // 排位命令（desc，asc）
+			    };
+			    temp=$.extend(temp,opt_parms,opt);
+				return temp;
+			}
+			// 双击事件
+			function onDblClickRow(row){
+//				if (row) {
+//					_table(row.STCD);
+//				}
+			}
+			// 排序事件
+			function onSort(name, order){
+				_refresh();
+			}
+		}
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		// 初始化增加、修改和删除,公开函数
+		this.InitAddEditDel=function(opt){
+			opt_all=$.extend(opt_all,opt);
+			opt_all.query_add_dayprecipitation.bind("click",event_add);
+			opt_all.btn_del_dayprecipitation.bind("click",event_del);
+			opt_all.query_ref.bind("click",event_ref);
+			opt_all.btn_outAll_pptn.bind("click",exportAllPptn);
+			opt_all.btn_outPage_pptn.bind("click",exportPagePptn);
+			opt_all.btn_into_pptn.bind("click",upload_model_show);
+			opt_all.btn_muban_pptn.bind("click",downloadTemplate);
+			
+			//初始化主合同编辑表单 保存button类型为submit
+			opt_all.info_form_dayprecipitation.bootstrapValidator().on("success.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+				// 校验数据正确,执行保存数据
+				_save();
+				
+			}).on("error.form.bv", function(e) {
+				e.preventDefault(); // 去掉默认提交事件
+			});	
+		}
+		//下拉数据初始化
+		this.InitSelect = function (){
+			Load_select_stcd_pptn();
+			Load_select_stcd_pptn_list();
+		}
+		//下载模板
+		function downloadTemplate(){
+			window.location.href=basePath+"/common/download/日降水量表.xls"
+		}
+		
+		function Load_select_stcd_pptn(){
+			opt_control.query_stcd_pptn.empty();
+			var url = opt_all.url_upstcd_Stbprp;
+			opt_control.query_stcd_pptn.append("<option value=''>请选择测站名称</option>");
+			common_ajax(null,url, function(data) {
+				console.log(JSON.stringify(data));
+				$.each(data.rows, function(i) {
+					opt_control.query_stcd_pptn.append(
+						'<option value=' + data.rows[i].STCD + '>'+ data.rows[i].STNM + '</option>');
+				});
+			});
+		}
+		function Load_select_stcd_pptn_list(){
+			opt_control.btn_stcd_pptn.empty();
+			var url = opt_all.url_upstcd_Stbprp;
+			opt_control.btn_stcd_pptn.append("<option value=''>请选择测站名称</option>");
+			common_ajax(null,url, function(data) {
+				console.log(JSON.stringify(data));
+				$.each(data.rows, function(i) {
+					opt_control.btn_stcd_pptn.append(
+							'<option value=' + data.rows[i].STCD + '>'+ data.rows[i].STNM + '</option>');
+				});
+			});
+		}
+		
+	    // 修改记录，调出窗体,公开函数
+		this.edit=function(nm) {
+			_edit(nm);
+		}
+		// 履约评价
+		this.evaluation=function(id) {
+			_Evaluation(id);
+		}
+		//显示合同详细
+		this.onClickContract = function(id){
+			window.location.href = opt_all.url_details + "?contractId="+id;
+		}
+		//单条删除
+		this.del=function(nm){
+			if(nm != null && nm != ""){
+				_del(nm);
+			}
+		}
+		
+		//绑定删除事件
+		function event_del(){
+			_removeids();
+		}
+		
+		// 批量删除
+		function _removeids(){
+           var ids = g_select_and_tip(opt_all.query_table_dayprecipitation,"NM");
+           var ids_=(tm.substring(tm.length-1)==',')?tm.substring(0,tm.length-1):tm;
+          
+           if (ids.length==0 && ids_.length==0) return;
+           
+           $(".fixed-table-container tbody tr.selected td").addClass("row-bcground");
+           
+           var url= opt_all.url_remove+"?stPptnDayRFormBean.stPptnDayRInfoBean.nm="+ids;
+            
+           confirm("资料管理","您确定要删除这些记录吗？","icon-remove-sign", function(result) {
+			   if(result){
+			 		common_ajax(null, url, function(response){
+						// 删除后，从后台取出返回数据
+					    _refresh();
+					    var msg = new $.zui.Messager("消息提示："+response.message, {placement: "center",type:"primary"});
+					    msg.show();	
+						    
+			 		}); 
+               }
+			});    
+		}
+		//删除单条记录
+		function _del(nm){
+			var url= opt_all.url_remove+"?stPptnDayRFormBean.stPptnDayRInfoBean.nm="+nm;
+			confirm("资料管理","您确定要删除该条记录吗？","icon-remove-sign", function(result) {
+			   if(result){
+			 		common_ajax(null, url, function(response){
+						// 删除后，从后台取出返回数据
+					    _refresh();
+					    var msg = new $.zui.Messager("消息提示："+response.message, {placement: "center",type:"primary"});
+					    msg.show();	
+			 		}); 
+               }
+			}); 
+		}
+		
+		//新增和编辑函数
+		function _edit(nm){
+			//加载Edit页面基本选择数据，成功后调用显示编辑页面
+			//加载字典分类数据下拉框数据
+			Load_EditSelectData( 
+				function(){ 
+					LoadEditData(nm);
+				}
+			);
+		}
+		
+		//显示详情
+		function _table(queryId){
+			var url = opt_all.url_list+"?mPptnFormBean.mPptnInfoBean.stcd=" + queryId;
+			common_ajax(null,url, function(response) {
+				for(var key in response.rows[0]){
+				   if($("#"+key+"_pptnDetail")[0]){
+					   $("#"+key+"_pptnDetail").html(response.rows[0][key]);
+				   }
+				}
+				var now = new Date(response.rows[0].TM.time);
+				var year = now.getFullYear(),
+				　　month = now.getMonth() + 1,
+				　　date = now.getDate(),
+				　　hour = now.getHours(),
+				　　minute = now.getMinutes(),
+				　　second = now.getSeconds();
+				var tm = year + "-" + month + "-" + date + " " + hour + ":" + minute + ":" + second;
+				$("#TM_pptnDetail").html(tm);
+			});
+			opt_all.query_info_dayprecipitation.modal({
+				show 	   : true
+				,backdrop  : false // 背景遮挡
+					,moveable  : true
+			}).on('shown.zui.modal', function() {
+			});
+		}
+		
+		//加载所属工程下拉
+		function Load_select_engineer(){
+			opt_control.select_engineerCode.empty();
+			var url = opt_all.url_engineer;
+			opt_control.select_engineerCode.append("<option value=''>请选择所属工程</option>");
+			common_ajax(null,url, function(data) {
+				$.each(data.engineers, function(i) {
+					opt_control.select_engineerCode.append(
+						'<option value=' + data.engineers[i].NM + '>'+ data.engineers[i].ENGINEER_NAME + '</option>');
+				});
+			});
+		}
+		
+		//加载Edit页面上数据，并调出增加或编辑页面显示
+		function LoadEditData(nm){
+			if(nm!= null && nm!=""){
+				var url = opt_all.url_edit+"?stPptnDayRFormBean.stPptnDayRInfoBean.nm="+nm;
+				// 动态加载页面数据
+				common_ajax(null,url, function(response) {
+					$('#nm_daypptn_').val(response.stPptnDayRInfoBean.nm);
+					$('#stcd_daypptn_').val(response.stPptnDayRInfoBean.stcd);
+					$('#laydate_daypptn_tm_').val(response.stPptnDayRInfoBean.tm);
+					comm_loadFormData_flag(response.stPptnDayRInfoBean,"_daypptn");
+					
+					$('#stcd_daypptn_').prop('disabled',true);
+					$('#laydate_daypptn_tm_').prop('disabled',true);
+					
+					opt_all.edit_dialog_dayprecipitation.find('.modal-title').html("<i class='icon icon-pencil'></i>&nbsp;修改降水量");
+					///////////////////////////////////////////
+				});
+			}else{
+				$('#stcd_daypptn_').prop('disabled',false);
+				$('#laydate_daypptn_tm_').prop('disabled',false);
+				
+				opt_all.edit_dialog_dayprecipitation.find('.modal-title').html("<i class='icon icon-plus-sign'></i>&nbsp;新增降水量") ;
+			}
+			
+			opt_all.edit_dialog_dayprecipitation.modal({
+				 show : true
+				,backdrop : false // 背景遮挡
+				,moveable : true
+			}).on('hide.zui.modal', function() {
+				$('#nm_daypptn_').val('');
+				$('#stcd_daypptn_').val('');
+				$('#laydate_daypptn_tm_').val('');
+				_reset();//当第一次验证正确后，关闭窗体。再进来时，重置窗体(保留窗体上数据)。
+           });
+			
+		}
+		
+		// 保存主合同数据
+		function _save() {
+			$('#stcd_daypptn_').val("");
+			$('#laydate_daypptn_tm_').val("")
+			$("#stcd_daypptn_").val($('#stcd_daypptn').val());
+			$("#laydate_daypptn_tm_").val($('#tm_daypptn').val());
+	 		var json=opt_all.info_form_dayprecipitation.serialize();
+	 		common_ajax(json, opt_all.url_save, function(response){
+	 			opt_all.edit_dialog_dayprecipitation.modal("hide");
+			    //重置表单
+			    _reset();
+			    // 刷新列表
+			    _refresh();
+	 		});
+		}
+		
+		//文件上传
+		function filesUpload(){
+			var file_options = {
+				//初始化参数
+				url:opt_all.url_import	//文件上传地址
+			   ,filters:{//文件过滤器
+				   	// 只允许上传Excel
+				    mime_types: [
+				        {title: 'Excel', extensions: 'xlsx,xls'},
+				    ],
+				    // 最大上传文件为 10MB
+				    max_file_size: '100mb',
+				    // 不允许上传重复文件
+				    prevent_duplicates: true,
+				    removeUploaded:true
+				}
+			   ,responseHandler:function(responseObject, file){
+				   // 当服务器返回的文本内容包含 `'error'` 文本时视为上传失败
+				   var response = JSON.parse(responseObject.response);
+				   if(response.retflag=='error') {
+					   layer.alert(response.message, {
+						    skin: 'layui-layer-lan'
+						    ,closeBtn: 0
+						    ,anim: 4 //动画类型
+					   });
+					   var uploader = $('#dayprecipitation_myUploader').data('zui.uploader');
+					   uploader.removeFile(file);
+					   return '导入失败';
+				   }else if(response.retflag=='success') {
+					   _refresh();
+					   layer.alert("导入成功!", {
+						    skin: 'layui-layer-lan'
+						    ,closeBtn: 0
+						    ,anim: 4 //动画类型
+					   });
+					   var uploader = $('#dayprecipitation_myUploader').data('zui.uploader');
+					   uploader.removeFile(file);
+				   }
+			   }
+			}
+			$('#dayprecipitation_myUploader').uploader(file_options);
+		}
+		
+		//文件上传模态框
+		function upload_model_show(){
+			filesUpload();
+			opt_all.info_upload.modal({
+				 show : true
+				,backdrop : false // 背景遮挡
+				,moveable : true
+			}).on('shown.zui.modal', function() {
+	
+	        });
+		}
+		
+		//导出全部
+		function exportAllPptn(){
+			var url= opt_all.url_export+"?";
+			var data="mPptnFormBean.pageBean.limit=99999999"
+					+"&mPptnFormBean.pageBean.offset=0" 
+					+"&mPptnFormBean.pageBean.sortOrder="+TableQueryParams.order
+					+"&mPptnFormBean.pageBean.sort="+TableQueryParams.sort
+					+"&mPptnFormBean.searchName="+opt_all.query_searchName_pptn.val()
+					+"&mPptnFormBean.startTime="+opt_control.query_startTime_pptn.val()// 查询关键字
+				    +"&mPptnFormBean.endTime="+opt_control.query_endTime_pptn.val() // 查询关键字
+				    +"&mPptnFormBean.stcd="+opt_control.btn_stcd_pptn.val()// 查询关键字
+			confirm("<i class='icon icon-reply'></i>&nbsp;导出全部","您确定要导出全部信息吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url+data;
+               }
+			});
+		}
+		
+		//导出当前页
+		function exportPagePptn(){
+			var url= opt_all.url_export+"?";
+			var data_page="mPptnFormBean.pageBean.limit="+TableQueryParams.limit
+						 +"&mPptnFormBean.pageBean.offset="+TableQueryParams.offset
+						 +"&mPptnFormBean.pageBean.sortOrder="+TableQueryParams.order
+						 +"&mPptnFormBean.pageBean.sort="+TableQueryParams.sort
+						 +"&mPptnFormBean.searchName"+opt_all.query_searchName_pptn.val()
+						 +"&mPptnFormBean.startTime="+opt_control.query_startTime_pptn.val()// 查询关键字
+						 +"&mPptnFormBean.endTime="+opt_control.query_endTime_pptn.val() // 查询关键字
+						 +"&mPptnFormBean.stcd="+opt_control.btn_stcd_pptn.val()// 查询关键字
+			confirm("<i class='icon icon-circle-arrow-up'></i>&nbsp;导出当前页","您确定要导出当前页吗？","icon-info", function(result) {
+			   if(result){
+				   window.location.href=url+data_page;
+			   }
+			});
+		}
+		
+		//****绑定事件
+		//绑定添加或修改事件
+		function event_add(){
+			_edit("");
+		}
+
+		//绑定刷新事件
+		function event_ref(){
+			// _table();
+			 _refresh();
+		}
+		
+		//删除物资输入框
+		function event_selfRemove(){
+    		var myId = $(this).data("id");
+    		if(myId==null){
+    			$(this).parent("td").parent("tr").remove();
+    		}
+		}
+		
+		//****绑定事件******end
+	    // 刷新
+	    function _refresh(){
+	    	opt_all.query_table_dayprecipitation.bootstrapTable('refresh');
+	    }
+	    this.flash=function(){
+			_refresh();
+		}
+		// 重置主合同
+		function _reset(){
+			opt_all.info_form_dayprecipitation.data('bootstrapValidator').resetForm(true);
+		}
+		//公开函数
+		this.reset=function(){
+			_reset();
+		}
+		////////////////////////////////////////////////////////////////////////////////
+		//加载所有外键表到下拉框，无
+		function Load_EditSelectData(callback){
+			//所有编辑页面下拉框加载
+			callback();
+		}
+	};
+})(jQuery);
+			

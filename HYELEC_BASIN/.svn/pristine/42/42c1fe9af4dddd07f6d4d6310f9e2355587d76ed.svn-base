@@ -1,0 +1,88 @@
+package com.lyht.business.analysisCalculation.service;
+
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.business.analysisCalculation.bean.ResultSecond;
+import com.lyht.business.analysisCalculation.bean.ResultSixth;
+import com.lyht.business.analysisCalculation.dao.ResultSecondDao;
+import com.lyht.business.analysisCalculation.dao.ResultSixthDao;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Service
+@Scope("prototype")
+@Transactional
+public class ResultSixthService {
+	@Resource
+	private ResultSixthDao rsDao;
+	@Resource
+	private ResultSecondDao secondDao;
+	public void saveResultSixth(ResultSixth rs) {
+		rsDao.delResultSixth(rs);
+		rsDao.saveResultSixth(rs);
+	}
+	@Transactional(propagation=Propagation.REQUIRED)
+	public Hashtable<String,Object> saveStep6ResultData(String stcd,String pch,String data){
+		Hashtable<String,Object> table = new Hashtable<String,Object>();
+		try {
+			JSONObject dataJson = JSONObject.fromObject(data);
+			JSONArray array= dataJson.getJSONArray("tableData");
+			JSONObject fcJson=dataJson.getJSONObject("fcjg");
+			rsDao.deleteByStcdAndPch(stcd, pch);
+			if(array!=null && array.size()>0){
+				for(int i=0;i<array.size();i++) {
+					 JSONObject jObject=array.getJSONObject(i);
+					 ResultSixth  rSixth=new ResultSixth();
+					 rSixth.setTm(jObject.getString("DATE"));
+					 rSixth.setEr(jObject.getDouble("ER"));
+					 rSixth.setE(jObject.getDouble("E"));
+					 rSixth.setEpe(jObject.getDouble("EPE"));
+					 rSixth.setErc(jObject.getDouble("ERC"));
+					 rSixth.setP(jObject.getDouble("P"));
+					 rSixth.setPape(jObject.getDouble("PAPE"));
+					 rSixth.setPe(jObject.getDouble("PE"));
+					 rSixth.setR(jObject.getDouble("R"));
+					 rSixth.setRgdx(jObject.getDouble("RGDX"));
+					 rSixth.setSdrc(jObject.getDouble("SDRC"));
+					 rSixth.setStcd(stcd);
+					 rSixth.setPch(pch);
+					 rsDao.saveResultSixth(rSixth);
+				 }
+			}
+			if(fcJson.containsKey("FCS") && fcJson.containsKey("FCJ")
+					&& fcJson.containsKey("FC") && fcJson.containsKey("TC")){
+				ResultSecond second = new ResultSecond();
+				second.setSTCD(stcd);
+				second.setPch(pch);
+				second.setFc(fcJson.getDouble("FC"));
+				second.setFcj(fcJson.getDouble("FCJ"));
+				second.setFcs(fcJson.getDouble("FCS"));
+				second.setTc(fcJson.getDouble("TC"));
+				second.setRc(fcJson.getDouble("RC"));
+				List<Map> relist=this.secondDao.querySecondByStcdAndPch(stcd, pch);
+				if(relist!=null && relist.size()>0){
+					secondDao.updateSecondFcinfo(second);
+				}else{
+					secondDao.saveResultSecond(second);
+				}
+			}
+			table.put("reflag", "1");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			table.put("reflag", "0");
+			table.put("message", "保存失败!");
+		}
+		return table;
+	}
+}
