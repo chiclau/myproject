@@ -1,0 +1,162 @@
+﻿$(function(){
+	initDate();
+	initTable();
+	initWjly("zcfg");
+	initWjly("ssbm");
+	initHeight();
+})
+function initHeight(){
+	var screenHeight=window.screen.availHeight-430;
+	$('.layui-table-body').height(screenHeight);
+}
+
+function serch(){
+	var fgly = $("#fgly_id").val();
+	var ssbm = $("#ssbm_id").val();
+	var startDate = $("#startDate").val();
+	var endDate = $("#endDate").val();
+	var searchName = $("#searchName_zcfg").val();
+	initTable(fgly,ssbm,startDate,endDate,searchName);
+}
+function initWjly(condition){
+	  $.ajax({
+			url:basePath+"policy/zcfg!initWjly.action",
+			data:{"condition":condition},
+			type: "POST",
+			dataType:"json",
+			success:function(response){
+				var data = response.rows;
+				var html = '<option value = "0">请选择</option>';
+				for (var i = 0; i < data.length; i++) {
+					html += ' <option value = "'+data[i].nm+'">'+data[i].name+'</option>'
+				}
+				if(condition == "zcfg")$("#fgly_id").append(html);
+				if(condition == "ssbm")$("#ssbm_id").append(html);
+			}
+		})
+}
+layui.use('table', function(){
+	  var table = layui.table;
+	  //监听工具条
+	  table.on('tool()', function(obj){
+		  debugger;
+	    var data = obj.data;
+	    if(obj.event === 'del'){
+	    	var fgbm = data.fgbm
+	    	layer.confirm('你确定要删除吗？', function(index){
+	    		 $.ajax({
+	    				url:basePath+"policy/zcfg!delete.action",
+	    				data:{"fgbm":fgbm},
+	    				type: "POST",
+	    				dataType:"json",
+	    				success:function(response){
+	    					if(response.success == 'success'){
+	    						layer.open({
+	    					        type: 1
+	    					        ,content: '<div style="padding: 20px 100px;">删除成功</div>'
+	    					        ,btn: '关闭全部'
+	    					        ,btnAlign: 'c' //按钮居中
+	    					        ,shade: 0 //不显示遮罩
+	    					        ,yes: function(){
+	    					          layer.closeAll();
+	    					        }
+	    					      });
+	    						$(".layui-laypage-btn")[0].click(); 
+	    					}else{
+	    						layer.open({
+	    					        type: 1
+	    					        ,content: '<div style="padding: 20px 100px;">删除失败</div>'
+	    					        ,btn: '关闭全部'
+	    					        ,btnAlign: 'c' //按钮居中
+	    					        ,shade: 0 //不显示遮罩
+	    					        ,yes: function(){
+	    					          layer.closeAll();
+	    					        }
+	    					      });
+	    					}
+	    				}
+	    			})
+	 	   });
+	    }
+	    if(obj.event === 'detail'){
+	    	if(data.url == null){
+	    		layer.open({
+			        type: 1
+			        ,content: '<div style="padding: 20px 100px;">未上传附件</div>'
+			        ,btn: '关闭'
+			        ,btnAlign: 'c' //按钮居中
+			        ,shade: 0 //不显示遮罩
+			        ,yes: function(){
+			          layer.closeAll();
+			        }
+			      });
+	    	}else{
+	    		window.open(data.url)
+	    	}
+	    }
+	    if(obj.event === 'edit'){
+	    	 layer.open({
+	   		  type: 2, 
+	   		  title: '修改',
+	   		  area: ['900px', '480px'],
+	   		  skin: 'layui-layer-molv' ,
+	   		  icon: 6,
+	   		  content: basePath+'business/zhengcefagui/add.jsp?fgbm='+data.fgbm,
+	   	});
+	    }
+	  });
+	});
+function initDate(){
+	// 仅选择日期
+	$(".form-date").datetimepicker(
+	{
+	    language:  "zh-CN",
+	    weekStart: 1,
+	    todayBtn:  1,
+	    autoclose: 1,
+	    todayHighlight: 1,
+	    startView: 2,
+	    minView: 2,
+	    forceParse: 0,
+	    format: "yyyy-mm-dd"
+	});
+}
+$('#addfile').click(function(){
+	 layer.open({
+		  type: 2, 
+		  title: '新增',
+		  area: ['900px', '480px'],
+		  skin: 'layui-layer-molv' ,
+		  icon: 6,
+		  content: basePath+'business/zhengcefagui/add.jsp',
+	});
+})
+
+function initTable(fgly,ssbm,startDate,endDate,searchName){
+  layui.use('table', function(){
+   	  var table = layui.table;
+   	  table.render({
+   	    elem: '#testone'
+   	    ,url:basePath+"policy/zcfg!list.action"	
+   	    ,toolbar: '#toolbarDemo'
+   	    ,title: '政策法规表'
+   	    ,where:{"fgly":fgly,"ssbm":ssbm,"startDate":startDate,"endDate":endDate,"searchName":searchName}
+   	    ,cols: [[
+   	      {toolbar: '#id',field:'fgbm', title:'序号', width:80, fixed: 'left', unresize: true, sort: true}
+   	      ,{field:'bt', title:'法规内容', width:250, fixed: 'left',align:'left'}
+   	      ,{field:'ly', title:'法规来源', width:150, }
+   	      ,{field:'ssfl', title:'法规分类', width:150, }
+   	      ,{field:'zdjg', title:'发布单位', width:200,  sort: true}
+   	      ,{field:'wh', title:'法规文号', width:150}
+   	      ,{field:'pbrq', title:'发布时间',width:150}
+   	      ,{field:'bz', title:'备注', width:300}
+   	      ,{fixed: 'right', title:'操作',width:150, align:'center',toolbar: '#barDemo'}
+   	      
+   	    ]]
+   	    ,page: true
+   	  });
+   	});
+  setTimeout(() => {
+	  initHeight();
+}, 100); 
+}

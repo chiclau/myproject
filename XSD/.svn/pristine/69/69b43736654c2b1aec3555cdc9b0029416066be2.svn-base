@@ -1,0 +1,103 @@
+#mapStyle .changeBaseMapBtn span {
+    font-size: 12px;
+    color: #fff;
+    padding: 3px;
+    border-radius: 3px;
+    background-color:#20A0FF;
+}
+
+.changeBaseMapBtn{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 85px;
+    height: 60px;
+    background: url(../images/basevec.png) no-repeat 0 0;
+    background-size: 86px 120px;
+    border-radius: 3px;
+    transition: all .5s ease;
+    z-index: 2000;
+}
+
+.btnMapZoomIn{
+    position: absolute;
+    top: 90px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: url(../images/btn_zoomin.png) no-repeat 0 0;
+    z-index: 2000;
+}
+
+.btnMapZoomOut{
+    position: absolute;
+    top: 130px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: url(../images/btn_zoomout.png) no-repeat 0 0;
+    z-index: 2000;
+}
+
+.btnMapExtent{
+    position: absolute;
+    top: 170px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: url(../images/globe.png) no-repeat 0 0;
+    z-index: 2000;
+}
+
+.xingzhengqu{
+    position: absolute;
+    top: 200px;
+    left: 0px;
+    width: 40px;
+    height:92px;
+    z-index:2000;
+    background-color: #133359;
+    opacity:0.8;
+    font-size: 22px;
+    color: #fff;
+    font-family: cursive;
+}
+
+.liuyu{
+    position: absolute;
+    top: 322px;
+    left: 0px;
+    width: 40px;
+    height:92px;
+    z-index:2000;
+    background-color: #133359;
+    opacity:0.8;
+    font-size: 22px;
+    color: #fff;
+    font-family: cursive;
+}
+
+.gongsi{
+    position: absolute;
+    top: 444px;
+    left: 0px;
+    width: 40px;
+    height:92px;
+    z-index:2000;
+    background-color: #133359;
+    opacity:0.8;
+    font-size: 22px;
+    color: #fff;
+    font-family: cursive;
+}
+
+.toolbarthemebtn{
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    /*width: 40px;*/
+    /*height:80px;*/
+    z-index:2000;
+    color: #fff;
+    font-family: cursive;
+}

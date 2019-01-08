@@ -1,0 +1,420 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+ <%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>水资源管理系统</title>
+		 <!-- 引入头部icon图标 -->	
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/favicon.ico">
+		 <!-- 引入icon图标 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/iconfont.css">
+		 <link rel="stylesheet" href="<%=basePath%>common/js/ztree/css/zTreeStyle/zTreeStyle.css">
+		 <!-- 引入zui样式 -->
+		 <!-- 引入本页面的样式 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/layui/css/layui.css">
+		 <link rel="stylesheet" href="<%=basePath%>business/shujujiansuo/shujujiansuo.css">
+	</head>
+<body>	
+	<div class="container-fluid" id="pid">
+		<ul class="cd-accordion-menu animated" style="border-top-left-radius: 6px;border-top-right-radius:6px;border-bottom-left-radius: 6px;border-bottom-right-radius:6px;border:1px solid #eaebef">
+		    <li class="has-children" style="position:relative;">
+			    <input type="checkbox" name ="group-1" id="group-1" checked>
+				<label for="group-1" style="background: #518cc2;border-top-left-radius:6px;border-top-right-radius:6px;">
+				    <img style="margin-top:-3px;margin-left:10px;margin-right:10px;" src="<%=basePath %>common/images/login/1.png" alt="">基础查询
+				    <i class="icon icon-chevron-down" style="color:white;margin-left:5px;"></i></label>
+				    <div class="btn-group" style="position:absolute;z-index:333;right:5px;top:2px;">
+			        <button type="button" class="btn  btn-primary" id="sjly_id">全部</button>
+			         <input type="hidden" id="sjly_" > 
+					<div class="btn-group" style="border-radius:6px;">
+					    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+						    <span class="caret"></span>
+						    <span class="sr-only">操作</span>
+						</button>
+						<ul class="dropdown-menu" role="menu">
+						    <li><a href="javascript:sjly(3);">能源局</a></li>
+						    <li><a href="javascript:sjly(2);">生态环境部</a></li>
+						    <li><a href="javascript:sjly(1);">水利部</a></li>
+						   <li style="display:none;" id="all_li"><a href="javascript:sjly(0);">全部</a></li>
+						</ul>
+					</div>
+				</div>
+				<ul>
+				    <li class="has-children" style="background: white">
+					    <div class="row">
+						    <div class="col-md-3">
+							    <div class="layui-form-item">
+								    <label class="layui-form-label"  style="width:109px;padding-top:11px;color:#333333;background:white">项目名称：</label>
+								    <div class="layui-input-block">
+								        <input type="text" name="xmmc" lay-verify="title" autocomplete="off" placeholder="请输入项目名称" class="layui-input inputclass-one">
+								    </div>
+								</div>
+							</div>	
+							<div class="col-md-3">
+							    <div class="layui-form-item">
+								    <label class="layui-form-label"  style="width:109px;padding-top:11px;color:#333333;background:white">行政区划：</label>
+									<div class="layui-input-block" id="loadTreeDate">
+									    <input type="text" id="sheng" name="sheng" lay-verify="title" autocomplete="off" placeholder="请选择" class="layui-input inputclass-one">
+									    <div id="zTreeDiv" style="position:absolute;top:0;z-index: 100;margin-top: 28px;width:259px;" hidden >
+                                            <ul id="treeDemo" class="ztree" style="height:300px;background-color: white;border:1px solid #757575;">
+                                            </ul>
+                                        </div>
+									</div>
+							    </div>
+							</div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="width:109px;padding-top:11px;white-space: nowrap;color:#333333;background:white">所在流域：</label>
+                                    <div class="layui-input-block">
+                                        <select id="xmszly" name="xmszly" class="selectCom">
+                                            <option value="">全部</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="width:109px;padding-top:11px;white-space:nowrap;color:#333333;background:white">建设运营状态：</label>
+                                    <div class="layui-input-block">
+                                        <select id="jszt" name="jszt" class="selectCom">
+                                            <option value="">全部</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+						</div>
+						<div class="row">
+						    <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="width:109px;padding-top:11px;color:#333333;background:white">开发方式：</label>
+                                    <div class="layui-input-block">
+                                        <select id="kffs" name="kffs" class="selectCom">
+                                            <option value="">全部</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">投资性质：</label>
+                                    <div class="layui-input-block">
+                                        <select id="tzxz" name="tzxz" class="selectCom">
+                                            <option value="">全部</option>
+                                            <option value="国有">国有</option>
+                                            <option value="集体">集体</option>
+                                            <option value="民营">民营</option>
+                                            <option value="混合">混合</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="width:109px;padding-top:11px;white-space: nowrap;color:#333333;background:white">并网情况：</label>
+                                    <div class="layui-input-block">
+                                        <select id="bwqk" name="bwqk" class="selectCom">
+                                            <option value="">全部</option>
+                                            <option value="1">接入电网</option>
+                                            <option value="3">直供电(民用电)</option>
+                                            <option value="2">直供电(化工)</option>
+                                            <option value="4">直供电(其他)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">规划符合状况：</label>
+                                    <div class="layui-input-block" style="margin-left:114px;">
+                                        <select name="sffhgh" class="selectCom">
+                                            <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>                            
+                                    </div>
+                                </div>
+                            </div>
+				        </div>
+						<div class="row">
+						    <div class="col-md-3">
+                                <div class="layui-form-item" style="margin-bottom:0px">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">项目审批状况：</label>
+                                    <div class="layui-input-block" style="margin-left:111px;">
+                                        <select name="sfyxmhz" class="selectCom">
+                                            <option value="">全部</option>                     
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-5" style="height:40px;margin-top:10px;">
+                                <div class="layui-form-item" style="margin-bottom:0px">
+                                    <label class="layui-form-label"  style="width:100px;padding-top:11px;color:#333333;background:white">投产时间：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="tcny" id="tcny" lay-verify="date" placeholder="最早投产时间" autocomplete="off" class="layui-input">-
+                                    </div>
+                                    <div class="layui-form-mid" style="color:black">-</div>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="tcnyEnd" id="tcnyEnd" lay-verify="date" placeholder="最晚投产时间" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+						    <div class="col-md-4" style="margin-top:-5px;">
+							    <div class="layui-form-item" style="margin-bottom:0px">
+								    <label class="layui-form-label"  style="width:80px;margin-top:11px;white-space: nowrap;color:#333333;background:white">装机容量：</label>
+									<div class="layui-input-inline" style="width:139px;">
+                                        <input type="number" name="zjrl" lay-verify="title" autocomplete="off" placeholder="最小容量（千瓦）" class="layui-input inputclass-one">
+                                    </div>
+                                    <div class="layui-form-mid" style="color:black;line-height:45px">-</div>
+                                    <div class="layui-input-inline" style="width:160px;">
+                                        <input type="number" name="zjrlMax" lay-verify="title" autocomplete="off" placeholder="最大容量（千瓦）" class="layui-input inputclass-one">
+                                    </div>
+							    </div>
+							</div>
+						</div>
+				    </li>
+				</ul>
+			</li>
+			<li class="has-children"  style="background: white">
+			    <input type="checkbox" name ="group-3" id="group-3">
+				<label for="group-3" style="background: #518cc2;">
+				    <img style="margin-top:-3px;margin-left:10px;margin-right:10px;" src="<%=basePath %>common/images/login/1.png" alt="">高级查询
+				    <i class="icon icon-chevron-down" style="color:white;margin-left:5px;"></i>
+				</label>
+				<ul>
+				    <li>
+					    <div class="row">
+						    <div class="col-md-3">
+							    <div class="layui-form-item">
+								    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">是否符合规划环评：</label>
+									<div class="layui-input-block"  style="margin-left:123px;">
+									    <select name="sffhghhp" class="selectCom">
+									        <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+									    </select>			
+									</div>
+								</div>
+							</div>  
+							<div class="col-md-3">
+							    <div class="layui-form-item">
+								    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">是否通过竣工环保验收：</label>
+									<div class="layui-input-block"  style="margin-left:149px;">
+									    <select name="sftgjghbys" class="selectCom">
+									        <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+									    </select>	
+									</div>
+								</div>
+							</div>
+							<div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">是否有项目竣工报告：</label>
+                                    <div class="layui-input-block"  style="margin-left:150px;">
+                                        <select name="sfyjgbg" class="selectCom">
+                                            <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>   
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="text-indent: 39px;white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">是否通过项目环评：</label>
+                                     <div class="layui-input-block" style="margin-left:160px;">
+                                         <select name="sftgxmhp" class="selectCom" onchange="xmhp()">
+                                             <option value="">全部</option>                  
+                                             <option value="是">是</option>
+                                             <option value="否">否</option>
+                                         </select>  
+                                     </div>
+                                </div>
+                            </div>
+						</div>
+						<div class="row">
+						    <div class="col-md-6" style="height:58px;">
+							    <div class="layui-form-item">
+								    <label class="layui-form-label"  style="white-space:nowrap;width:352px;padding-top:11px;color:#333333;background:white">环评时间早于投产（是否通过项目环评为“是”时可选）：</label>
+									<div class="layui-input-block" style="margin-left:356px;">
+									    <select name="hpsjzytcsj" class="selectCom" disabled>
+									        <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+									    </select>							     
+									</div>
+							    </div>
+							</div>
+							<div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">生态流量泄放措施：</label>
+                                    <div class="layui-input-block"  style="margin-left:123px;">
+                                        <select name="stllxfcs" class="selectCom">
+                                            <option value="">所有</option>                  
+                                            <option value="有">有</option>
+                                            <option value="无">无</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">生态流量监控设施：</label>
+                                    <div class="layui-input-block" style="margin-left:122px;">
+                                        <select name="stljkss" class="selectCom">
+                                            <option value="">所有</option>                  
+                                            <option value="有">有</option>
+                                            <option value="无">无</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+						</div>
+						<div class="row">
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="width:109px;padding-top:11px;color:#333333;background:white">过鱼措施：</label>
+                                    <div class="layui-input-block">
+                                        <select name="gycs" class="selectCom">
+                                            <option value="">所有</option>                  
+                                            <option value="有">有</option>
+                                            <option value="无">无</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">鱼类增殖放流措施：</label>
+                                    <div class="layui-input-block" style="margin-left:123px;">
+                                        <select name="zzflcs" class="selectCom">
+                                            <option value="">所有</option>                  
+                                            <option value="有">有</option>
+                                            <option value="无">无</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">坝下是否存在脱水干涸：</label>
+                                    <div class="layui-input-block"  style="margin-left:150px;">
+                                        <select name="bxsfcztsgk" class="selectCom">
+                                            <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>   
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">是否涉及自然保护区：</label>
+                                    <div class="layui-input-block" style="margin-left:132px;">
+                                        <select name="sfsjzrbhq" class="selectCom" onchange="sjbhq()">
+                                            <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6" style="height:58px;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:352px;padding-top:11px;color:#333333;background:white">涉及核心区（“是否涉及自然保护区”查询条件为“是”时可选）：</label>
+                                    <div class="layui-input-block" style="margin-left:393px;">
+                                        <select name="hxq" class="selectCom" disabled>
+                                            <option value="">全部</option>                  
+                                            <option value="涉及">涉及</option>
+                                            <option value="不涉及">不涉及</option>
+                                        </select>                                
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="height:58px;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">涉及缓冲区（“是否涉及自然保护区”查询条件为“是”时可选）：</label>
+                                    <div class="layui-input-block" style="margin-left:395px;">
+                                        <select name="hcq" class="selectCom" disabled>
+                                            <option value="">全部</option>                  
+                                            <option value="涉及">涉及</option>
+                                            <option value="不涉及">不涉及</option>
+                                        </select>   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6" style="height:58px;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:352px;padding-top:11px;color:#333333;background:white">涉及实验区（“是否涉及自然保护区”查询条件为“是”时可选）：</label>
+                                    <div class="layui-input-block" style="margin-left:393px;">
+                                        <select name="sys" class="selectCom" disabled>
+                                            <option value="">全部</option>                  
+                                            <option value="涉及">涉及</option>
+                                            <option value="不涉及">不涉及</option>
+                                        </select>                            
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="height:58px;">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">保护区未分区（“是否涉及自然保护区”查询条件为“是”时可选）：</label>
+                                    <div class="layui-input-block" style="margin-left:408px;">
+                                        <select name="wfq" class="selectCom" disabled>
+                                            <option value="">全部</option>                  
+                                            <option value="是">是</option>
+                                            <option value="否">否</option>
+                                        </select>   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7" style="height:58px;">
+                                <div class="layui-form-item">
+                                     <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">电站投产时间与保护区设立时间先后关系（“是否涉及自然保护区”查询条件为“是”时可选）：</label>
+                                     <div class="layui-input-block" style="margin-left:565px;">
+                                         <select name="dztcsjybhqslsjxhgx" class="selectCom" disabled>
+                                             <option value="">所有</option>                  
+                                             <option value="有">有</option>
+                                             <option value="无">无</option>
+                                         </select>   
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+					</li>
+			    </ul>
+		    </li>
+		</ul>
+	    <div class="row" style="margin-top:10px">
+	        <div class="layui-form-item" style="margin-bottom:0px">
+			    <label class="layui-form-label"  style="white-space:nowrap;width:109px;padding-top:11px;color:#333333;background:white">筛选条件：</label>
+				<div class="layui-input-block" style="margin-left:115px;" id="mei">
+				    <div id="meiki"></div>
+				    <div id="meikiy" style="text-align:center">
+		      	       <button class="btn btn-primary button-two"  style="margin-right:10px" type="button" onclick="searchData(1)"><i  style="margin-right:4px;" class="icon icon-search"></i>搜索</button>  
+		      	       <button class="btn btn-primary button-third" style="margin-right:10px" type="button" onclick="searchData(2)"><i style="margin-right:4px;" class="icon icon-cloud-upload"></i>导出</button>
+				       <button class="btn btn-primary button-third" style="" type="button" onclick="resetQuery()"><i style="margin-right:4px;" class="icon icon-reply"></i>重置</button>
+				    </div>
+				</div>
+		    </div>
+		</div>
+		<table class="layui-hide" id="searchList" lay-filter="test1"></table>
+	</div>
+</body>
+<script src="<%=basePath%>common/layui/lay/modules/layer.js" type="text/javascript" charset="utf-8" ></script>
+<script src="<%=basePath%>business/shujujiansuo/list.js"></script>
+<script type="text/javascript" src="<%=basePath%>common/inc/city.js"></script>
+<script src="<%=basePath%>common/js/ztree/js/jquery.ztree.all.js"></script>

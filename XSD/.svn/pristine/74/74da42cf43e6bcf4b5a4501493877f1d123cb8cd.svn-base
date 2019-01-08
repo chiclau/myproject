@@ -1,0 +1,152 @@
+﻿/*整个搜索控件*/
+.wholeSearchDiv{
+    position: absolute;
+    z-index: 1101;
+    width: 100%;
+    /*top: 0px;*/
+    /*right: 0px;*/
+
+}
+
+.searchInputBtnDiv{
+    position: absolute;
+    right:140px;
+    top:20px;
+    height: 38px;
+    width:435px;
+    z-index: 2000;
+    /*background-color: chartreuse;*/
+}
+
+.searchValueDiv{
+    float: left;
+    background: #fff;
+    width: 375px;
+    line-height: 36px;
+    color: #888;
+    font-size: 14px;
+    text-indent: 15px;
+    height: 36px;
+    border: 1px solid #387cec;
+}
+
+.searchBtnDiv{
+    float: left;
+    width: 38px;
+    cursor: pointer;
+    background: url("../images/bmseabtn.png") center no-repeat #4286f5;
+    height: 36px;
+    line-height: 38px;
+    border: 1px solid #387cec;
+}
+
+.searchResultPanelDiv{
+    display: none;
+    position: absolute;
+    right:201px;
+    top:56px;
+    width: 373px;
+    height: 180px;
+    background: #fff;
+    box-shadow: 0px 2px 2px 0px #c9c9c9;
+    -moz-box-shadow: 0px 2px 2px 0px #c9c9c9;
+    -webkit-box-shadow: 0px 2px 2px 0px #c9c9c9;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+.titSearchPosition{
+    height: 45px;
+    line-height: 45px;
+    margin: 0 20px;
+    color: #666;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
+
+.fl {
+    float: left;
+}
+
+.red {
+    color: red;
+}
+
+.fr {
+    float: right;
+}
+
+
+.seakuangSearchPosition{
+    width: 100%;
+    height: 440px;
+    overflow-y: auto;
+}
+
+.wholeSearchDiv .seatextSearchPosition {
+    /* height: 77px; */
+    margin: 0 20px;
+    padding-top: 13px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+
+.tt2pageSearchPosition{
+    width: 295px;
+    height: 25px;
+    margin: 0px auto;
+    padding-top: 10px;
+}
+
+.seatext {
+    cursor: pointer;
+}
+.seatext:hover{
+    background-color: #EFF2F5;
+}
+
+.seatext .id {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    color: #fff;
+    text-align: center;
+    background: url(../images/搜索.png) no-repeat;
+    margin-right: 15px;
+}
+
+.seatext ul.ad {
+    width: 210px;
+    height: 100%;
+    font-size: 15px;
+    color: #666;
+    margin: 0px;
+    padding: 0px;
+}
+
+.seatext ul.ad li {
+    line-height: 36px;
+    list-style-type:none;
+}
+
+.seatext ul.ad em {
+    /*color: #4285f4;*/
+    font-family: "微软雅黑",Arial;
+    font-size: 12px;
+    line-height: 24px;
+    font-style: normal;
+}
+
+.clear {
+    clear: both;
+    line-height: 0px;
+    font-size: 0;
+    visibility: hidden;
+}
+
+.poilist1{
+    margin: 0px;
+    padding: 0px;
+}

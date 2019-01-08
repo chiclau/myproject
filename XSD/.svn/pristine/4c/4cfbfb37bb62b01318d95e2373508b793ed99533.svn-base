@@ -1,0 +1,343 @@
+package com.lyht.business.datasearch.dao;
+/**
+ * 数据检索Dao
+ * @author 刘魁
+ *@创建时间 2018/10/10
+ */
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.datasearch.bean.HpsInfoSum;
+import com.lyht.business.datasearch.formbean.ComUploadFormBean;
+import com.lyht.business.datasearch.formbean.DataSerchFormBean;
+
+@Repository
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class DataSearchDao extends HibernateBaseDao<HpsInfoSum> {
+
+    /**
+     * 数据检索返回的集合 
+     */
+    @SuppressWarnings("static-access")
+	public PageResults listSearchData(DataSerchFormBean formBean,Integer page,Integer limit) {
+        StringBuilder sql = new StringBuilder();
+        ArrayList parmValue=new ArrayList();
+        sql.append("SELECT hps.dzbh dzbh,hps.id id,hps.xmmc xmmc,hps.sheng sheng,hps.shi shi,hps.xian xian,hps.xmwz xmwz,ly.name xmszly,hps.yjzl yjzl,");
+        sql.append("hps.jthl jthl,hps.zjrl zjrl,hps.ztz ztz,hps.sjfdl sjfdl,hps.tzxz tzxz,hps.tzly tzly,bw.name bwqk,");
+        sql.append("kf.name kfname,js.name jsname,hps.sfyxmhz,hps.sffhgh ");
+        if(formBean.getSjly()!=null && !"".equals(formBean.getSjly())) {//如果数据来源不是空
+            if(formBean.getSjly().equals("1") ) {//水利部
+          	  sql.append(" from slb_hps_info hps  ");
+	          }
+            if (formBean.getSjly().equals("2") ) {//环境部
+	        	  sql.append(" from hjb_hps_info1 hps  ");
+	  		}
+            if (formBean.getSjly().equals("3")) {//能源局
+	  			 sql.append(" from nyj hps ");
+	  		}
+            if (formBean.getSjly().equals("0")) {//全部
+            	  sql.append(" from hps_info_sum1 hps "); //全部 总表
+	  		}
+        }else {
+        	  sql.append(" from hps_info_sum1 hps "); //全部 总表
+        }
+        sql.append("LEFT JOIN sys_dict kf on kf.nm = hps.kffs AND kf.listnm_sys_dict_cate='kffs'");
+        sql.append("LEFT JOIN sys_dict js on js.nm = hps.jszt AND js.listnm_sys_dict_cate='jszt' ");
+        sql.append("LEFT JOIN sys_dict bw on bw.nm = hps.bwqk AND bw.listnm_sys_dict_cate='bwqk' ");
+        sql.append("LEFT JOIN sys_dict ly on ly.nm = hps.xmszly AND ly.listnm_sys_dict_cate='xmszly' ");
+        sql.append("WHERE 1=1 ");
+        if(formBean.getXmmc()!=null && !"".equals(formBean.getXmmc())){ // 项目名称
+            sql.append("and hps.xmmc like '%" + formBean.getXmmc() + "%' ");
+        }
+        if(formBean.getSheng()!=null && !"".equals(formBean.getSheng())){ // 省
+        	if(formBean.getSheng().equals("全国")) {
+        		
+        	}else {
+        		  sql.append("and hps.sheng in ("+ this.splitCity(formBean.getSheng()) + ") or hps.shi in ("+ this.splitCity(formBean.getSheng()) + ") or hps.xian in ("+ this.splitCity(formBean.getSheng()) + ") ");
+        	}
+          
+        }
+        if(formBean.getXmszly()!=null && !"".equals(formBean.getXmszly())){ // 所在流域
+            sql.append("and hps.xmszly = '"+ formBean.getXmszly() + "' ");
+        }
+        if(formBean.getJszt()!=null && !"".equals(formBean.getJszt())){ // 建设状态
+            sql.append("and hps.jszt = '"+ formBean.getJszt() + "' ");
+        }
+        if(formBean.getTcny()!=null && !"".equals(formBean.getTcny())){ // 投产时间
+            sql.append("and hps.tcny >= '" + formBean.getTcny() + "' ");
+        }
+        if(formBean.getTcnyEnd()!=null && !"".equals(formBean.getTcnyEnd())){ // 最晚投产时间
+            sql.append("and hps.tcny <= '" + formBean.getTcnyEnd() + "' ");
+        }
+        if(formBean.getZjrl()!=0.0){ // 装机容量
+            sql.append("and hps.zjrl >= '"+ formBean.getZjrl() + "' ");
+        }
+        if(formBean.getZjrlMax()!=0.0){ // 最大装机量
+            sql.append("and hps.zjrl <= '"+ formBean.getZjrlMax() + "' ");
+        }
+        if(formBean.getKffs()!=null && !"".equals(formBean.getKffs())){ // 开发方式
+            sql.append("and hps.kffs = '"+ formBean.getKffs() + "' ");
+        }
+        if(formBean.getTzxz()!=null && !"".equals(formBean.getTzxz())){ // 投资性质
+            sql.append("and hps.tzxz = '"+ formBean.getTzxz() + "' ");
+        }
+        if(formBean.getBwqk()!=null && !"".equals(formBean.getBwqk())){ // 并网情况
+            sql.append("and hps.bwqk = '"+ formBean.getBwqk() + "' ");
+        }
+        if(formBean.getSfyxmhz()!=null && !"".equals(formBean.getSfyxmhz())){ // 是否有项目核准
+            sql.append("and hps.sfyxmhz = '"+ formBean.getSfyxmhz() + "' ");
+        }
+        if(formBean.getSffhgh()!=null && !"".equals(formBean.getSffhgh())){ // 是否符合规划
+            sql.append("and hps.sffhgh = '"+ formBean.getSffhgh() + "' ");
+        }
+        if(formBean.getSffhghhp()!=null && !"".equals(formBean.getSffhghhp())){ // 是否符合规划环评
+            sql.append("and hps.sffhghhp = '"+ formBean.getSffhghhp() + "' ");
+        }
+        if(formBean.getSftgjghbys()!=null && !"".equals(formBean.getSftgjghbys())){ // 是否通过竣工环保验收
+            sql.append("and hps.sftgjghbys = '"+ formBean.getSftgjghbys() + "' ");
+        }
+        if(formBean.getSftgxmhp()!=null && !"".equals(formBean.getSftgxmhp())){ // 是否通过项目环评
+            sql.append("and hps.sftgxmhp = '"+ formBean.getSftgxmhp() + "' ");
+        }
+        if(formBean.getHpsjzytcsj()!=null && !"".equals(formBean.getHpsjzytcsj())){ // 环评时间早于投产
+            sql.append("and hps.hpsjzytcsj = '"+ formBean.getHpsjzytcsj() + "' ");
+        }
+        if(formBean.getSfyjgbg()!=null && !"".equals(formBean.getSfyjgbg())){ // 是否有项目竣工报告
+            sql.append("and hps.sfyjgbg = '"+ formBean.getSfyjgbg() + "' ");
+        }
+        if(formBean.getStllxfcs()!=null && !"".equals(formBean.getStllxfcs())){ // 生态流量泄放措施
+            sql.append("and hps.stllxfcs = '"+ formBean.getStllxfcs() + "' ");
+        }
+        if(formBean.getStljkss()!=null && !"".equals(formBean.getStljkss())){ // 生态流量泄监控设施
+            sql.append("and hps.stlljkss = '"+ formBean.getStljkss() + "' ");
+        }
+        if(formBean.getGycs()!=null && !"".equals(formBean.getGycs())){ // 过鱼措施
+            sql.append("and hps.gycs = '"+ formBean.getGycs() + "' ");
+        }
+        if(formBean.getZzflcs()!=null && !"".equals(formBean.getZzflcs())){ // 增殖放流措施
+            sql.append("and hps.zzflcs = '"+ formBean.getZzflcs() + "' ");
+        }
+        if(formBean.getSfsjzrbhq()!=null && !"".equals(formBean.getSfsjzrbhq())){ // 是否涉及自然保护区
+            sql.append("and hps.sfsjzrbhq = '"+ formBean.getSfsjzrbhq() + "' ");
+        }
+        if(formBean.getHxq()!=null && !"".equals(formBean.getHxq())){ // 涉及核心区
+            sql.append("and hps.hxq = '"+ formBean.getHxq() + "' ");
+        }
+        if(formBean.getBxsfcztsgk()!=null && !"".equals(formBean.getBxsfcztsgk())){ // 坝下是否存在脱水干涸
+            sql.append("and hps.bxsfcztsgk = '"+ formBean.getBxsfcztsgk() + "' ");
+        }
+        if(formBean.getHcq()!=null && !"".equals(formBean.getHcq())){ // 涉及缓冲区
+            sql.append("and hps.hcq = '"+ formBean.getHcq() + "' ");
+        }
+        if(formBean.getSys()!=null && !"".equals(formBean.getSys())){ // 实验室区
+            sql.append("and hps.sys = '"+ formBean.getSys() + "' ");
+        }
+        if(formBean.getDztcsjybhqslsjxhgx()!=null && !"".equals(formBean.getDztcsjybhqslsjxhgx())){ // 涉及缓冲区
+            sql.append("and hps.dztcsjybhqslsjxhgx = '"+ formBean.getDztcsjybhqslsjxhgx() + "' ");
+        }
+        if(formBean.getWfq()!=null && !"".equals(formBean.getWfq())){ // 未分区
+            sql.append("and hps.wfq = '"+ formBean.getWfq() + "' ");
+        }
+        //sql.append("  ORDER BY sd_sheng ASC ");
+        System.out.println(sql.toString());
+        PageResults retValue =new PageResults();
+        retValue = this.findPageByFetchedSql(sql.toString(), null
+                ,page,limit,parmValue.toArray());
+        return retValue;
+    }
+
+    /**
+     * 查询选中的
+     */
+    public List<Map> selectDetails(Integer id) {
+        StringBuilder sql = new StringBuilder();
+        sql.append(" SELECT h.id, h.slb_dzbh slbDzbh, h.nyj_dzbh nyjDzbh, h.sthjb_dzbh sthjbDzbh, h.dzbh, ISNULL(h.xmmc, '') AS xmmc, ");
+        sql.append(" ISNULL(h.dj, '') AS dj,ISNULL(h.bw, '') AS bw,ISNULL(h.sheng, '') AS sheng,ISNULL(h.shi, '') AS shi,ISNULL(h.xian, '') AS xian, ");
+        sql.append(" ISNULL(h.szxjxzqbm, '') AS szxjxzqbm,ISNULL(h.xmwz, '') AS xmwz,ISNULL(h.jsdw, '') AS jsdw,ISNULL(h.dzlxr, '') AS dzlxr,ISNULL(h.lxrdh, '') AS lxrdh, ");
+        sql.append(" ISNULL(ly.name, '') AS xmszly,ISNULL(h.yjzl, '') AS yjzl,ISNULL(h.jthl, '') AS jthl,ISNULL(h.zjrl, '') AS zjrl,ISNULL(h.ztz, '') AS ztz, ");
+        sql.append(" ISNULL(h.sjnfdl, '') AS sjnfdl,ISNULL(h.sjnfdl_xz, '') AS sjnfdlXz,ISNULL(h.tzxz, '') AS tzxz,ISNULL(h.tzly, '') AS tzly,ISNULL(bw.name, '') AS bwqk,ISNULL(kf.name, '') AS kfName, ");
+        sql.append(" ISNULL(h.qskhdjl, '') AS qskhdjl,ISNULL(js.name, '') AS jsName,ISNULL(h.dysj, '') AS dysj,ISNULL(h.ccyy, '') AS ccyy,ISNULL(h.sfykzstxf, '') AS sfykzstxf, ");
+        sql.append(" ISNULL(h.sjfdl, '') AS sjfdl,ISNULL(h.sjfdl_xz, '') AS sjfdlXz,ISNULL(h.sfyxmhz, '') AS sfyxmhz,ISNULL(h.hzwjmcjch, '') AS hzwjmcjch,ISNULL(h.xmhzdw, '') AS xmhzdw, ");
+        sql.append(" ISNULL(h.sffhgh, '') AS sffhgh,ISNULL(h.ghmc, '') AS ghmc,ISNULL(h.ghshsj, '') AS ghshsj,ISNULL(h.ghspbm, '') AS ghspbm,ISNULL(h.sffhghhp, '') AS sffhghhp, ");
+        sql.append(" ISNULL(h.ghhpwj, '') AS ghhpwj,ISNULL(h.scwjwh, '') AS scwjwh,ISNULL(h.ghhpscbm, '') AS ghhpscbm,ISNULL(h.sftgxmhp, '') AS sftgxmhp,ISNULL(h.spwjmc, '') AS spwjmc, ");
+        sql.append(" ISNULL(h.spwjwh, '') AS spwjwh,ISNULL(h.hpspsj, '') AS hpspsj,ISNULL(h.ppbm, '') AS ppbm,ISNULL(h.sftgjghbys, '') AS sftgjghbys,ISNULL(h.yswjmc, '') AS yswjmc, ");
+        sql.append(" ISNULL(h.yswjwh, '') AS yswjwh,ISNULL(h.ysbm, '') AS ysbm,ISNULL(h.stllxfcs, '') AS stllxfcs,ISNULL(h.stlljkss, '') AS stlljkss,ISNULL(h.gycs, '') AS gycs, ");
+        sql.append(" ISNULL(h.zzflcs, '') AS zzflcs,ISNULL(h.qthbcs, '') AS qthbcs,ISNULL(h.qthbcsms, '') AS qthbcsms,ISNULL(h.sfsjzrbhq, '') AS sfsjzrbhq,ISNULL(h.zrbhqslyj, '') AS zrbhqslyj, ");
+        sql.append(" ISNULL(h.zrbhqjj, '') AS zrbhqjj,ISNULL(h.hxq, '') AS hxq,ISNULL(h.hcq, '') AS hcq,ISNULL(h.sys, '') AS sys,ISNULL(h.wfq, '') AS wfq, ");
+        sql.append(" ISNULL(h.bxsfcztsgk, '') AS bxsfcztsgk,ISNULL(h.tshdcd, '') AS tshdcd,ISNULL(h.qtsthjwt, '') AS qtsthjwt,ISNULL(h.tbr, '') AS tbr,ISNULL(h.dh, '') AS dh,ISNULL(h.tbsj, '') AS tbsj, ");
+        sql.append(" ISNULL(h.xchcr, '') AS xchcr,ISNULL(h.ywjmc, '') AS ywjmc,ISNULL(h.dzzs, '') AS dzzs,ISNULL(h.tcny, '') AS tcny,ISNULL(h.zhltqk, '') AS zhltqk, ");
+        sql.append(" ISNULL(h.zrk, '') AS zrk,ISNULL(h.bg, '') AS bg,ISNULL(h.swdj, '') AS swdj,ISNULL(h.ghspjwh, '') AS ghspjwh,ISNULL(h.jsfaspbmjwh, '') AS jsfaspbmjwh, ");
+        sql.append(" ISNULL(h.pzkmbmjwh, '') AS pzkmbmjwh,ISNULL(h.hpjhbyswh, '') AS hpjhbyswh,ISNULL(h.sbjwh, '') AS sbjwh,ISNULL(h.ydpcjwh, '') AS ydpcjwh, ");
+        sql.append(" ISNULL(h.sfjddzzhwxx, '') AS sfjddzzhwxx,ISNULL(h.ysbmjwh, '') AS ysbmjwh,ISNULL(h.xmfrmc, '') AS xmfrmc,ISNULL(h.zytzr, '') AS zytzr,ISNULL(h.lxdh, '') AS lxdh, ");
+        sql.append(" ISNULL(h.bz, '') AS bz,ISNULL(h.hpsjzytcsj, '') AS hpsjzytcsj,ISNULL(h.sfyjgbg, '') AS sfyjgbg,ISNULL(h.dztcsjybhqslsjxhgx, '') AS dztcsjybhqslsjxhgx, ");
+        sql.append(" ISNULL(h.sd_sheng, '') AS sdSheng,ISNULL(h.sd_shi, '') AS sdShi,ISNULL(h.sd_xian, '') AS sdXian FROM hps_info_sum1 h ");
+        sql.append(" LEFT JOIN sys_dict kf on kf.nm = h.kffs AND kf.listnm_sys_dict_cate='kffs'LEFT JOIN sys_dict js on js.nm = h.jszt AND js.listnm_sys_dict_cate='jszt'  ");
+        sql.append(" LEFT JOIN sys_dict ly on ly.nm = h.xmszly AND ly.listnm_sys_dict_cate='xmszly' ");
+        sql.append(" LEFT JOIN sys_dict bw on bw.nm = h.bwqk AND bw.listnm_sys_dict_cate='bwqk' ");
+        sql.append(" where 1=1 ");
+    
+            sql.append("and h.id = " + id);
+ 
+        return this.createSQLQuerybyMap(sql.toString());
+    }
+    
+    /**
+     * 根据查询条件导出文档 
+     */
+    @SuppressWarnings("static-access")
+	public List<Map> uploadScorp(DataSerchFormBean formBean) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(" SELECT h.id, h.slb_dzbh slbDzbh, h.nyj_dzbh nyjDzbh, h.sthjb_dzbh sthjbDzbh, h.dzbh, ISNULL(h.xmmc, '') AS xmmc, ");
+        sql.append(" ISNULL(h.dj, '') AS dj,ISNULL(h.bw, '') AS bw,ISNULL(h.sheng, '') AS sheng,ISNULL(h.shi, '') AS shi,ISNULL(h.xian, '') AS xian, ");
+        sql.append(" ISNULL(h.szxjxzqbm, '') AS szxjxzqbm,ISNULL(h.xmwz, '') AS xmwz,ISNULL(h.jsdw, '') AS jsdw,ISNULL(h.dzlxr, '') AS dzlxr,ISNULL(h.lxrdh, '') AS lxrdh, ");
+        sql.append(" ISNULL(ly.name, '') AS xmszly,ISNULL(h.yjzl, '') AS yjzl,ISNULL(h.jthl, '') AS jthl,ISNULL(h.zjrl, '') AS zjrl,ISNULL(h.ztz, '') AS ztz, ");
+        sql.append(" ISNULL(h.sjnfdl, '') AS sjnfdl,ISNULL(h.sjnfdl_xz, '') AS sjnfdlXz,ISNULL(h.tzxz, '') AS tzxz,ISNULL(h.tzly, '') AS tzly,ISNULL(bw.name, '') AS bwqk,ISNULL(kf.name, '') AS kfName, ");
+        sql.append(" ISNULL(h.qskhdjl, '') AS qskhdjl,ISNULL(js.name, '') AS jsName,ISNULL(h.dysj, '') AS dysj,ISNULL(h.ccyy, '') AS ccyy,ISNULL(h.sfykzstxf, '') AS sfykzstxf, ");
+        sql.append(" ISNULL(h.sjfdl, '') AS sjfdl,ISNULL(h.sjfdl_xz, '') AS sjfdlXz,ISNULL(h.sfyxmhz, '') AS sfyxmhz,ISNULL(h.hzwjmcjch, '') AS hzwjmcjch,ISNULL(h.xmhzdw, '') AS xmhzdw, ");
+        sql.append(" ISNULL(h.sffhgh, '') AS sffhgh,ISNULL(h.ghmc, '') AS ghmc,ISNULL(h.ghshsj, '') AS ghshsj,ISNULL(h.ghspbm, '') AS ghspbm,ISNULL(h.sffhghhp, '') AS sffhghhp, ");
+        sql.append(" ISNULL(h.ghhpwj, '') AS ghhpwj,ISNULL(h.scwjwh, '') AS scwjwh,ISNULL(h.ghhpscbm, '') AS ghhpscbm,ISNULL(h.sftgxmhp, '') AS sftgxmhp,ISNULL(h.spwjmc, '') AS spwjmc, ");
+        sql.append(" ISNULL(h.spwjwh, '') AS spwjwh,ISNULL(h.hpspsj, '') AS hpspsj,ISNULL(h.ppbm, '') AS ppbm,ISNULL(h.sftgjghbys, '') AS sftgjghbys,ISNULL(h.yswjmc, '') AS yswjmc, ");
+        sql.append(" ISNULL(h.yswjwh, '') AS yswjwh,ISNULL(h.ysbm, '') AS ysbm,ISNULL(h.stllxfcs, '') AS stllxfcs,ISNULL(h.stlljkss, '') AS stlljkss,ISNULL(h.gycs, '') AS gycs, ");
+        sql.append(" ISNULL(h.zzflcs, '') AS zzflcs,ISNULL(h.qthbcs, '') AS qthbcs,ISNULL(h.qthbcsms, '') AS qthbcsms,ISNULL(h.sfsjzrbhq, '') AS sfsjzrbhq,ISNULL(h.zrbhqslyj, '') AS zrbhqslyj, ");
+        sql.append(" ISNULL(h.zrbhqjj, '') AS zrbhqjj,ISNULL(h.hxq, '') AS hxq,ISNULL(h.hcq, '') AS hcq,ISNULL(h.sys, '') AS sys,ISNULL(h.wfq, '') AS wfq, ");
+        sql.append(" ISNULL(h.bxsfcztsgk, '') AS bxsfcztsgk,ISNULL(h.tshdcd, '') AS tshdcd,ISNULL(h.qtsthjwt, '') AS qtsthjwt,ISNULL(h.tbr, '') AS tbr,ISNULL(h.dh, '') AS dh,ISNULL(h.tbsj, '') AS tbsj, ");
+        sql.append(" ISNULL(h.xchcr, '') AS xchcr,ISNULL(h.ywjmc, '') AS ywjmc,ISNULL(h.dzzs, '') AS dzzs,ISNULL(h.tcny, '') AS tcny,ISNULL(h.zhltqk, '') AS zhltqk, ");
+        sql.append(" ISNULL(h.zrk, '') AS zrk,ISNULL(h.bg, '') AS bg,ISNULL(h.swdj, '') AS swdj,ISNULL(h.ghspjwh, '') AS ghspjwh,ISNULL(h.jsfaspbmjwh, '') AS jsfaspbmjwh, ");
+        sql.append(" ISNULL(h.pzkmbmjwh, '') AS pzkmbmjwh,ISNULL(h.hpjhbyswh, '') AS hpjhbyswh,ISNULL(h.sbjwh, '') AS sbjwh,ISNULL(h.ydpcjwh, '') AS ydpcjwh, ");
+        sql.append(" ISNULL(h.sfjddzzhwxx, '') AS sfjddzzhwxx,ISNULL(h.ysbmjwh, '') AS ysbmjwh,ISNULL(h.xmfrmc, '') AS xmfrmc,ISNULL(h.zytzr, '') AS zytzr,ISNULL(h.lxdh, '') AS lxdh, ");
+        sql.append(" ISNULL(h.bz, '') AS bz,ISNULL(h.hpsjzytcsj, '') AS hpsjzytcsj,ISNULL(h.sfyjgbg, '') AS sfyjgbg,ISNULL(h.dztcsjybhqslsjxhgx, '') AS dztcsjybhqslsjxhgx, ");
+        sql.append(" ISNULL(h.sd_sheng, '') AS sdSheng,ISNULL(h.sd_shi, '') AS sdShi,ISNULL(h.sd_xian, '') AS sdXian FROM hps_info_sum1 h ");
+        sql.append(" LEFT JOIN sys_dict kf on kf.nm = h.kffs AND kf.listnm_sys_dict_cate='kffs'LEFT JOIN sys_dict js on js.nm = h.jszt AND js.listnm_sys_dict_cate='jszt'  ");
+        sql.append(" LEFT JOIN sys_dict ly on ly.nm = h.xmszly AND ly.listnm_sys_dict_cate='xmszly'   ");
+        sql.append(" LEFT JOIN sys_dict bw on bw.nm = h.bwqk AND bw.listnm_sys_dict_cate='bwqk'   ");
+        sql.append(" where 1=1  ");
+        if(formBean.getXmmc()!=null && !"".equals(formBean.getXmmc())){ // 项目名称
+            sql.append("and h.xmmc like '%" + formBean.getXmmc() + "%' ");
+        }
+        if(formBean.getSheng()!=null && !"".equals(formBean.getSheng())){ // 省
+            sql.append("and h.sheng in ("+ this.splitCity(formBean.getSheng()) + ") or h.shi in ("+ this.splitCity(formBean.getSheng()) + ") or h.xian in ("+ this.splitCity(formBean.getSheng()) + ") ");
+        }
+        if(formBean.getXmszly()!=null && !"".equals(formBean.getXmszly())){ // 所在流域
+            sql.append("and h.xmszly = '"+ formBean.getXmszly() + "' ");
+        }
+        if(formBean.getJszt()!=null && !"".equals(formBean.getJszt())){ // 建设状态
+            sql.append("and h.jszt = '"+ formBean.getJszt() + "' ");
+        }
+        if(formBean.getTcny()!=null && !"".equals(formBean.getTcny())){ // 投产时间
+            sql.append("and h.tcny >= '" + formBean.getTcny() + "' ");
+        }
+        if(formBean.getTcnyEnd()!=null && !"".equals(formBean.getTcnyEnd())){ // 最晚投产时间
+            sql.append("and h.tcny <= '" + formBean.getTcnyEnd() + "' ");
+        }
+        if(formBean.getZjrl()!=0.0){ // 装机容量
+            sql.append("and h.zjrl >= '"+ formBean.getZjrl() + "' ");
+        }
+        if(formBean.getZjrlMax()!=0.0){ // 最大装机量
+            sql.append("and h.zjrl <= '"+ formBean.getZjrlMax() + "' ");
+        }
+        if(formBean.getKffs()!=null && !"".equals(formBean.getKffs())){ // 开发方式
+            sql.append("and h.kffs = '"+ formBean.getKffs() + "' ");
+        }
+        if(formBean.getTzxz()!=null && !"".equals(formBean.getTzxz())){ // 投资性质
+            sql.append("and h.tzxz = '"+ formBean.getTzxz() + "' ");
+        }
+        if(formBean.getBwqk()!=null && !"".equals(formBean.getBwqk())){ // 并网情况
+            sql.append("and h.bwqk = '"+ formBean.getBwqk() + "' ");
+        }
+        if(formBean.getSfyxmhz()!=null && !"".equals(formBean.getSfyxmhz())){ // 是否有项目核准
+            sql.append("and h.sfyxmhz = '"+ formBean.getSfyxmhz() + "' ");
+        }
+        if(formBean.getSffhgh()!=null && !"".equals(formBean.getSffhgh())){ // 是否符合规划
+            sql.append("and h.sffhgh = '"+ formBean.getSffhgh() + "' ");
+        }
+        if(formBean.getSffhghhp()!=null && !"".equals(formBean.getSffhghhp())){ // 是否符合规划环评
+            sql.append("and h.sffhghhp = '"+ formBean.getSffhghhp() + "' ");
+        }
+        if(formBean.getSftgjghbys()!=null && !"".equals(formBean.getSftgjghbys())){ // 是否通过竣工环保验收
+            sql.append("and h.sftgjghbys = '"+ formBean.getSftgjghbys() + "' ");
+        }
+        if(formBean.getSftgxmhp()!=null && !"".equals(formBean.getSftgxmhp())){ // 是否通过项目环评
+            sql.append("and h.sftgxmhp = '"+ formBean.getSftgxmhp() + "' ");
+        }
+        if(formBean.getHpsjzytcsj()!=null && !"".equals(formBean.getHpsjzytcsj())){ // 环评时间早于投产
+            sql.append("and h.hpsjzytcsj = '"+ formBean.getHpsjzytcsj() + "' ");
+        }
+        if(formBean.getSfyjgbg()!=null && !"".equals(formBean.getSfyjgbg())){ // 是否有项目竣工报告
+            sql.append("and h.sfyjgbg = '"+ formBean.getSfyjgbg() + "' ");
+        }
+        if(formBean.getStllxfcs()!=null && !"".equals(formBean.getStllxfcs())){ // 生态流量泄放措施
+            sql.append("and h.stllxfcs = '"+ formBean.getStllxfcs() + "' ");
+        }
+        if(formBean.getStljkss()!=null && !"".equals(formBean.getStljkss())){ // 生态流量泄监控设施
+            sql.append("and h.stlljkss = '"+ formBean.getStljkss() + "' ");
+        }
+        if(formBean.getGycs()!=null && !"".equals(formBean.getGycs())){ // 过鱼措施
+            sql.append("and h.gycs = '"+ formBean.getGycs() + "' ");
+        }
+        if(formBean.getZzflcs()!=null && !"".equals(formBean.getZzflcs())){ // 增殖放流措施
+            sql.append("and h.zzflcs = '"+ formBean.getZzflcs() + "' ");
+        }
+        if(formBean.getSfsjzrbhq()!=null && !"".equals(formBean.getSfsjzrbhq())){ // 是否涉及自然保护区
+            sql.append("and h.sfsjzrbhq = '"+ formBean.getSfsjzrbhq() + "' ");
+        }
+        if(formBean.getHxq()!=null && !"".equals(formBean.getHxq())){ // 涉及核心区
+            sql.append("and h.hxq = '"+ formBean.getHxq() + "' ");
+        }
+        if(formBean.getBxsfcztsgk()!=null && !"".equals(formBean.getBxsfcztsgk())){ // 坝下是否存在脱水干涸
+            sql.append("and h.bxsfcztsgk = '"+ formBean.getBxsfcztsgk() + "' ");
+        }
+        if(formBean.getHcq()!=null && !"".equals(formBean.getHcq())){ // 涉及缓冲区
+            sql.append("and h.hcq = '"+ formBean.getHcq() + "' ");
+        }
+        if(formBean.getSys()!=null && !"".equals(formBean.getSys())){ // 涉及缓冲区
+            sql.append("and h.sys = '"+ formBean.getSys() + "' ");
+        }
+        if(formBean.getDztcsjybhqslsjxhgx()!=null && !"".equals(formBean.getDztcsjybhqslsjxhgx())){ // 涉及缓冲区
+            sql.append("and h.dztcsjybhqslsjxhgx = '"+ formBean.getDztcsjybhqslsjxhgx() + "' ");
+        }
+        if(formBean.getWfq()!=null && !"".equals(formBean.getWfq())){ // 涉及缓冲区
+            sql.append("and h.wfq = '"+ formBean.getWfq() + "' ");
+        }
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	/**
+	 * 通用导出的查询
+	 */
+	public List<Map> comDetails(ComUploadFormBean uploadBean) {
+		StringBuilder sql = new StringBuilder();
+		sql.append(uploadBean.getSql());
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	// 字符串切割
+	public static String splitCity(String city){
+		String[] split = city.split(",");
+		String str = "";
+		for (int i = 0; i < split.length; i++) {
+			if(i == split.length-1){
+				str += "'"+split[i]+"'";
+			}else{
+				str += "'"+split[i]+"',";
+			}
+		}
+		return str;
+	}
+
+	// 查询数据来源
+	public List<Map> selectDzFrom(int id) {
+		StringBuilder sql = new StringBuilder();
+		sql.append("select * from hps_info_sum1 where 1=1 ");
+		sql.append("AND id = '" + id +"'");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+}

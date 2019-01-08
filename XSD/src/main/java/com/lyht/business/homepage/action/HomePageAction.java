@@ -1,0 +1,381 @@
+package com.lyht.business.homepage.action;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.homepage.service.HomePageService;
+import com.lyht.util.BaseLyhtAction;
+import com.lyht.util.CommonFunction;
+
+import net.sf.json.JSONArray;
+
+
+/**
+ * 基础信息Action
+ * @author 刘魁
+ *@创建时间 2018/10/08
+ */
+@Namespace("/homePage")
+@Controller
+@Scope("prototype")
+@Action("homePage")
+@SuppressWarnings("rawtypes")
+public class HomePageAction extends BaseLyhtAction{
+
+	private static final long serialVersionUID = 1L;
+	
+	private static Logger log = Logger.getLogger("HomePageAction");
+	
+	private String address;//查询地址参数
+	private String shi;//市
+	private String bj;//参数标记0全国，1省，2,市，3县
+	
+	private String css;//参数标记1倒序，2正序
+	
+	private String name;
+	
+	private int page;
+
+	private int limit;
+	
+	@Resource private HomePageService homePageService;
+	
+	
+	/**
+	 * 获取电站信息
+	 * */
+	public String list(){
+		log.info("SysStaffAction=list:获取电站信息");
+		HashMap<String, Object> mHashMap=new HashMap<String,Object>();
+		PageResults dzListData = homePageService.getDzListData(bj,name,shi,address,page,limit);
+		if (dzListData == null){
+			JSONArray mJSONArray = new JSONArray();
+			mHashMap.put("total", 0);
+			mHashMap.put("rows", mJSONArray);
+		} else {
+			mHashMap.put("code",0);
+			mHashMap.put("msg", "");
+			mHashMap.put("count", dzListData.getTotalCount());
+			mHashMap.put("data", dzListData.getResults());		
+		}
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 获取电站信息list_zz(首页折线图统计)
+	 * */
+	public String list_zz(){
+		log.info("SysStaffAction=list:获取电站信息list_zz(首页折线图统计)");
+		HashMap<String, Object> mHashMap=new HashMap<String,Object>();
+		PageResults dzListData = homePageService.list_zz(bj,name,address,page,limit);
+		if (dzListData == null){
+			JSONArray mJSONArray = new JSONArray();
+			mHashMap.put("total", 0);
+			mHashMap.put("rows", mJSONArray);
+		} else {
+			mHashMap.put("code",0);
+			mHashMap.put("msg", "");
+			mHashMap.put("count", dzListData.getTotalCount());
+			mHashMap.put("data", dzListData.getResults());		
+		}
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国每个省得水电站个数
+	 * @return
+	 */
+	public String countQg(){
+		log.info("BaseInfoAction=countQg:统计全国每个省得水电站个数");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countQg(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计长江经济带每个省得水电站个数
+	 * @return
+	 */
+	public String countCj(){
+		log.info("BaseInfoAction=countCj:统计长江经济带每个省得水电站个数");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countCj(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国电站数量
+	 * @return
+	 */
+	public String countDz(){
+		log.info("BaseInfoAction=countDz:统计全国电站数量");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDz(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国装机容量数量
+	 * @return
+	 */
+	public String countZjrl(){
+		log.info("BaseInfoAction=countZjrl:统计全国装机容量数量");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countZjrl(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国建设状态
+	 * @return
+	 */
+	public String countJszt(){
+		log.info("BaseInfoAction=countJszt:统计全国建设状态");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countJszt(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国开发方式
+	 * @return
+	 */
+	public String countKffs(){
+		log.info("BaseInfoAction=countKffs:统计全国开发方式");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countKffs(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计全国电站数量(长江)
+	 * @return
+	 */
+	public String countDz_cj(){
+		log.info("BaseInfoAction=countDz_cj:统计全国电站数量(长江)");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDz_cj(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国装机容量数量(长江)
+	 * @return
+	 */
+	public String countZjrl_cj(){
+		log.info("BaseInfoAction=countZjrl_cj:统计全国装机容量数量(长江)");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countZjrl_cj(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国建设状态(长江)
+	 * @return
+	 */
+	public String countJszt_cj(){
+		log.info("BaseInfoAction=countJszt_cj:统计全国建设状态(长江)");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countJszt_cj(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 统计全国开发方式(长江)
+	 * @return
+	 */
+	public String countKffs_cj(){
+		log.info("BaseInfoAction=countKffs_cj:统计全国开发方式(长江)");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countKffs_cj(address,bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计水电站——右
+	 * @return
+	 */
+	public String countDz_right(){
+		log.info("BaseInfoAction=countDz_right:统计水电站——右");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDz_right(address,bj,css);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计水装机总规模——右
+	 * @return
+	 */
+	public String countZjzgm_right(){
+		log.info("BaseInfoAction=countZjzgm_right:统计水装机总规模——右");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countZjzgm_right(address,bj,css);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计水电站——右（长江）
+	 * @return
+	 */
+	public String countDz_right_cj(){
+		log.info("BaseInfoAction=countDz_right_cj:统计水电站——右（长江）");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDz_right_cj(address,bj,css);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 统计水装机总规模——右(长江)
+	 * @return
+	 */
+	public String countZjzgm_right_cj(){
+		log.info("BaseInfoAction=countZjzgm_right_cj:统计水装机总规模——右（长江）");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countZjzgm_right_cj(address,bj,css);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 地图搜索键盘抬起事件
+	 * @return
+	 */
+	public String keyUp(){
+		log.info("BaseInfoAction=keyUp:地图搜索键盘抬起事件");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.keyUp(bj);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 根据电站状态查询各地区电站数量
+	 * @return
+	 */
+	public String countDzslByYxzt(){
+		log.info("BaseInfoAction=keyUp:根据电站状态查询各地区电站数量");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDzslByYxzt(bj,name,address);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 根据电站状态查询各地区电站装机容量
+	 * @return
+	 */
+	public String countDzzjrlByYxzt(){
+		log.info("BaseInfoAction=keyUp:根据电站状态查询各地区电站装机容量");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDzzjrlByYxzt(bj,name,address);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 小水电发展历程数量统计
+	 * @return
+	 */
+	public String countDzByDate(){
+		log.info("BaseInfoAction=keyUp:小水电发展历程数量统计");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countDzByDate(bj,name,address);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	/**
+	 * 小水电发展历程装机统计
+	 * @return
+	 */
+	public String countZjByDate(){
+		log.info("BaseInfoAction=keyUp:小水电发展历程装机统计");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countZjByDate(bj,name,address);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	/**
+	 * 首页图表转换
+	 * @return
+	 */
+	public String countTbzh(){
+		log.info("BaseInfoAction=countTbzh:首页图表转换");
+		HashMap<String, Object> mHashMap = new HashMap<String, Object>();
+		List<Map> list = homePageService.countTbzh(bj,address);
+		mHashMap.put("rows", list);
+		CommonFunction.writeResponse(getResponse(), mHashMap);
+		return null;
+	}
+	
+	
+	public void setCss(String css) {
+		this.css = css;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public void setBj(String bj) {
+		this.bj = bj;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getLimit() {
+		return limit;
+	}
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+	public void setPage(int page) {
+		this.page = page;
+	}
+	public int getPage() {
+		return page;
+	}
+
+	public String getShi() {
+		return shi;
+	}
+
+	public void setShi(String shi) {
+		this.shi = shi;
+	}
+
+}

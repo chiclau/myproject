@@ -1,0 +1,174 @@
+package com.lyht.business.datasearch.service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.datasearch.dao.DataSearchDao;
+import com.lyht.business.datasearch.dao.ZdSumDao;
+import com.lyht.business.datasearch.formbean.ComUploadFormBean;
+import com.lyht.business.datasearch.formbean.DataSerchFormBean;
+import com.lyht.util.DateUtil;
+import com.lyht.util.ExcelUtils;
+
+/**
+ * 数据检索
+ * @author 刘魁
+ *@创建时间 2018/10/10
+ */
+@Service
+@Scope("prototype")
+@Transactional
+@SuppressWarnings("rawtypes")
+public class DataSearchService {
+    
+    @Resource
+    private DataSearchDao dao;
+    @Resource
+    private ZdSumDao zdSumdao;
+
+    /**
+     * 检索数据信息
+     */
+    @Transactional(propagation=Propagation.REQUIRED)
+    public PageResults listSearchData(DataSerchFormBean formBean,Integer page,Integer limit) {
+        return dao.listSearchData(formBean,page,limit);
+    }
+
+    // 查询建设状态
+    public List<Map> listZdSum() {
+        return zdSumdao.listZdSum();
+    }
+
+    /**
+     * 查询选中的项目
+     */
+    public List<Map> selectDetails(Integer id,String name) {
+        return dao.selectDetails(id,name);
+    }
+
+    /**
+     * 根据条件查询内容让action保存进session
+     */
+	public List<Map> exportDetails( DataSerchFormBean formBean){
+        return dao.uploadScorp(formBean);
+	}
+	
+	/**
+	 * 将session中查询出来的数据导出成ex表格
+	 */
+	public void uploadDetails(HttpServletRequest request, HttpServletResponse response, List<Map> list)  throws Exception {
+		String title="电站详细信息";
+        String [] tab = {"序号","项目名称","省","市","县",
+        		"项目位置","建设(运营)单位","电站联系人","联系人电话","项目所在流域","一级支流","具体河流","装机容量(千瓦)",
+        		"总投资(万元)","设计年发电量(万千瓦时)","设计年发电量修正(万千瓦时)","投资性质(所有制)","投资来源","并网情况",
+        		"开发方式","取水口河道距离","建设(运营)状态","对应时间(环保部)","拆除原因","是否已开展生态修复","2017年实际发电量(万千瓦时)",
+        		"2017年实际发电量_修正(万千瓦时)","是否有项目核准(审批)","审核(审批)文件名称及文号","项目核准(审批)部门",
+        		"是否符合规划","规划名称","规划审批时间","规划审批部门","是否符合规划环评","规划环评文件","审查文件文号",
+        		"规划环评审查部门","是否通过项目环评","审批文件名称","审批文件文号","环评审批时间","审批部门","是否通过竣工环保验收",
+        		"验收文件名称","验收文件文号","验收部门","生态流量泄放措施","生态流量监控设施","过鱼措施","增殖流放措施",
+        		"其他环保措施","其他环保措施描述","是否涉及自然保护区","自然保护区设立时间","自然保护区级别","核心区",
+        		"缓冲区","实验区","未分区","坝下是否存在脱水干涸","脱水河段长度(公里)","其他生态环境问题","填表人",
+        		"电话","填表时间","现场核查人","源文件名称","电站座数","投产年月(能源局)","综合利用情况",
+        		"总库容(万立方米)","坝高(米)","上网电价(元/千万时)","规划审批及文号","技术方案审批部门及文号","批准开工部门及文号",
+        		"环评及环保验收文号","水保及文号","用地批准及文号","是否进行地质灾害危险性评估","验收部门及文号","项目法人名称",
+        		"主要投资方","联系电话","环评时间早于投产时间","是否有竣工报告","电站投产时间与保护区设立时间先后关系","备注"};
+        String [] val = {"xmmc","sheng","shi","xian",
+        		"xmwz","jsdw","dzlxr","lxrdh","xmszly","yjzl","jthl","zjrl",
+        		"ztz","sjnfdl","sjnfdlXz","tzxz","tzly","bwqk",
+        		"kfName","qskhdjl","jsName","dysj","ccyy","sfykzstxf","sjfdl",
+        		"sjfdlXz","sfyxmhz","hzwjmcjch","xmhzdw",
+        		"sffhgh","ghmc","ghshsj","ghspbm","sffhghhp","ghhpwj","scwjwh",
+        		"ghhpscbm","sftgxmhp","spwjmc","spwjwh","hpspsj","ppbm","sftgjghbys",
+        		"yswjmc","yswjwh","ysbm","stllxfcs","stlljkss","gycs","zzflcs",
+        		"qthbcs","qthbcsms","sfsjzrbhq","zrbhqslyj","zrbhqjj","hxq",
+        		"hcq","sys","wfq","bxsfcztsgk","tshdcd","qtsthjwt","tbr",
+        		"dh","tbsj","xchcr","ywjmc","dzzs","tcny","zhltqk",
+        		"zrk","bg","swdj","ghspjwh","jsfaspbmjwh","pzkmbmjwh",
+        		"hpjhbyswh","sbjwh","ydpcjwh","sfjddzzhwxx","ysbmjwh","xmfrmc",
+        		"zytzr","lxdh","hpsjzytcsj","sfyjgbg","dztcsjybhqslsjxhgx","bz"};
+        String year = DateUtil.getYear();//年
+        String method = DateUtil.getMonth();//月
+        String day = DateUtil.getDay();//日
+        String replace= year + "年" + method + "月" +day + "日";
+        String file = ExcelUtils.SellerStat2Excel(list, request, replace,tab,title,val);
+        response.setContentType("multipart/form-data");
+        String path = request.getSession().getServletContext().getRealPath("/")+file;
+        response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;
+        byte[] buffer = new byte[1024];
+        while (b != -1){
+            b = inputStream.read(buffer);
+            //4.写到输出流(out)中 
+            out.write(buffer,0,b);
+        }
+        inputStream.close();
+        out.close();
+        out.flush();
+	}
+
+	/**
+	 * 通用导出的查询
+	 */
+	public List<Map> comDetails(ComUploadFormBean uploadBean) {
+		return dao.comDetails(uploadBean);
+	}
+
+	/**
+	 * 通用导出功能
+	 */
+	public void comUpload(HttpServletRequest request, HttpServletResponse response, List<Map> list, String[] tabTitle,
+			String[] sqlTitle, String fileName,String tabType) throws Exception {
+		String year = DateUtil.getYear();//年
+        String method = DateUtil.getMonth();//月
+        String day = DateUtil.getDay();//日
+        String replace= year + "年" + method + "月" +day + "日";
+        String file=null;
+        if(tabType.equals("1")) {
+        	 file = ExcelUtils.SellerStat2Excel2(list, request, replace,tabTitle,fileName,sqlTitle);
+        }else {
+        	 file = ExcelUtils.SellerStat2Excel(list, request, replace,tabTitle,fileName,sqlTitle);
+        }
+	
+        response.setContentType("multipart/form-data");
+        String path = request.getSession().getServletContext().getRealPath("/")+file;
+        response.setHeader("Content-Disposition", "attachment;fileName="+new String(file.getBytes("UTF-8"),"ISO8859-1"));
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)
+        File files = new File(path);
+        FileInputStream inputStream = new FileInputStream(files);
+        ServletOutputStream out= response.getOutputStream();
+        int b = 0;
+        byte[] buffer = new byte[1024];
+        while (b != -1){
+            b = inputStream.read(buffer);
+            //4.写到输出流(out)中 
+            out.write(buffer,0,b);
+        }
+        inputStream.close();
+        out.close();
+        out.flush();
+	}
+	
+	// 查询当前选中的数据数据来源
+	public List<Map> selectDzFrom(int xmmc,String name) {
+		
+		return dao.selectDzFrom(xmmc,name);
+	}
+
+}

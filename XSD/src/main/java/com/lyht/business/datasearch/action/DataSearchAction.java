@@ -1,0 +1,201 @@
+package com.lyht.business.datasearch.action;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Controller;
+
+import com.lyht.RetMessage;
+import com.lyht.base.hibernate.common.PageResults;
+import com.lyht.business.datasearch.control.DataSearchControl;
+import com.lyht.business.datasearch.formbean.ComUploadFormBean;
+import com.lyht.business.datasearch.formbean.DataSerchFormBean;
+import com.lyht.business.datasearch.service.DataSearchService;
+import com.lyht.util.BaseLyhtAction;
+import com.lyht.util.CommonFunction;
+
+import net.sf.json.JSONArray;
+
+/**
+ * 数据检索Action
+ * @author 刘魁
+ *@创建时间 2018/10/08
+ */
+@Namespace("/sjjs")
+@Controller
+@Scope("prototype")
+@Action("sjjs")
+@SuppressWarnings("rawtypes")
+public class DataSearchAction  extends BaseLyhtAction{
+
+	private static final long serialVersionUID = 1L;
+	
+	private static Logger log = Logger.getLogger("DataSearchAction");
+	
+	private DataSerchFormBean formBean = new DataSerchFormBean();
+	
+	private ComUploadFormBean uploadBean = new ComUploadFormBean();
+	
+	@Resource
+	private DataSearchControl controller;
+	@Resource
+	private DataSearchService service;
+	private Integer page;
+    private Integer limit;
+	
+    
+
+    // 数据检索返回集合
+	public String list(){
+	    log.info("DataSearchAction=list:数据检索");
+	    HashMap<String,Object> hashMap = new HashMap<String,Object>();
+	    RetMessage mRetMessage = new RetMessage();
+        PageResults mPageResults=new PageResults();
+        mRetMessage = controller.listSearch(formBean, mPageResults,page,limit);
+        if (mRetMessage.getRetflag().equals(RetMessage.RETFLAG_ERROR)){
+            JSONArray mJSONArray = new JSONArray();
+            hashMap.put("total", 0);
+            hashMap.put("rows", mJSONArray);           
+        } else {
+            hashMap.put("code",0);
+            hashMap.put("msg", "");
+            hashMap.put("count", mPageResults.getTotalCount());
+            hashMap.put("data", mPageResults.getResults());
+        }
+        hashMap.put(RetMessage.AJAX_RETFLAG, mRetMessage.getRetflag());
+        hashMap.put(RetMessage.AJAX_MESSAGE, mRetMessage.getMessage());
+        CommonFunction.writeResponse(getResponse(), hashMap);
+	    return null;
+	}
+	
+	// 查询建设运营状态
+	public String listjszt(){
+	    log.info("DataSearchAction=listjszt:查询建设状态");
+	    HashMap<String,Object> hashMap = new HashMap<String,Object>();
+	    List<Map> list =  service.listZdSum();
+	    hashMap.put("rows", list);
+	    CommonFunction.writeResponse(getResponse(), hashMap);
+	    return null;
+	}
+	
+	// 查询选中的电站信息
+	public String selectDetails(){
+	    log.info("DataSearchAction=selectDetails:查询选中的电站信息");
+	    HashMap<String,Object> hashMap = new HashMap<String,Object>();
+	    List<Map> list = service.selectDetails(formBean.getId(),formBean.getXmmc());
+	    hashMap.put("rows", list.get(0));
+	    CommonFunction.writeResponse(getResponse(), hashMap);
+	    return null;
+	}
+	
+	// 查询数据来源
+	public String selectDzFrom(){
+		log.info("DataSearchAction=selectDetails:查询数据来源");
+		HashMap<String,Object> hashMap = new HashMap<String,Object>();
+		List<Map> list = service.selectDzFrom(formBean.getId(),formBean.getXmmc());
+		hashMap.put("rows", list.get(0));
+		CommonFunction.writeResponse(getResponse(), hashMap);
+		return null;
+	}
+	
+	// 根据查询出的内容保存到session用于导出
+	public String exportDetails(){
+		log.info("DataSearchAction=exportDetails:根据筛选条件导出电站信息");
+		try {
+			List<Map> list = service.exportDetails(formBean);
+			HttpSession session = getRequest().getSession();
+			session.setAttribute("upload", list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return null;
+	}
+	
+	// 将session中的数据导出成ex表格
+	@SuppressWarnings("unchecked")
+	public String uploadDetails(){
+		try{
+			HttpSession session = getRequest().getSession();
+			List<Map> list = (List<Map>) session.getAttribute("upload");
+			service.uploadDetails(getRequest(), getResponse(), list);
+			session.removeAttribute("upload");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// 通用导出第一步，根据条件查询后保存到session
+	public String comDetails(){
+		log.info("DataSearchAction=comDetails:通用导出Excel");
+		HttpSession session = getRequest().getSession();
+		List<Map> list = service.comDetails(uploadBean);
+		session.setAttribute("comUploadList", list);
+		session.setAttribute("tabTitle", uploadBean.getTabTitle());
+		session.setAttribute("sqlTitle", uploadBean.getSqlTitle());
+		session.setAttribute("fileName", uploadBean.getFileName());
+		session.setAttribute("tabType", uploadBean.getTabType());
+		return null;
+	}
+	
+	// 通用导出到文件
+	@SuppressWarnings("unchecked")
+	public String comUpload(){
+		try {
+			HttpSession session = getRequest().getSession();
+			List<Map> list = (List<Map>) session.getAttribute("comUploadList");
+			String[] tabTitle = (String[]) session.getAttribute("tabTitle");
+			String[] sqlTitle = (String[]) session.getAttribute("sqlTitle");
+			String fileName = (String) session.getAttribute("fileName");
+			String tabType = (String) session.getAttribute("tabType");
+			service.comUpload(getRequest(),getResponse(),list,tabTitle,sqlTitle,fileName,tabType);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	
+	public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+	
+    public DataSerchFormBean getFormBean() {
+        return formBean;
+    }
+
+    public void setFormBean(DataSerchFormBean formBean) {
+        this.formBean = formBean;
+    }
+
+	public ComUploadFormBean getUploadBean() {
+		return uploadBean;
+	}
+
+	public void setUploadBean(ComUploadFormBean uploadBean) {
+		this.uploadBean = uploadBean;
+	}
+    
+
+}

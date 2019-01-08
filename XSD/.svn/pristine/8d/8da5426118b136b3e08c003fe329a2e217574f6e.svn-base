@@ -1,0 +1,728 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
+	String name = request.getParameter("name");//用request得到
+	String bj = request.getParameter("bj");//用request得到
+	String address = request.getParameter("address");//用request得到
+%>
+<!DOCTYPE html>
+<html style="padding-top: 0px;">
+<head>
+<title></title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/layui/css/layui.css">
+<!-- zui css -->
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/zui/css/zui.css">
+<!--bootstrap 样式 -->
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/js/bootstrapValidator/css/bootstrapValidator.css">
+<link rel="stylesheet" type="text/css" id="zui_theme_link_css"
+	href="<%=basePath%>common/zui/css/zui-theme-green.css">
+<!--自定义样式-->
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/inc/css.css">
+<!-- jquery js -->
+<script src="<%=basePath%>common/jquery/jquery-1.11.3.min.js"
+	charset="utf-8"></script>
+<script src="<%=basePath%>common/jquery/jquery.cookie.js"
+	charset="utf-8"></script>
+<!-- zui js -->
+<script src="<%=basePath%>common/zui/js/zui.min.js" charset="utf-8"></script>
+<!-- 提示组件 -->
+<script src="<%=basePath%>common/js/bootbox.js" charset="utf-8"></script>
+<!-- bootstrapValidator js-->
+<script
+	src="<%=basePath%>common/js/bootstrapValidator/js/bootstrapValidator.min.js"
+	charset="utf-8"></script>
+<script
+	src="<%=basePath%>common/js/bootstrapValidator/js/language/zh_CN.js"
+	charset="utf-8"></script>
+<!--zui，下拉选择查找chosen-->
+<link href="<%=basePath%>common/zui/lib/chosen/chosen.min.css"
+	rel="stylesheet">
+<script src="<%=basePath%>common/zui/lib/chosen/chosen.min.js"
+	charset="utf-8"></script>
+<!--日期选择-->
+<script src="<%=basePath%>common/datejs/laydate.dev.js" charset="utf-8"></script>
+<script
+	src="<%=basePath%>common/zui/lib/datetimepicker/datetimepicker.min.js"
+	type="text/javascript" charset="utf-8"></script>
+<!-- 自定义函数及变量 -->
+<script src="<%=basePath%>common/inc/js.js" charset="utf-8"></script>
+<link href="<%=basePath%>business/system/home_page/sty.css"
+	rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/js/ztree/css/zTreeStyle/zTreeStyle.css">
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/assets/css_/iconfont.css">
+<!-- eachars -->
+<script src="<%=basePath%>common/eCharts/echarts.min.js"></script>
+<link href="<%=basePath%>common/zui/lib/uploader/zui.uploader.min.css"
+	rel="stylesheet">
+<link
+	href="<%=basePath%>common/js/bootstrap-datetime/bootstrap-datetimepicker.min.css"
+	rel="stylesheet" />
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/js/bootstraptable/bootstrap-table.min.css" />
+<link rel="stylesheet"
+	href="<%=basePath%>common/js/ztree/css/zTreeStyle/zTreeStyle.css"
+	type="text/css">
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/layui/css/layui.css" />
+<link rel="stylesheet"
+	href="<%=basePath%>common/js/treegrid/css/jquery.treegrid.css"
+	type="text/css">
+
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/js/combox/combox.css">
+<link rel="stylesheet" type="text/css"
+	href="<%=basePath%>common/icon/iconfont.css">
+
+<script type="text/javascript"
+	src="<%=basePath%>common/js/ztree/js/jquery.ztree.all.js"></script>
+<script type="text/javascript"
+	src="<%=basePath%>common/echarts3.8/echarts.min.js"></script>
+<script src="<%=basePath%>common/layui/layui.js"></script>
+<script src="<%=basePath%>common/layui/layui.all.js"></script>
+<script src="<%=basePath%>common/eCharts/chanliu-echarts.min.js"></script>
+<script type="text/javascript"
+	src='<%=basePath %>common/js/combox/combox.js'></script>
+
+<style>
+.col-md-6 {
+	height: 340px;
+}
+
+.col-md-6:nth-child(2), .col-md-6:nth-child(4) {
+	padding-left: 0px;
+}
+
+#item-one {
+	color: white;
+	background: #568fc3;
+}
+
+.list-group-item {
+	padding: 5px 13px;
+}
+
+.table {
+	margin-bottom: 0px;
+}
+
+.layui-table, .layui-table-view {
+	margin: 0px;
+}
+
+.container-tablecss {
+	height: 200px;
+	overflow: auto;
+	width: 101%;
+}
+
+.layui-table tr th {
+	border: 0px solid red;
+	background: #518cc2;
+	color: white;
+}
+
+.layui-table td, .layui-table th {
+	text-align: center;
+}
+
+.layui-table-tool {
+	display: none;
+}
+</style>
+</head>
+
+<body>
+	<div style="height: 300px; width: 100%;">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-6"
+					style="margin-top: 8x; padding-left: 0px; height: 590px;" id ="one">
+					<ul class="list-group list-group-one">
+						<li class="list-group-item" id="item-one"><i
+							class="icon icon-area-chart" style="margin-right: 10px"></i><span
+							id="dzsl_id"></span></li>
+						<li class="list-group-item" id="mainfive" style="height: 550px">
+
+						</li>
+					</ul>
+				</div>
+				<div class="col-md-6"
+					style="margin-top: 8x; padding-left: 0px; height: 590px;"id ="two">
+					<ul class="list-group list-group-one">
+						<li class="list-group-item" id="item-one"><i
+							class="icon icon-area-chart" style="margin-right: 10px"></i><span
+							id="dzrl_id"></span></li>
+						<li class="list-group-item" id="mainseven" style="height: 550px">
+
+						</li>
+					</ul>
+				</div>
+				<button class="btn btn-primary"
+					style="float: right; margin-right: 10px; margin-bottom: 10px; border-radius: 5px;"
+					type="button" onclick = "exprot()">导出</button>
+				<div class="col-md-12"
+					style="margin-top: 8x; padding-left: 0px; padding-right: 0px;">
+
+					<table class="layui-hide" id="test" lay-filter="test"></table>
+					<script type="text/html" id="id">
+ 				{{d.LAY_TABLE_INDEX+1}}
+				</script>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+</body>
+
+<script type="text/javascript">
+$(function(){
+ basePath = '<%=basePath%>';
+ name = '<%=name%>';
+ address = '<%=address%>';
+ bj = '<%=bj%>';
+ initDzsl(name,bj,address);
+ initDzzjrl(name,bj,address);
+ initTable(name,bj,address);
+})
+
+exprot = function(){
+	 var tabTitle;
+	 var sqlTitle;
+	 var sql ;
+	 var fileName;
+	 if(bj == 0 || bj == 1){
+		 fileName = "全国（"+name+"）小水电信息" 
+	 }else if(bj == 2 || bj == 3){
+		 fileName = "长江经济带（"+name+"）小水电信息" 
+	 }else{
+		 fileName = address+"（"+name+"）小水电信息" 
+	 }
+	 tabTitle = ['序号','省','市','县','项目名称','项目位置','所在河流（对应具体河流）','装机容量（千瓦）','投产年月','总投资（万元）','设计年发电量（万千瓦时）'
+	 ,'坝高(米)','总库容','建设（运营）状态','投资性质/来源','并网情况','开发方式','是否有项目核准（审批）','核准（审批）文件名称及文号'
+	 ,'是否符合规划','规划名称','规划审批部门','是否符合规划环评','规划环评文件','是否通过项目环评','审批部门','是否通过竣工环保验收'
+	 ,'验收部门','生态流量泄放措施','生态流量监控设施','过鱼措施','增殖放流措施','是否涉及自然保护区','核心区','缓冲区','实验区','未分区','坝下是否存在脱水干涸'
+	 ,'填表人','电话','备注']
+	 sqlTitle = [  'sheng','shi','xian',   'xmmc','xmwz','xmszly','zjrl','tcny','ztz','sjnfdl','bg','zrk','jszt','tzly','bwqk','kffs','sfyxmhz','hzwjmcjch'
+		 ,'sffhgh','ghmc','ghspbm','sffhghhp','ghhpwj','sftgxmhp','ppbm','sftgjghbys'
+		 ,'ysbm','stllxfcs','stlljkss','gycs','zzflcs','sfsjzrbhq','hxq','hcq','sys','wfq','bxsfcztsgk'
+		 ,'tbr','dh','bz']
+	 if(bj == 0 || bj == 2){
+		 if(name == "总数"){
+			 sql = " SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql =  " SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "  h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE s.name = '"+name+"' " 
+		 }
+	 }
+	 if(bj == 1 || bj == 3){
+		 if(name == "总数"){
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE h.sheng IN ('上海市','安徽省','浙江省','江苏省','湖北省','云南省','贵州省','四川省','重庆市','湖南省','江西省') "
+		 }else{
+			 sql = " SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE sss.name = '"+name+"' AND h.sheng IN ('上海市','安徽省','浙江省','江苏省','湖北省','云南省','贵州省','四川省','重庆市','湖南省','江西省') " 
+		 }
+	 }
+	 if(bj == 4){
+		 if(name == "总数"){
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql = " SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE sss.name = '"+name+"' AND h.sheng = '"+address+"' " 
+		 }
+	 }
+	 if(bj == 5){
+		 if(name == "总数"){
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE s.name = '"+name+"' AND h.sheng = '"+address+"' " 
+		 }
+	 }
+	 if(bj == 7){
+		 if(name == "总数"){
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE sss.name = '"+name+"' AND h.shi = '"+address+"' " 
+		 }
+	 }
+	 if(bj == 8){
+		 if(name == "总数"){
+			 sql = " SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE s.name = '"+name+"' AND h.shi = '"+address+"' " 
+		 }
+	 }
+	 if(bj == 10){
+		 if(name == "总数"){
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+		 }else{
+			 sql =" SELECT h.sheng,h.shi,h.xian,h.xmmc,h.xmwz,ssss.name AS xmszly,h.zjrl,h.tcny,h.ztz,h.sjnfdl,h.bg,h.zrk,s.name AS jszt,h.tzly, "
+			     + " ss.name AS bwqk ,sss.name AS kffs,h.sfyxmhz,h.hzwjmcjch , "
+			     + "   h.sffhgh,h.ghmc,h.ghspbm,h.sffhghhp,h.ghhpwj,h.sftgxmhp,h.ppbm,h.sftgjghbys,"
+			     + " h.ysbm,  h.stllxfcs,h.stlljkss,h.gycs,h.zzflcs,h.sfsjzrbhq,h.hxq,h.hcq,h.wfq,h.bxsfcztsgk ,"
+			     + " h.tbr,  h.dh,h.bz  "
+			     +"  FROM hps_info_sum1 h  "
+				 + " LEFT JOIN sys_dict s ON h.jszt = s.nm AND s.listnm_sys_dict_cate = 'jszt' "
+				 + " LEFT JOIN sys_dict ss ON h.bwqk = ss.nm AND ss.listnm_sys_dict_cate = 'bwqk' "
+				 + " LEFT JOIN sys_dict sss ON h.kffs = sss.nm AND sss.listnm_sys_dict_cate = 'kffs' "
+				 + " LEFT JOIN sys_dict ssss ON h.xmszly = ssss.nm AND sss.listnm_sys_dict_cate = 'xmszly' "
+				 + " WHERE  h.xian = '"+address+"' " 
+		 }
+	 }
+	daochu(fileName,tabTitle,sqlTitle,sql)
+}
+
+function daochu(fileName,tabTitle,sqlTitle,sql){
+	 $.ajax({
+	  	 url : basePath + "sjjs/sjjs!comDetails.action",
+	 	 type : "post",
+	     dateType : "JSON",
+	 	 async : false,
+	 	 traditional:true,
+	     data : {"uploadBean.tabTitle":tabTitle
+	    	 	,"uploadBean.sqlTitle":sqlTitle
+	    	 	,"uploadBean.sql":sql
+	    	 	,"uploadBean.fileName":fileName
+	    	 	},
+	 	 success : function(response){
+	  		 window.location.href=basePath + "sjjs/sjjs!comUpload.action"   
+	  	 }
+	})
+}
+
+function initTable(name,bj,address){
+	if(name == "总数(座)"){
+		 name = "总数";
+	}
+  layui.use('table', function(){
+   	  var table = layui.table;
+   	  table.render({
+   	    elem: '#test'
+   	    ,url:'<%=basePath%>'+"homePage/homePage!list.action"
+   	    ,toolbar: '#toolbarDemo'
+   	    ,title: '用户数据表'
+   	    ,where:{"name":name,"bj":bj,"address":address}
+   	    ,cols: [[
+   	      {field:'id', title:'序号', width:80, fixed: 'left',templet:'#id'}
+   	      ,{field:'xmmc', title:'项目名称',fixed: 'left', width:250}
+   	      ,{field:'xmwz', title:'项目位置', width:150}
+   	      ,{field:'jthl', title:'所在河流（对应具体河流）', width:200}
+   	      ,{field:'zjrl', title:'装机容量（千瓦）', width:150}
+   	      ,{field:'ztz', title:'总投资（万元）', width:150}
+   	      ,{field:'sjnfdl', title:'设计年发电量（万千瓦时）', width:150}
+   	      ,{field:'jszt', title:'建设（运营）状态', width:150}
+   	      ,{field:'tzxz', title:'投资性质/来源', width:150}
+   	      ,{field:'bwqk', title:'并网情况', width:150}
+   	      ,{field: 'kffs', title:'开发方式',  width:150}
+   	      ,{field: 'sfyxmhz', title:'是否有项目核准（审批）', width:180}
+   	    ]]
+   	    ,page: true
+   	  });
+   	});
+}
+
+   
+function initDzzjrl(name,bj,address){
+	 // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('mainseven'));
+	 if(bj == 0 || bj == 1 || bj == 2 || bj == 3){
+		if(name == "总数(座)"){
+			 $("#dzrl_id").text("各省小水电装机容量统计（总数）");
+			 tcText = "各省小水电装机容量统计（总数）";
+			 name = "总数";
+		 }else{
+			 $("#dzrl_id").text("各省小水电装机容量统计（"+name+"）");
+			 tcText = "各省小水电装机容量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 4 || bj == 5){
+		 if(name == "总数(座)"){
+			 $("#dzrl_id").text("各市小水电装机容量统计（总数）");
+			 tcText = "各市小水电装机容量统计（总数）";
+			 name = "总数";
+		 }else{
+			 $("#dzrl_id").text("各市小水电装机容量统计（"+name+"）");
+			 tcText = "各市小水电装机容量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 6){
+		 $("#dzrl_id").text("各市小水电装机容量统计");
+		 tcText = "各市小水电装机容量统计";
+	 }
+	 if(bj == 7 || bj == 8){
+		 if(name == "总数(座)"){
+			 $("#dzrl_id").text("各县小水电装机容量统计（总数）");
+			 tcText = "各县小水电装机容量统计（总数）";
+			 name = "总数";
+		 }else{
+			 $("#dzrl_id").text("各县小水电装机容量统计（"+name+"）");
+			 tcText = "各县小水电装机容量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 9){
+		 $("#dzrl_id").text("各县小水电装机容量统计");
+		 tcText = "各县小水电装机容量统计";
+	 }
+	 if(bj == 10){
+		 $("#two").addClass("layui-table-tool")
+		 return false;
+	 }
+	 var len = []
+	 var datas = []
+	 var rest = []
+	 var value = 0;
+     $.ajax({
+		url:basePath+"homePage/homePage!countDzzjrlByYxzt.action",
+		data:{"bj":bj,"name":name,"address":address},
+		type: "POST",
+		dataType:"json",
+		success:function(response){
+
+			var data = response.rows
+			for (var i = 0; i < data.length; i++) {
+				len.push(data[i].name);
+				var map = data[i];
+				var val = map.value;
+				if(val != null){
+					val = val.toFixed(2)
+				}
+				var maps = {'name':data[i].name,'value':val}
+				rest.push(maps)
+				value+=data[i].value;
+			}
+			value = value.toFixed(2);
+			datas.push({"value":value, "name":'总数(万千瓦)', selected:true})
+			  // 指定图表的配置项和数据
+		     var option = {
+		     		  title : {
+		     		        text: tcText,
+		     		        x:'center'
+		     		    },
+		     		 tooltip: {
+		     		        trigger: 'item',
+		     		        formatter: "{a} <br/>{b}: {c} ({d}%)"
+		     		    },
+		     		    legend: {
+		     		        orient: 'horizontal',
+		     		        bottom: 5,
+		     		        data:len
+		     		    },
+		     		   color:['#007bbb','#008e57','#933d92','#c48f00','#A0522D'],
+		     		    series: [
+		     		    	 {
+			     		            name:'总数',
+			     		            type:'pie',
+			     		            center:['50%','46.5%'],
+			     		            selectedMode: 'single',
+			     		            radius: [0, '32.5%'],
+			     		            label: {
+			     		            	show:true,
+			     		                normal: {
+			     		                    position: 'center',
+			     		                    formatter: '{b}\n {c}',
+			     		                    color:'white'
+			     		                }
+			     		            },
+			     		            labelLine: {
+			     		                normal: {
+			     		                    show: false
+			     		                }
+			     		            },
+			     		           data:datas
+			     		           
+			     		        },
+		     		        {
+		     		            name:'',
+		     		            type:'pie',
+		     		            radius: ['40%', '55%'],
+		     		            label: {
+		     		                normal: {
+		     		                	show: true,
+		     		                    formatter: '{b}: {c}({d}%)'
+		     		                }
+		     		            },
+		     		            data:rest
+		     		        }
+		     		    ]
+		     };
+		     // 使用刚指定的配置项和数据显示图表。
+		     myChart.setOption(option);
+		}
+	});
+}
+function initDzsl(name,bj,address){
+	 // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('mainfive'));
+	 if(bj == 0 || bj == 1 || bj == 2 || bj == 3){
+		 if(name == "总数(座)"){
+			 $("#dzsl_id").text("各省小各省小电站详细表（总数）");
+			 zjText = "各省小水电投产数量统计（总数）";
+			 name = "总数"
+		 }else{
+			 $("#dzsl_id").text("各省小各省小电站详细表（"+name+"）");
+			 zjText = "各省小水电投产数量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 4 || bj == 5 ){
+		 if(name == "总数(座)"){
+			 $("#dzsl_id").text("各市小各省小电站详细表（总数）");
+			 zjText = "各市小水电投产数量统计（总数）";
+			 name = "总数"
+		 }else{
+			 $("#dzsl_id").text("各市小水电投产数量统计（"+name+"）");
+			 zjText = "各市小水电投产数量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 6){
+		 $("#dzsl_id").text("各市小水电投产数量统计");
+		 zjText = "各市小水电投产数量统计";
+	 }
+	 if(bj == 7 || bj == 8){
+		 if(name == "总数(座)"){
+			 $("#dzsl_id").text("各县小各省小电站详细表（总数）");
+			 zjText = "各县小水电投产数量统计（总数）";
+			 name = "总数"
+		 }else{
+			 $("#dzsl_id").text("各县小水电投产数量统计（"+name+"）");
+			 zjText = "各县小水电投产数量统计（"+name+"）";
+		 }
+	 }
+	 if(bj == 9){
+		 $("#dzsl_id").text("各县小水电投产数量统计");
+		 zjText = "各县小水电投产数量统计";
+	 }
+	 if(bj == 10){
+		 
+		 $("#one").addClass("layui-table-tool");
+		 return false;
+	 }
+	 var len = []
+	 var datas = []
+	 var rest = []
+	 var value = 0;
+     $.ajax({
+		url:basePath+"homePage/homePage!countDzslByYxzt.action",
+		data:{"bj":bj,"name":name,"address":address},
+		type: "POST",
+		dataType:"json",
+		success:function(response){
+			var data = response.rows
+			for (var i = 0; i < data.length; i++) {
+				len.push(data[i].name);
+				rest.push(data[i])
+				value+=data[i].value;
+			}
+			datas.push({"value":value, "name":'总数(座)', selected:true})
+			  // 指定图表的配置项和数据
+		     var option = {
+		     		  title : {
+		     		        text: zjText,
+		     		      //  subtext: '纯属虚构',
+		     		        x:'center'
+		     		    },
+		     		 tooltip: {
+		     		        trigger: 'item',
+		     		        formatter: "{a} <br/>{b}: {c} ({d}%)"
+		     		    },
+		     		    legend: {
+		     		        orient: 'horizontal',
+		     		        bottom: 5,
+		     		        data:len
+		     		    },
+		     		   color:['#007bbb','#008e57','#933d92','#c48f00','#A0522D'],
+		     		    series: [
+		     		    	 {
+			     		            name:'总数',
+			     		            type:'pie',
+			     		            center:['50%','46.5%'],
+			     		            selectedMode: 'single',
+			     		            radius: [0, '32.5%'],
+			     		            label: {
+			     		            	show:true,
+			     		                normal: {
+			     		                    position: 'center',
+			     		                    formatter: '{b}\n {c}',
+			     		                    color:'white'
+			     		                }
+			     		            },
+			     		            labelLine: {
+			     		                normal: {
+			     		                    show: false
+			     		                }
+			     		            },
+			     		           data:datas
+			     		           
+			     		        },
+		     		        {
+		     		            name:'',
+		     		            type:'pie',
+		     		            radius: ['40%', '55%'],
+		     		            label: {
+		     		                normal: {
+		     		                	show: true,
+		     		                    formatter: '{b}: {c}({d}%)'
+		     		                }
+		     		            },
+		     		            data:rest
+		     		        }
+		     		    ]
+		     };
+		     // 使用刚指定的配置项和数据显示图表。
+		     myChart.setOption(option);
+		}
+	});
+}
+        
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+    </script>

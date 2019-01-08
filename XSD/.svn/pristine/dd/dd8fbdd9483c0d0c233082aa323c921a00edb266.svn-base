@@ -1,0 +1,166 @@
+#menu {
+	float:right;
+    margin: 0;
+    height:100%;
+    list-style: none;  
+}
+#menu li {
+    float: left;
+    padding: 0 0 10px 0;
+    position: relative;
+}
+@media(min-width:1024px){ 
+	.menu_first_li{
+		width:60px;
+		margin-right:10px;
+	}
+	.menu_image{
+		width:60px;
+		height:60px;
+		margin-top:5px;
+		margin-left:7px;
+		margin-bottom:3px;
+	}
+}
+@media(min-width:1360px){ 
+	.menu_first_li{
+		width:70px;/**根菜单的宽度*/
+		margin-right:10px;
+	}
+	.menu_image{
+		width:60px;
+		height:60px;
+		margin-top:5px;
+		margin-left:7px;
+		margin-bottom:3px;
+	}
+}
+#menu a {
+    float: left;
+    height: 15px;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+.menu-root-style-title{
+	font:"simhei", "黑体";/**根菜单字体*/
+}
+.menu-root-a{
+    color: #ffffff;/**根菜单字体颜色*/
+}
+.menu-root-active{
+	color:#ffffff;
+}
+.menu-sub-a{
+	color: #ffffff;/**子菜单字体颜色*/
+}
+.menu_first_li:hover > .menu-root-a{
+	color: #ffffff;
+	font:"simhei", "黑体";
+}
+
+#menu li:hover > ul {
+    display: block;
+}
+
+/* Sub-menu */
+#menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;    
+    display: none;
+    position: absolute;
+    top: 65px;/**弹出下拉菜单对应的位置，与header的高度一样*/
+    left: 0;
+    z-index: 99999;    
+    background-color: #272727;/**弹出下拉对应的颜色*/  
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+#menu ul li {
+    float: none;
+    margin: 0;
+    padding: 0;
+    display: block;  
+    box-shadow: 0 1px 0 #E0E0E0, 
+                0 1px 0 #777777;
+}
+
+#menu ul li:last-child { 
+    box-shadow: none;    
+}
+
+#menu ul a {    
+    padding: 10px;
+    height: auto;
+    line-height: 1;
+    display: block;
+    white-space: nowrap;
+    float: none;
+    text-transform: none;
+}
+
+*html #menu ul a { /* IE6 */   
+    height: 10px;
+    width: 88px;
+}
+
+*:first-child+html #menu ul a { /* IE7 */    
+    height: 10px;
+    width: 88px;
+}
+
+#menu ul a:hover {
+    color:#ffffff;/**光标移动到子菜单时的字体颜色*/
+    background-color: #5E6B7E;/**光标移动到子菜单时的背景色*/
+    background-image: linear-gradient(#5E6B7E, #5E6B7E);/**光标移动到子菜单时的背景色*/
+}
+.menu-sub-a .menu-sub-active{
+	color:#ffffff;/**光标移动到子菜单时的字体颜色*/
+    background-color: #5E6B7E;/**光标移动到子菜单时的背景色*/
+    background-image: linear-gradient(#5E6B7E, #5E6B7E);/**光标移动到子菜单时的背景色*/
+}
+.menu-sub-active{
+	color:#ffffff;/**光标移动到子菜单时的字体颜色*/
+    background-color: #5E6B7E;/**光标移动到子菜单时的背景色*/
+    background-image: linear-gradient(#5E6B7E, #5E6B7E);/**光标移动到子菜单时的背景色*/
+}
+.menu-sub-style-title{
+	font:"simhei", "黑体";
+}
+#menu ul li:first-child a {
+    border-radius: 4px 4px 0 0;
+}
+
+#menu ul li:first-child a:after {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: -8px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 8px solid #444;
+}
+
+#menu ul li:first-child a:hover:after {
+    border-bottom-color: #5E6B7E; 
+}
+
+#menu ul li:last-child a {
+    border-radius: 0 0 5px 5px;
+}
+
+/* Clear floated elements */
+#menu:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+}
+
+* html #menu             { zoom: 1; } /* IE6 */
+*:first-child+html #menu { zoom: 1; } /* IE7 */

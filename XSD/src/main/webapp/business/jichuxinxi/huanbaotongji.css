@@ -1,0 +1,10 @@
+@CHARSET "UTF-8";
+/* 抵消两侧padding值样式 */
+.list-group-one{
+	padding-left:0px!important;
+	
+}
+.list-group-two{
+	padding-right:0px!important;
+}
+

@@ -1,0 +1,917 @@
+package com.lyht.business.environment.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
+import com.lyht.base.hibernate.basedao.HibernateBaseDao;
+import com.lyht.business.baseinfo.bean.NyjHpsInfo;
+
+/**
+ * 环保统计Dao
+ * 
+ * @author 刘魁
+ * @创建时间 2018/10/10
+ */
+@Repository
+@Scope("prototype")
+@SuppressWarnings("rawtypes")
+public class EnvironmentDao extends HibernateBaseDao<NyjHpsInfo> {
+	@SuppressWarnings("unused")
+	private static final String cjjjd = "'上海市','安徽省','浙江省','江苏省','湖北省','云南省','贵州省','四川省','重庆市','湖南省','江西省'";
+	/**
+	 * 环保统计图表切换功能
+	 * 
+	 * @param tableId
+	 * @param arr
+	 * @return
+	 */
+	public List<Map> echartsAndTable(String tableId, String arr) {
+		StringBuilder sql = new StringBuilder();
+		if (tableId.equals("sthj_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs = '有' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs = '有' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs = '无' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs = '无' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs is null  then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.stllxfcs is null  then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0   ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("stll_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss = '有' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss = '有' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss = '无' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss = '无' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss is null then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.stlljkss is null then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id WHERE H.jszt in(1,2)   ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("gycs_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.gycs = '有' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.gycs = '有' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.gycs = '无' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.gycs = '无' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.gycs is null   then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.gycs is null   then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0   ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("zzfl_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs = '有' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs = '有' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs = '无' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs = '无' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs is null   then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.zzflcs is null   then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0   ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("gh_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh = '否' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh = '否' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh  is null    then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.sffhgh  is null    then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("hp_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '否' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '否' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp  is null    then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp  is null    then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("ghhp_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '否' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp = '否' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp  is null   then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.sffhghhp  is null   then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2) ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("jgys_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys = '否' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys = '否' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys  is null    then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.sftgjghbys  is null    then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id WHERE H.jszt in(1,2)  ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("bxtsgh_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk = '否' then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk = '否' then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk  is null    then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.bxsfcztsgk  is null    then 1 else 0 end )AS zdz3 ");
+			sql.append(" from hps_info_sum1 H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id WHERE H.jszt in(1,2)  ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		if (tableId.equals("hpqk_id")) {
+			sql.append(" select D.date,ISNULL(SUM(H.zjrl), 0) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp = '是' then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp = '是' then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp='否'   then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp='否'     then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp is null   then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.sftgxmhp is null   then 1 else 0 end )AS  zdz3  ");
+			sql.append(" from date_sum D  LEFT JOIN  hps_info_sum1 H  ON DATENAME(yy, H.dysj) = D.date AND H.sd_shi_id IN (" + arr + ")  AND  H.jszt in(1,2) ");
+			sql.append(" GROUP BY D.date HAVING D.date IS NOT NULL AND D.date <= GETDATE() ");
+			sql.append(" ORDER BY D.date DESC ");
+		}
+		if (tableId.equals("tcqhpqk_id")) {
+			sql.append(" select D.date,ISNULL(SUM(H.zjrl), 0) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj > H.dysj then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj > H.dysj  then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj < H.dysj  then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj < H.dysj  then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj IS NULL then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.hpspsj IS NULL  then 1 else 0 end )AS zdz3 ");
+			sql.append(" from date_sum D  LEFT JOIN  hps_info_sum1 H  ON DATENAME(yy, H.dysj) = D.date  AND H.sd_shi_id IN (" + arr + ") ");
+			sql.append(" GROUP BY D.date HAVING D.date IS NOT NULL AND D.date <= GETDATE() ");
+			sql.append(" ORDER BY D.date DESC ");
+		}
+		if (tableId.equals("sjzrbhqk_id")) {
+			sql.append(" select A.name,SUM(H.zjrl) AS zrl,COUNT(H.id) AS zdz, ");
+			sql.append(" SUM(CASE WHEN H.sfsjzrbhq = '是' AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl1, ");
+			sql.append(" SUM(CASE WHEN H.sfsjzrbhq = '是' AND H.jszt in(1,2) then 1 else 0 end )AS zdz1, ");
+			sql.append(" SUM(CASE WHEN H.sfsjzrbhq = '否' AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl2, ");
+			sql.append(" SUM(CASE WHEN H.sfsjzrbhq = '否' AND H.jszt in(1,2) then 1 else 0 end )AS zdz2, ");
+			sql.append(" SUM(CASE WHEN H.hxq = '涉及' or wfq='涉及' and  H.sfsjzrbhq = '是' AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl3, ");
+			sql.append(" SUM(CASE WHEN H.hxq = '涉及' or wfq='涉及' and  H.sfsjzrbhq = '是' AND H.jszt in(1,2) then 1 else 0 end )AS zdz3, ");
+			sql.append(" SUM(CASE WHEN H.hcq = '涉及' and  H.sfsjzrbhq = '是' AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl4, ");
+			sql.append(" SUM(CASE WHEN H.hcq = '涉及' and  H.sfsjzrbhq = '是'  AND H.jszt in(1,2) then 1 else 0 end )AS zdz4, ");
+			sql.append(" SUM(CASE WHEN H.sys = '涉及'  and  H.sfsjzrbhq = '是' AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl5, ");
+			sql.append(" SUM(CASE WHEN H.sys = '涉及'  and  H.sfsjzrbhq = '是' AND H.jszt in(1,2)  then 1 else 0 end )AS zdz5 ,");
+			sql.append(" SUM(CASE WHEN H.sfsjzrbhq is null AND H.jszt in(1,2) then 1 else 0 end )AS zdz6, ");
+			sql.append("  SUM(CASE WHEN H.sfsjzrbhq is null  AND H.jszt in(1,2) then H.zjrl else 0 end )AS zrl6 ");
+			sql.append(" from hps_info_sum1  H LEFT JOIN Area A  ON A.id = H.sd_sheng_id OR A.id = H.sd_shi_id  WHERE H.jszt in(1,2)  ");
+			sql.append(" GROUP BY A.name,A.id HAVING COUNT(H.id) > 0  ");
+			sql.append(" AND A.id IN (" + arr + ") ");
+			sql.append(" ORDER BY A.id ");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	/**
+	 * 环保措施情况统计
+	 * @return
+	 */
+	public List<Map> hbcstjYou(String xzqhdm) {
+		StringBuffer sql = new StringBuffer("selectSUM(case WHEN dysj<'1986' AND sftgxmhp='是' then 1 else 0 end )as 'y1', ");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' AND sftgxmhp='是' then 1 else 0 end )as 'y2',");
+		sql.append("SUM(case WHEN stllxfcs='有' then 1 else 0 end )as 'y2',");
+		sql.append("SUM(case WHEN gycs='有'  then 1 else 0 end )as 'y3',");
+		sql.append("SUM(case WHEN zzflcs='有'  then 1 else 0 end )as 'y4'");
+		sql.append(" from hps_info_sum1  ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  where  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	/**
+	 * 环保措施情况统计 无
+	 * @return
+	 */
+	public List<Map> hbcstjWu(String xzqhdm) {
+		StringBuffer sql = new StringBuffer("select   COUNT(1) zuida,  ");
+		sql.append(" SUM(case WHEN stlljkss='无' then 1 else 0 end )as 'w1',");
+		sql.append(" SUM(case WHEN stllxfcs='无' then 1 else 0 end )as 'w2', ");
+		sql.append(" SUM(case WHEN gycs='无'  then 1 else 0 end )as 'w3',");
+		sql.append(" SUM(case WHEN zzflcs='无'  then 1 else 0 end )as 'w4'");
+		sql.append(" from hps_info_sum1  ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  where  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	/**
+	 * 投产前完成环评审批情况统计图
+	 * @return
+	 */
+	public List<Map> queryHuanBao2(String xzqhdm) {
+		StringBuffer sql = new StringBuffer("SELECT * FROM   hps_info_sum1  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	/**
+	 * 涉及自然保护区情况 核心区，试验区，缓冲区
+	 */
+	public List<Map> sjzrbhqqk(String xzqhdm) {
+		StringBuffer sql = new StringBuffer("SELECT name,value FROM (select  ");
+		sql.append(" SUM(case WHEN sys='涉及' then 1 else 0 end )as '试验区', ");
+		sql.append(" SUM(case WHEN hcq='涉及' then 1 else 0 end )as '缓冲区' ,");
+		sql.append(" SUM(case WHEN hxq='涉及' or wfq='涉及' then 1 else 0 end )as '核心区（未分区）' ");
+		sql.append(" from hps_info_sum1 WHERE sfsjzrbhq='是' AND jszt in(1,2)  ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append(" AND  xian  IN ('" + xians + "')");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(" ) as b  unpivot (value FOR name IN([试验区],[缓冲区],[核心区（未分区）])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	public List<Map> sjzrbhqqk_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer("SELECT name,value FROM (select  ");
+		sql.append(" SUM(case WHEN sys='涉及' then 1 else 0 end )as '试验区', ");
+		sql.append(" SUM(case WHEN hcq='涉及' then 1 else 0 end )as '缓冲区' ,");
+		sql.append(" SUM(case WHEN hxq='涉及' or wfq='涉及' then 1 else 0 end )as '核心区（未分区）' ");
+		sql.append(" from hps_info_sum1 WHERE sfsjzrbhq='是' AND jszt in(1,2)  ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(" ) as b  unpivot (value FOR name IN([试验区],[缓冲区],[核心区（未分区）])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	/**
+	 * 环保统计涉及自然保护区（是，否，未知）
+	 * @return
+	 */
+	public List<Map> queryHuanBao3(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT  (CASE sfsjzrbhq WHEN '是' THEN '是' WHEN '否' THEN '否' ELSE '未知' END) as name,");
+		sql.append("COUNT(CASE sfsjzrbhq WHEN '是' THEN '是' WHEN '否' THEN '否' ELSE '未知' END) AS value ");
+		sql.append("FROM hps_info_sum1 WHERE 1=1 AND jszt in(1,2)  ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append("  GROUP BY sfsjzrbhq  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	public List<Map> queryHuanBao3_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT  (CASE sfsjzrbhq WHEN '是' THEN '是' WHEN '否' THEN '否' ELSE '未知' END) as name,");
+		sql.append("COUNT(CASE sfsjzrbhq WHEN '是' THEN '是' WHEN '否' THEN '否' ELSE '未知' END) AS value ");
+		sql.append("FROM hps_info_sum1 WHERE 1=1 AND jszt in(1,2)  ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append("  GROUP BY sfsjzrbhq  ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	// 开展项目环评情况统计
+	public List<Map> kzxmhpqkS(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE sftgxmhp='是' ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append("  UNION ALL select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE sftgxmhp='否' ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	public List<Map> kzxmhpqkS_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE sftgxmhp='是' ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append("  UNION ALL select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE sftgxmhp='否' ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	// 投产前完成环评审批情况统计
+	public List<Map> tcqWanCheng(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE hpspsj< dysj ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append("  UNION ALL select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE hpspsj > dysj ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> tcqWanCheng_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE hpspsj< dysj ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append("  UNION ALL select  SUM(case WHEN dysj<'1986' then 1 else 0 end )as 'y1',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1986' AND '1989' then 1 else 0 end )as 'y2',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1989' AND '1998' then 1 else 0 end )as 'y3',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '1998' AND '2003' then 1 else 0 end )as 'y4',");
+		sql.append(" SUM(case WHEN dysj BETWEEN '2003' AND '2006' then 1 else 0 end )as 'y5',");
+		sql.append(" SUM(case WHEN dysj>'2006'  then 1 else 0 end )as 'y6'");
+		sql.append(" from hps_info_sum1 WHERE hpspsj > dysj ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	// 生态环境流量泄放设施统计
+	public List<Map> llxfTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN stllxfcs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN stllxfcs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN stllxfcs IS NULL THEN 1 ELSE 0 END) as '未知' ");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");//只统计在建，运行
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> llxfTotal_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN stllxfcs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN stllxfcs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN stllxfcs IS NULL THEN 1 ELSE 0 END) as '未知' ");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");//只统计在建，运行
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> lljkTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN stlljkss='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN stlljkss='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN stlljkss IS NULL THEN 1 ELSE 0 END) as '未知' ");
+		sql.append("from hps_info_sum1  where 1=1AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> lljkTotal_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN stlljkss='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN stlljkss='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN stlljkss IS NULL THEN 1 ELSE 0 END) as '未知' ");
+		sql.append("from hps_info_sum1  where 1=1AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	// 过鱼设施统计
+	public List<Map> gycsTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN gycs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN gycs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN gycs IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2)");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> gycsTotal_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN gycs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN gycs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN gycs IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2)");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	// 增殖放流措施统计
+	public List<Map> zzlfTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN zzflcs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN zzflcs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN zzflcs IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> zzlfTotal_1(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN zzflcs='有' THEN 1 ELSE 0 END) as '有', ");
+		sql.append(" SUM(CASE WHEN zzflcs='无' THEN 1 ELSE 0 END) as '无',");
+		sql.append(" SUM(CASE WHEN zzflcs IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([有],[无],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	//开展项目环评情况，环形图
+	public List<Map> kzxmhpqkTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sftgxmhp='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sftgxmhp='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sftgxmhp IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> kzxmhpqkTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sftgxmhp='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sftgxmhp='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sftgxmhp IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	//是否有环评审批
+	public List<Map> sfyhpspTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN hpspsj IS  not NULL  THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN hpspsj='' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN  hpspsj IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> sfyhpspTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN hpspsj IS  not NULL  THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN hpspsj='' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN  hpspsj IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	// 是否符合规划
+	public List<Map> fhghTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sffhgh='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sffhgh='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sffhgh IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	public List<Map> fhghTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sffhgh='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sffhgh='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sffhgh IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	// 是否符合规划环评
+	public List<Map> ghhpTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sffhghhp='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sffhghhp='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sffhghhp IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> ghhpTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sffhghhp='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sffhghhp='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sffhghhp IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	// 是否通过竣工环保验收
+	public List<Map> hbysTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sftgjghbys='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sftgjghbys='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sftgjghbys IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2)");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> hbysTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN sftgjghbys='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN sftgjghbys='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN sftgjghbys IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2)");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	// 是否存在坝下脱水干涸情况
+	public List<Map> tsgkTotal(String xzqhdm) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append("  AND sheng IN ("+cjjjd+") ");
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> tsgkTotal(String sheng,String shi,String xian) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("SELECT name,value FROM (SELECT ");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk='是' THEN 1 ELSE 0 END) as '是', ");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk='否' THEN 1 ELSE 0 END) as '否',");
+		sql.append(" SUM(CASE WHEN bxsfcztsgk IS NULL THEN 1 ELSE 0 END) as '未知'");
+		sql.append("from hps_info_sum1  where 1=1 AND jszt in(1,2) ");
+		if (!sheng.equals("") && sheng != null) {
+			String shengs = sheng.replace(",", "' , '");
+				sql.append("  and  sd_sheng  IN ('"+shengs+"'  )");
+		}
+		if (!shi.equals("") && shi != null) {
+			String shis = shi.replace(",", "' , '");
+				sql.append("  and  sd_shi  IN ('"+shis+"'  )");
+		}
+		if (!xian.equals("") && xian != null) {
+			String xians = xian.replace(",", "' , '");
+				sql.append("  and  sd_xian  IN ('"+xians+"'  )");
+		}
+		sql.append(") as b UNPIVOT (value FOR name in([是],[否],[未知])) t");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+	
+	public List<Map> hbtj8_f(String xzqhdm) {
+		StringBuffer sql = new StringBuffer(" ");
+		sql.append("  SELECT  bxsfcztsgk name,COUNT(ID)  value FROM  hps_info_sum1 WHERE bxsfcztsgk='否'");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append(" GROUP BY bxsfcztsgk");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+
+	public List<Map> hbtj8_wz(String xzqhdm) {
+		StringBuffer sql = new StringBuffer(" ");
+		sql.append("  SELECT  bxsfcztsgk name,COUNT(ID)  value FROM  hps_info_sum1 WHERE bxsfcztsgk='未知'");
+		if (!xzqhdm.equals("") && xzqhdm != null) {
+			String xians = xzqhdm.replace(",", "' , '");
+			if (xians != null && !xians.equals("")) {
+				sql.append("  AND  xian  IN (' " + xians + "  '  )");
+			}
+		}
+		sql.append(" GROUP BY bxsfcztsgk");
+		return this.createSQLQuerybyMap(sql.toString());
+	}
+}

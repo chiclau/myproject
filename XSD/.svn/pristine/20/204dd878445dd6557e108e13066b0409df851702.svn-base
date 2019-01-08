@@ -1,0 +1,730 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+ <%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>水资源管理系统</title>
+		 <!-- 引入头部icon图标 -->	
+<%-- 		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/favicon.ico">
+		 <!-- 引入icon图标 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/iconfont.css">
+		  <link rel="stylesheet" href="<%=basePath%>common/js/ztree/css/zTreeStyle/zTreeStyle.css">
+		 --%>
+		 <!-- 引入本页面的样式 -->
+		 <link rel="stylesheet" href="<%=basePath%>business/huanbaotongji/huanbaotongji.css">
+		<style>
+	
+		</style>
+	</head>
+<body>	
+	<div class="container-fluid" style="padding-top:6px;">
+	    <div class="row">
+	     	<div class="col-md-2" style="padding-right:6px;">
+		        <ul id="tree1" class="ztree" style="height:100%;overflow:auto;border:1px solid #dddddd; border-radius: 6px;"></ul>			
+			</div>
+			<div class="col-md-10  list-group-one list-group-two">
+	               <div class="col-md-12 list-group-one"  style="height:300px;padding-left:0px;">
+	                 <ul class="list-group" style="position:relative;">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电装机类型组成 <button id="table-icon_qg_dz_fzlc11"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+						   		 <button style="margin-right:5px;" id="jc_export1" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(1)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="item-one" style="height: 260px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+							  <div class="col-md-6 list-group-one" > 
+							  <div class="list-group-item" id="zjrl1" style="height:250px;border:none;">
+							   		
+							  </div>
+							  </div>
+							    <div class="col-md-6 list-group-one" > 
+							   <div class="list-group-item" id="zjgm" style="height:250px;border:none;">
+							   		
+							  </div>
+							  </div>
+						  </li>
+				<li class="list-group-item desplay" id="mainonedes_qg_kffs_date11" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>地区名称</th>
+									      <th>总装机容量（万千瓦）/座数</th>
+									      <th>5万千瓦到1万千瓦装机容量 /座数</th>
+									      <th>1万千瓦到500千瓦装机容量 /座数</th>
+									      <th>500千瓦以下装机容量 /座数</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_jszt1">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_jszt1">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	              <div class="col-md-12"  style="height:300px;padding-left:0px;">
+	                   <ul class="list-group" style="position:relative;">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电所在流域分布 <button id="table-icon_qg_dz_fzlc12"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+					 		 <button style="margin-right:5px;" id="jc_export2" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(2)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="item-one" style="height: 260px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+							 <div class="col-md-6 list-group-one" > 
+							  <div class="list-group-item" id="szly1" style="height:250px;border:none;">
+							   		
+							  </div>
+							  </div>
+							    <div class="col-md-6 list-group-one" > 
+							   <div class="list-group-item" id="szly2" style="height:250px;border:none;">
+							   		
+							  </div>
+							  </div>
+						   </li>
+						   <li class="list-group-item desplay" id="mainonedes_qg_kffs_date12" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>流域名称</th>
+									      <th>总装机容量（万千瓦）/座数</th>
+									      <th>5万千瓦到1万千瓦装机容量 /座数</th>
+									      <th>1万千瓦到500千瓦装机容量 /座数</th>
+									      <th>500千瓦以下装机容量 /座数</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_jszt2">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_jszt2">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                <div class="col-md-6" style="height:290px;padding-left:0px;">
+	                   <ul class="list-group" style="position:relative;">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电建设状态统计 <button id="table-icon_qg_dz_fzlc13"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+						  <button style="margin-right:5px;" id="jc_export3" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(3)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="jszt1" style="height:250px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+						   		
+						  </li>
+						  	  <li class="list-group-item desplay" id="mainonedes_qg_kffs_date13" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>地区名称</th>
+									      <th>总装机容量（万千瓦）/座数</th>
+									      <th>废弃装机容量（万千瓦）/座数</th>
+									      <th>拆除装机容量（万千瓦）/座数</th>
+									      <th>运行装机容量（万千瓦）/座数</th>
+									      <th>拟建装机容量（万千瓦）/座数</th>
+									      <th>在建装机容量（万千瓦）/座数</th>
+									        <th>未知状态装机容量（万千瓦）/座数</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:222px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								        <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_jszt3">
+								  </tbody>
+								  		  <tbody id = "zj_table_qg_jszt3">
+								  </tbody>
+								</table>
+							</div>	
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  		<%-- 		<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup> --%>
+								  <tbody id = "zj_table_qg_jszt3">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	              
+	                 <div class="col-md-6" style="height:290px;padding-left:0px;">
+	                   <ul class="list-group" style="position:relative;">
+						  <li class="list-group-item" id="item-one" >
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电开发方式统计 <button id="table-icon_qg_dz_fzlc14"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+							  <button style="margin-right:5px;" id="jc_export4" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(4)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="kffs1" style="height:250px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+						   		
+						  </li>
+						  
+						     <li class="list-group-item desplay" id="mainonedes_qg_kffs_date14" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header">
+					   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+				  				<colgroup>
+				  				<col width="80">
+							    <col width="80">
+							    <col width="150">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							        <col width="200">
+							    <col>
+							  </colgroup>
+							  <thead>
+							    <tr>
+							          <th>序号</th>
+								      <th>地区名称</th>
+								      <th>总装机容量（万千瓦）/座数</th>
+								      <th>引水式装机容量（万千瓦）/座数</th>
+								      <th>坝后式装机容量（万千瓦）/座数</th>
+								      <th>混合式装机容量（万千瓦）/座数</th>
+								      <th>河床式装机容量（万千瓦）/座数</th>
+								        <th>未知开发方式装机容量（万千瓦）/座数</th>
+							    </tr> 
+							  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								     <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_kffs4">
+								  </tbody>
+								    <tbody id = "zj_table_qg_kffs14">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  		<%-- 		<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_kffs14">
+								  </tbody> --%>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	              
+	              <div class="col-md-12 list-group-one" style="height:300px;padding-left:0px;">
+	                 <ul class="list-group" style="position:relative;">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>设计年发电量随年份统计<button id="table-icon_qg_dz_fzlc1" class="btn btn-primary table-icon"  type="button">切换表格</button>
+						  <button style="margin-right:5px;" id="jc_export5" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(5)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="fzlc1" style="height:260px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;" >
+						  </li>
+						      <li class="list-group-item desplay" id="mainonedes_qg_kffs_date1" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+					   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+				  				<colgroup>
+				  				<col width="80">
+							    <col width="80">
+							    <col width="150">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							    <col>
+							  </colgroup>
+							  <thead>
+							    <tr>
+							          <th>序号</th>
+								      <th>年份</th>
+								      <th>总装机容量（万千瓦）/座数</th>
+								      <th>引水式装机容量（万千瓦）/座数</th>
+								      <th>坝后式机规模（万千瓦）/座数</th>
+								      <th>混合式机规模（万千瓦）/座数</th>
+								      <th>河床式机规模（万千瓦）/座数</th>
+							    </tr> 
+							    
+							  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_kffs_date1">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_kffs_date1">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	               <div class="col-md-12" style="padding-left:0px">
+                  <ul class="list-group list-group-one" style="position:relative">
+					  <li class="list-group-item" id="item-one">
+					   		<i class="icon icon-area-chart" style="margin-right:10px"></i><span class="jc_title"></span>小水电发展历程 <button id="jc_qiehuan_fzlc"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+					  <button style="margin-right:5px;" id="jc_export6" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(6)">导出表格</button>
+					  </li>
+					  <li class="list-group-item" id="fzlc2" style="height:300px">
+					   		
+					  </li>
+					   <li class="list-group-item desplay" id="mainonedes_qg_kffs_date2" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:300px;">
+					   		<div class="layui-table-header">
+					   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+				  				<colgroup>
+				  				<col width="80">
+							    <col width="80">
+							    <col width="150">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							    <col width="200">
+							    <col>
+							  </colgroup>
+							  <thead>
+							    <tr>
+							          <th>序号</th>
+								      <th>年份</th>
+								      <th>总装机容量（万千瓦）/座数</th>
+								      <th>引水式装机规模（万千瓦）/座数</th>
+								      <th>坝后式机规模（万千瓦）/座数</th>
+								      <th>混合式机规模（万千瓦）/座数</th>
+								      <th>河床式机规模（万千瓦）/座数</th>
+							    </tr> 
+							    
+							  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_kffs_date2">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_kffs_date2">
+								  </tbody>
+								</table>
+					  </li>
+				 </ul>
+              </div>
+	              <div class="col-md-12" style="height:300px;padding-left:0px;margin-top:-2px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电资金来源方式(所有制) <button id="table-icon5" class="btn btn-primary table-icon"  type="button">切换表格</button>
+						  	  <button style="margin-right:5px;" id="jc_export7" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(7)">导出表格</button>
+						  </li>
+						   <li class="list-group-item" id="item-one" style="height:260px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+						  <div class="col-md-6 list-group-one" > 
+						  <div class="list-group-item" id=zjly1 style="height:250px;border:none">
+						   		
+						  </div>
+						  </div>
+						   <div class="col-md-6 list-group-one" > 
+						   <div class="list-group-item" id="zjly2" style="height:250px;border:none">
+						   		
+						  </div>
+						  </div>
+						  </li>
+						  	<li class="list-group-item desplay" id="mainonedes15" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								        <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>地区名称</th>
+									      <th>总装机容量（万千瓦）/座数</th>
+									      <th>国有性质总装机容量（万千瓦）/座数</th>
+									      <th>民营性质总装机容量（万千瓦）/座数</th>
+									      <th>集体性质总装机容量（万千瓦）/座数</th>
+									       <th>混合性质总装机规模（万千瓦）/座数</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_jszt5">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_jszt5">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	              <div class="col-md-12 list-group-one" style="height:300px;padding-left:0px;">
+	                 <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电并网情况统计 <button id="table-icon6"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+							  <button style="margin-right:5px;" id="jc_export8" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(8)">导出表格</button>
+						  </li>
+						   <li class="list-group-item" id="item-one" style="height:260px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+						   <div class="col-md-6 list-group-one" style="height:260px"> 
+							  <div class="list-group-item" id=bwqk1 style="height:250px;border:none">
+							  </div>
+						  </div>
+						    <div class="col-md-6 list-group-one" style="height:260px" > 
+							   <div class="list-group-item" id="bwqk2" style="height:250px;border:none">
+							  </div>
+						  </div>
+						  </li>
+						    	<li class="list-group-item desplay" id="mainonedes16" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone " lay-size="sm" style="table-layout: fixed;    margin-top: 0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+									 <col width="200">
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <td >序号</td>
+									      <td >地区名称</td>
+									      <td style="word-wrap:break-word;">总装机容量（万千瓦）/座数</td>
+									      <td style="word-wrap:break-word;">接入电网总装机容量（万千瓦）/座数</td>
+									      <td style="word-wrap:break-word;">直供电（民用）总装机容量（万千瓦）/座数</td>
+									      <td style="word-wrap:break-word;">直供电（化工）总装机容量（万千瓦）/座数</td>
+									        <td style="word-wrap:break-word;">直供电（其它）总装机容量（万千瓦）/座数</td>
+									         <td style="word-wrap:break-word;">其它总装机容量（万千瓦）/座数</td>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:190px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="table-layout: fixed;margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								  </colgroup>
+								  <tbody id ="table_qg_jszt6">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								  </colgroup>
+								  <tbody id = "zj_table_qg_jszt6">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	 
+                  <div class="col-md-12 list-group-one" style="height:300px;padding-left:0px;">
+	                 <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>小水电项目核准情况统计 <button id="table-icon7"  class="btn btn-primary table-icon"  type="button">切换表格</button>
+						    <button style="margin-right:5px;" id="jc_export9" class="btn btn-primary table-icon desplay"  type="button" onclick = "jc_export(9)">导出表格</button>
+						  </li>
+						   <li class="list-group-item" id="item-one" style="height:260px;background: white;border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:0px;border-top-right-radius:0px;">
+							   <div class="col-md-6 list-group-one" style="height:260px"> 
+							  <div class="list-group-item" id="xmhzqk1" style="height:250px;border:none">
+							  </div>
+							  </div>
+							    <div class="col-md-6 list-group-one"  style="height:260px"> 
+							   <div class="list-group-item" id="xmhzqk2" style="height:250px;border:none">
+							   		
+							  </div>
+							  </div>
+						   </li>
+						       	<li class="list-group-item desplay" id="mainonedes17" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:260px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>地区名称</th>
+									      <th>总装机容量（万千瓦）/数量</th>
+									      <th>核准小水电总装机容量（万千瓦）/数量</th>
+									      <th>未核准总装机容量（万千瓦）/数量</th>
+									      <th>核准状态未知总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:202px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="table_qg_jszt7">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "zj_table_qg_jszt7">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	          <!--     <div class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i>小水电站开展生态修复情况统计
+						  </li>
+						  <li class="list-group-item" id="xfqk" style="height:250px">
+						   		
+						  </li>
+					 </ul>
+	              </div> -->
+			</div>
+	    </div>  
+	</div>
+</body>
+		<!--  [if lt IE 9]> -->
+<%-- 			    <script src="<%=basePath %>common/zui/lib/ieonly/html5shiv.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/respond.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/excanvas.js"></script>
+		<!--   <![endif] -->
+	<script src="<%=basePath%>common/layui/layui.all.js"></script>
+	<script src="<%=basePath %>common/zui/lib/jquery/jquery.js"></script>
+	<script src="<%=basePath%>common/js/ztree/js/jquery.ztree.all.js"></script>
+    <!-- 引入zui.js样式 -->
+	<script src="<%=basePath %>common/eCharts/echarts.min.js"></script>
+	<script src="<%=basePath %>common/zui/js/zui.lite.min.js"></script>
+	<script src="<%=basePath %>common/zui/js/zui.js"></script>
+ --%>
+    <script src="../business/jichuxinxi/list.js"></script>
+
+        

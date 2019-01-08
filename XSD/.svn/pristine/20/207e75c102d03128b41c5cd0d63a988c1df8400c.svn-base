@@ -1,0 +1,594 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+ <%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>小水电项目管理平台</title>
+		 <!-- 引入头部icon图标 -->	
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/favicon.ico">
+		 <!-- 引入icon图标 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/iconfont.css">
+		 <!-- 引入zui样式 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/css/zui.lite.min.css">
+		<style>
+		html body{
+			height:100%;
+			overflow: hidden;
+		   }
+		    .container-fluid{
+               padding-left:0px;
+               padding-right:0px;
+		    }
+		     .container-fluid img{
+               height:100%;
+		    }
+           .container-fluid .row  .col-md-12{
+               position: absolute;
+               top:0px;
+               left:0px;
+               width: 100%;
+               height:64px;
+		    }
+           .container-fluid .row  .col-md-12 .row .col-md-4{    
+               height:64px;
+               margin-top:18px; 
+		    }
+		   .container-fluid .row  .col-md-12 .row .col-md-4 img{   
+		   	    margin-left:24px;
+		   	    margin-top:3px;
+		        float:left; 
+		    }
+		     .container-fluid .row  .col-md-12 .row .col-md-4 p{ 
+		            margin-top: 8px;
+				    margin-left: 10px;
+				    margin-bottom: 0px;
+				    font-size: 24px;
+				    float: left;
+		    }
+		     .container-fluid .row  .col-md-12 .row .col-md-4 p+span{
+		     	    margin-top: -10px;
+				    padding-left: 13px;
+				    padding-right: 0px;
+				    font-size: 13px;
+				    color:#999999;
+				    border: 0px;
+				}
+           		     .container-fluid .row  .col-md-12 .row .col-md-4 span{ 
+				    display: inline-block;
+				    margin-top: 25px;
+				    padding-right: 16px;
+				    padding-left: 16px;
+				    border-left: 1px solid #b6b6b6;
+		    }
+		       .container-fluid .row .col-md-12 .row .col-md-4 span:first-child{   
+				     border-left:0px;
+				     margin-left: 84px;
+		    }
+          #row-second{
+      	        position: absolute;
+			  top: 134px;
+			  right: 0px;
+			  left: 0px;
+			    height: 380px;
+			    margin-right: -10px;
+			    margin-left: -10px;
+			    color:#FFFFFF;
+          }
+          #row-second .col-md-6 h2{
+          	    font-size:30px;
+			    margin-left: 109px;
+			    margin-top: 89px;
+			    margin-bottom: 30px;
+			    white-space: nowrap!important;
+          }
+           #row-second .col-md-6 h4{
+           	    font-size:14px;
+           	    font-weight: 100;
+			    margin-left: 109px;
+			    white-space: nowrap;
+          }
+            #row-second .col-md-6 .login-right{
+               display:inline-block;
+           	   width: 300px;
+           	   height:360px;
+           	   margin-top: 10px;
+           	   background: white;
+           	   border-radius:10px;
+          }
+           #row-second .col-md-6 .login-right img{
+           	   width: 60px;
+           	   height:60px;
+   			   margin-top: 26px;
+   			   margin-bottom: 26px;
+          }
+           #row-second .col-md-6 .login-right h3{
+           	   color: #333333;
+           	   font-weight: 550;
+           	   font-size:18px;
+           	   margin-top: 0px;
+          }          
+         .nav>li>a{
+         	float:right;
+         }          
+        .nav>li>a:nth-child(1){
+        	position: relative;
+         	margin-left: 45px;
+         	color: #368ae3;
+         }
+        .tab-content{
+         	position: relative;
+         	top: 20px;
+         }
+         .tab-content #tab2Content1{
+         	position: absolute;
+         	z-index:3333;
+         	top:0px;
+         	left: 0px;
+         	width: 100%;
+         }       
+         .form-control{
+         	width: 80%;
+         	margin-left:10%; 
+         	padding-left:40px;
+         }
+         #btn-p{
+         margin-top:10px;
+         
+         	width: 80%;
+         }
+         #banben{
+         	line-height: 57px;
+         	margin-right:30px; 
+         	text-align: right;
+         	color:#3f82e7;
+         }
+         #erweima{
+         	margin-left: 70px!important;
+         	margin-top: 0px!important;
+            margin-bottom: 0px!important;
+         	width: 160px!important;
+         	height: 160px!important;
+         	background: red;
+         }
+        #erweimaimg{
+            position: absolute;
+            top:0px;
+            left:59px;
+            width: 10px!important;
+            height:10px!important;
+            margin-left: 0px!important;
+		    margin-top: 0px!important;
+		    margin-bottom: 0px!important;
+         }        
+          #row-third{
+      	        position: absolute;
+      	        background: white;
+      	        color:#333;
+			    bottom: 0px;
+			    width: 100%;
+			    height:80px;
+			    line-height:80px;
+			    margin-right: auto;
+			    margin-left: auto;
+          }
+          #row-third .col-md-12{
+          	    height: 120px;
+			    background: white;
+			    color: #838383;
+			    margin-top: -21px; 
+			    white-space: nowrap;
+
+          }
+          
+           #row-third .col-md-12 p:first-child{
+           	    margin-top:30px; 
+          	    color:#5b5b5b;
+          }                            
+          .has-icon-left label{
+            position: relative;
+		    top: -52px;
+		    left: -97px;		  		 
+          }
+           .has-icon-right label{
+            position: relative;
+		    top: -52px;
+		    left: -97px;		  	 
+          }
+          .has-icon-right label img{           
+		    display: inline-block;
+		    width: 18px!important;
+		    height: 20px!important;
+          }
+       
+          .has-icon-left label img{           
+		    display: inline-block;
+		    width: 20px!important;
+		    height: 20px!important;
+          }
+       
+          #hasLeft{
+           height:40px;
+          }
+           #hasright{
+           height:40px;
+          }
+          @media (max-width: 1024px) {
+    			 #row-third{
+		          bottom:50px;
+		    }
+		  }
+		   @media (max-width: 1024px) {
+    			#row-second .col-md-6 h4,
+    			#row-second .col-md-6 h2{
+		         margin-left: 60px;
+		    }
+		    #row-second .col-md-6 .login-right{
+		    	margin-left: 120px;
+		    }
+		    .container-fluid .row .col-md-12 .row .col-md-4 p{
+		    	 letter-spacing:normal!important;
+		    }
+		    .container-fluid .row .col-md-12 .row .col-md-4 span{
+		    	    margin-right: 35px;
+		    }
+		    #row-second{
+		    	top:97px;
+		    }
+		    .container-fluid .row .col-md-12 .row .col-md-4{
+		    	     margin-top: 0px; 
+		    }
+		    .container-fluid .row .col-md-12 .row .col-md-4 span{
+		    	    margin-right:0px;
+		    }
+		    .container-fluid .row .col-md-12 .row .col-md-4 span:nth-child(1){
+		    	        margin-left: -37px;
+		    }
+		     .container-fluid .row  .col-md-12 .row .col-md-4 img{   
+		   	    margin-left:0px;
+		    }
+		  }
+	
+  #input{
+      position: relative;
+		    top: 0px;
+		    left: 0px;		  	
+  }
+   #yzinput{
+   text-align: left;
+   }
+ #checkCode{ 
+      font-family:Arial,宋体; 
+      font-style:italic; 
+      color:green; 
+      border:0; 
+      padding:2px 3px; 
+      letter-spacing:3px; 
+      font-weight:bolder; 
+    } 
+    @media (min-width: 1440px) {
+      #row-second{
+       top:182px;
+      }
+    } 
+
+    @media (min-width: 1680px) {
+   
+    } 
+    @media (min-width: 1920px) {
+   
+    } 
+		  /* 新加样式 */
+		   #bg-color{
+		    background: white;
+		   }
+		   .container-fluid .row .col-md-12 .row .col-md-4 p{
+		    margin-top:0px;
+		   }
+		   #input{
+		   border-top-right-radius: 2px; 
+border-top-left-radius: 2px; 
+border-bottom-right-radius:2px;
+border-bottom-left-radius:2px;}
+		</style>
+				        <script src="<%=basePath %>common/jquery/jquery-1.11.3.min.js"></script>
+		<!--   <![endif] -->
+	<script src="<%=basePath %>common/zui/lib/jquery/jquery.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">  
+		     <img src="<%=basePath %>common/images/login/bg.png" width="100%" height="100%" class="img-responsive" alt="响应式图片测试">
+		     <div class="row">
+		     	 <div class="col-md-12  col-lg-12 col-sm-12 col-xs-12">
+		     	 	 <div class="row" id="bg-color">
+		     	 		<div class="col-md-4 col-lg-4 col-sm-6 col-xs-6"> 
+		     	 			 <div class="row">
+		                            <img src="<%=basePath %>common/images/login/LOGO.png" alt="">
+                                    <p>小水电项目管理平台</p>
+                                    <span id="spanid">SHUIDIANXINGMUGUANLIPINGTAI</span>
+                             </div>
+		     	 		</div>
+		     	 		<div class="col-md-4 col-lg-4 hidden-sm hidden-xs"></div>
+		     	 		<div class="col-md-4 col-lg-4 col-sm-6 col-xs-6">
+		     	 			<!--  <span>资源分析</span>
+		     	 			<span>数据展示</span>
+		     	 			<span>模拟综合</span>
+		     	 			<span>实时监控</span> -->
+		     	 		</div>
+		     	 	 </div>
+		     	 </div>
+		     </div>
+		     <div class="row" id="row-second">
+		       <div class="col-md-3 col-lg-3 col-sm-3 col-xs-3">
+		     	  	<!--  <h2>现代化的基础设施,高效率的分析平台</h2>
+		     	  	 <h4>水资源综合信息化系统主要包括水资源信息服务、水资源业务管理、水资源应急管理、综合数据应用组成。</h4>
+		     	  	 <h4>通过对管理的基础信息进行多种方式的业务信息分析和表达,进行水资源模拟评测功能。</h4>
+		     	  	 <h4>工作效率同比提高30%。</h4> -->
+		     	  </div>
+		     	  <div class="col-md-6 col-lg-6 col-sm-6 col-xs-6" style="text-align:center;">
+		     	  	  <div class="login-right">
+		     	  	  	    <img src="<%=basePath %>common/images/login/LOGO.png" alt="">
+		     	  	  	    <h3 class="text-center">小水电项目管理平台</h3> 	  	    
+								<div class="tab-content">
+								    <div class="tab-pane fade active in"  id="tab2Content1">
+								      <form action="<%=basePath%>login/system!login.do" id="login_form" method="post" > 
+								      	<div class="input-control has-icon-left" id="hasLeft">
+										  <input id="inputAccountExample1" name="mSysUser.userName" type="text" class="form-control" placeholder="用户名">
+										  <label for="inputAccountExample1" class="input-control-icon-left"> <img src="<%=basePath%>common/images/login/zhanghu.png" alt=""></label>
+										</div>		
+								      	<div class="input-control has-icon-right" id="hasright">    
+										  <input id="inputPasswordExample1" name="mSysUser.userPwd"  type="password" class="form-control" placeholder="密码">
+										  <label for="inputPasswordExample1" class="input-control-icon-right"><img src="<%=basePath%>common/images/login/mima.png" alt=""></label>
+									
+										</div>
+										<div class="row">
+											<div  class="col-md-6">
+													<input type="text" id="input"  class=" form-control yzinput" placeholder="请输入验证码" style="margin-left: 30px;width:80%;    padding-left: 10px"/>
+											</div>
+												<div  class="col-md-6">
+													<input type="button" id="checkCode" class="code form-control" onclick="createCode()" style="background-color: white ;margin-left: -5px;"/>
+												<!-- <a href="#" onclick="createCode()">看不清楚</a><br> -->
+											</div>
+										</div>
+											  <font color="red " style="display: none;margin-left: 28px;" id="login_error_font">提示 : 用户名或密码错误，请重新输入</font>
+											    <font color="green " style="display: none;margin-left: 28px;" id="login_success_font">登录成功，等待跳转...</font>
+										<button type="button" id="btn-p" class="btn btn-primary"  onclick="validate()">登&nbsp;&nbsp;录</button> 
+			                           <%--  <div id="banben"><a href="<%=basePath %>register.jsp" role="button">注册</a></div> --%>
+			                            </form>
+									</div>
+								         
+								</div>
+		     	  	  </div>
+		     	  </div>
+		     </div>
+		     <div class="row text-center" id="row-third">
+		     	     <p>Copyright © 水电水利设计总院 All Rights Reserved.
+		     	 <%--     <button onclick="javascript:window.location.href='<%=basePath%>jcxx/jcxx!Test1.do'">你那是的</button><button onclick="export_jstl_qg()">导出</button> --%>
+					 <%--<button onclick="update()">修改</button>--%>
+		     	     </p>
+		     </div>
+		</div>
+	</body>
+	    <script src="<%=basePath %>main/js/yanzhengma.js"></script>
+	    <script src="<%=basePath%>common/layui/layui.all.js"></script>
+<script type="text/javascript">
+ $(function () {
+	 $(document).keyup(function(event){
+		  if(event.keyCode ==13){//回车->登陆
+			  validate();//先验证 验证码
+		  }
+		});
+    }); 
+    export_jstl_qg = function(){
+        var tabTitle;
+        var sqlTitle;
+        var sql ;
+        var fileName;
+        fileName = "新疆维吾尔自治区"
+        tabTitle = ['序号','水利部编号','水利部编号来源','能源局编号','能源局编号来源','生态环境部','生态环境部来源','电站编号','项目名称_简称','项目名称','项目名称（来源）','经度','经度（来源）','纬度','纬度（来源）','省','省（来源）','市','市（来源）','县','县（来源）','项目位置','项目位置（来源）'
+            ,'建设（运营）单位','建设（运营）单位（来源）','电站联系人','电站联系人（来源）','联系人电话','联系人电话（来源）','项目所在流域','项目所在流域（来源）','一级支流','一级支流（来源）'
+            ,'具体河流','具体河流（来源）','装机容量（千瓦）','装机容量（千瓦）（来源）','总投资（万元）','总投资（万元）（来源）','设计年发电量（万千瓦时）','设计年发电量（万千瓦时）（来源）','设计年发电量修正（万千瓦时）','设计年发电量修正（万千瓦时）（来源）','投资性质（所有制）','投资性质（所有制）（来源）'
+            ,'投资来源','投资来源（来源）','并网情况','并网情况（来源）','开发方式','开发方式（来源）','取水口河道距离','取水口河道距离（来源）','建设（运营）状态','建设（运营）状态（来源）'
+            ,'对应时间','对应时间（来源）','拆除原因','拆除原因（来源）','是否已开展生态修复','是否已开展生态修复（来源）','实际发电量（万千瓦时）','实际发电量（万千瓦时）（来源）','实际发电量_修正（万千瓦时）','实际发电量_修正（万千瓦时）（来源）'
+            ,'是否有项目核准（审批）','是否有项目核准（审批）（来源）','核准（审批）文件名称及文号','核准（审批）文件名称及文号（来源）','项目核准（审批）部门','项目核准（审批）部门（来源）','是否符合规划','是否符合规划（来源）'
+            ,'规划名称','规划名称（来源）','规划审批时间','规划审批时间（来源）','规划审批部门','规划审批部门（来源）','是否符合规划环评','是否符合规划环评（来源）','规划环评文件','规划环评文件（来源）'
+            ,'审查文件文号','审查文件文号（来源）','规划环评审查部门','规划环评审查部门（来源）','是否通过项目环评','是否通过项目环评（来源）','审批文件名称','审批文件名称（来源）','审批文件文号','审批文件文号（来源）'
+            ,'环评审批时间','环评审批时间（来源）','审批部门','审批部门（来源）','是否通过竣工环保验收','是否通过竣工环保验收（来源）','验收文件名称','验收文件名称（来源）','验收文件文号','验收文件文号（来源）'
+            ,'验收部门','验收部门（来源）','生态流量泄放措施','生态流量泄放措施（来源）','生态流量监控设施','生态流量监控设施（来源）','过鱼措施','过鱼措施（来源）','增殖放流措施','增殖放流措施（来源）','其他环保措施','其他环保措施（来源）'
+            ,'其他环保措施描述','其他环保措施描述（来源）','是否涉及自然保护区','是否涉及自然保护区（来源）','自然保护区设立时间','自然保护区设立时间（来源）','自然保护区级别','自然保护区级别（来源）','核心区','核心区（来源）','缓冲区','缓冲区（来源）'
+            ,'实验区','实验区（来源）','未分区','未分区（来源）','坝下是否存在脱水干涸','坝下是否存在脱水干涸（来源）','脱水河段长度（公里）','脱水河段长度（公里）（来源）','其他生态环境问题','其他生态环境问题（来源）'
+            ,'填表人','填表人（来源）','电话','电话（来源）','填表时间','填表时间（来源）','现场核查人','现场核查人（来源）','源文件名称','源文件名称（来源）','电站座数','电站座数（来源）','投产年月','投产年月（来源）'
+            ,'综合利用情况','综合利用情况（来源）','总库容（万立方米）','总库容（万立方米）（来源）','坝高（米）','坝高（米）（来源）','上网电价（元/千瓦时）','上网电价（元/千瓦时）（来源）','规划审批及文号','规划审批及文号（来源）'
+            ,'技术方案审批部门及文号','技术方案审批部门及文号（来源）','批准开工部门及文号','批准开工部门及文号（来源）','环评及环保验收文号','环评及环保验收文号（来源）','水保及文号','水保及文号（来源）','用地批准及文号','用地批准及文号（来源）'
+            ,'是否进行地质灾害危险性评估','是否进行地质灾害危险性评估（来源）','验收部门及文号','验收部门及文号（来源）','项目法人名称','项目法人名称（来源）'
+            ,'主要投资方','主要投资方（来源）','联系电话','联系电话（来源）','备注','备注（来源）']
+        sqlTitle = [	 'slb_dzbh','slb_dzbh_flag','nyj_dzbh','nyj_dzbh_flag','sthjb_dzbh','sthjb_dzbh_flag','dzbh','xmmc_a','xmmc','xmmc_flag','dj','dj_flag','bw','bw_flag','sheng','sheng_flag','shi','shi_flag','xian','xian_flag','xmwz','xmwz_flag'
+            ,'jsdw','jsdw_flag','dzlxr','dzlxr_flag','lxrdh','lxrdh_flag','xmszly','xmszly_flag','yjzl','yjzl_flag'
+            ,'jthl','jthl_flag','zjrl','zjrl_flag','ztz','ztz_flag','sjnfdl','sjnfdl_flag','sjnfdl_xz','sjnfdl_xz_flag','tzxz','tzxz_flag'
+            ,'tzly','tzly_flag','bwqk','bwqk_flag','kffs','kffs_flag','qskhdjl','qskhdjl_flag','jszt','jszt_flag'
+            ,'dysj','dysj_flag','ccyy','ccyy_flag','sfykzstxf','sfykzstxf_flag','sjfdl','sjfdl_flag','sjfdl_xz','sjfdl_xz_flag'
+            ,'sfyxmhz','sfyxmhz_flag','hzwjmcjch','hzwjmcjch_flag','xmhzdw','xmhzdw_flag','sffhgh','sffhgh_flag'
+            ,'ghmc','ghmc_flag','ghshsj','ghshsj_flag','ghspbm','ghspbm_flag','sffhghhp','sffhghhp_flag','ghhpwj','ghhpwj_flag'
+            ,'scwjwh','scwjwh_flag','ghhpscbm','ghhpscbm_flag','sftgxmhp','sftgxmhp_flag','spwjmc','spwjmc_flag','spwjwh','spwjwh_flag'
+            ,'hpspsj','hpspsj_flag','ppbm','ppbm_flag','sftgjghbys','sftgjghbys_flag','yswjmc','yswjmc_flag','yswjwh','yswjwh_flag'
+            ,'ysbm','ysbm_flag','stllxfcs','stllxfcs_flag','stlljkss','stlljkss_flag','gycs','gycs_flag','zzflcs','zzflcs_flag','qthbcs','qthbcs_flag'
+            ,'qthbcsms','qthbcsms_flag','sfsjzrbhq','sfsjzrbhq_flag','zrbhqslyj','zrbhqslyj_flag','zrbhqjj','zrbhqjj_flag','hxq','hxq_flag','hcq','hcq_flag'
+            ,'sys','sys_flag','wfq','wfq_flag','bxsfcztsgk','bxsfcztsgk_flag','tshdcd','tshdcd_flag','qtsthjwt','qtsthjwt_flag'
+            ,'tbr','tbr_flag','dh','dh_flag','tbsj','tbsj_flag','xchcr','xchcr_flag','ywjmc','ywjmc_flag','dzzs','dzzs_flag','tcny','tcny_flag'
+            ,'zhltqk','zhltqk_flag','zrk','zrk_flag','bg','bg_flag','swdj','swdj_flag','ghspjwh','ghspjwh_flag'
+            ,'jsfaspbmjwh','jsfaspbmjwh_flag','pzkmbmjwh','pzkmbmjwh_flag','hpjhbyswh','hpjhbyswh_flag','sbjwh','sbjwh_flag','ydpcjwh','ydpcjwh_flag'
+            ,'sfjddzzhwxx','sfjddzzhwxx_flag','ysbmjwh','ysbmjwh_flag','xmfrmc','xmfrmc_flag'
+            ,'zytzr','zytzr_flag','lxdh','lxdh_flag','bz','bz_flag']
+        sql = "SELECT slb_dzbh,slb_dzbh_flag,nyj_dzbh,nyj_dzbh_flag,sthjb_dzbh,sthjb_dzbh_flag,dzbh,xmmc_a"
+            +",xmmc,CASE WHEN xmmc_flag = 1 then '水利部' WHEN xmmc_flag = 2 then '生态环境部' WHEN xmmc_flag = 3 then '能源局' else NULL end AS xmmc_flag "
+            +",dj,CASE WHEN dj_flag = 1 then '水利部' WHEN dj_flag = 2 then '生态环境部' WHEN dj_flag = 3 then '能源局' else NULL end AS dj_flag "
+            +",bw,CASE WHEN bw_flag = 1 then '水利部' WHEN bw_flag = 2 then '生态环境部' WHEN bw_flag = 3 then '能源局' else NULL end AS bw_flag "
+            +",sheng,CASE WHEN sheng_flag = 1 then '水利部' WHEN sheng_flag = 2 then '生态环境部' WHEN sheng_flag = 3 then '能源局' else NULL end AS sheng_flag "
+            +",shi,CASE WHEN shi_flag = 1 then '水利部' WHEN shi_flag = 2 then '生态环境部' WHEN shi_flag = 3 then '能源局' else NULL end AS shi_flag "
+            +",xian,CASE WHEN xian_flag = 1 then '水利部' WHEN xian_flag = 2 then '生态环境部' WHEN xian_flag = 3 then '能源局' else NULL end AS xian_flag "
+            +",xmwz,CASE WHEN xmwz_flag = 1 then '水利部' WHEN xmwz_flag = 2 then '生态环境部' WHEN xmwz_flag = 3 then '能源局' else NULL end AS xmwz_flag "
+            +",jsdw,CASE WHEN jsdw_flag = 1 then '水利部' WHEN jsdw_flag = 2 then '生态环境部' WHEN jsdw_flag = 3 then '能源局' else NULL end AS jsdw_flag "
+            +",dzlxr,CASE WHEN dzlxr_flag = 1 then '水利部' WHEN dzlxr_flag = 2 then '生态环境部' WHEN dzlxr_flag = 3 then '能源局' else NULL end AS dzlxr_flag "
+            +",lxrdh,CASE WHEN lxrdh_flag = 1 then '水利部' WHEN lxrdh_flag = 2 then '生态环境部' WHEN lxrdh_flag = 3 then '能源局' else NULL end AS lxrdh_flag "
+            +",AAAA.name AS xmszly,CASE WHEN xmszly_flag = 1 then '水利部' WHEN xmszly_flag = 2 then '生态环境部' WHEN xmszly_flag = 3 then '能源局' else NULL end AS xmszly_flag "
+            +",yjzl,CASE WHEN yjzl_flag = 1 then '水利部' WHEN yjzl_flag = 2 then '生态环境部' WHEN yjzl_flag = 3 then '能源局' else NULL end AS yjzl_flag "
+            +",jthl,CASE WHEN jthl_flag = 1 then '水利部' WHEN jthl_flag = 2 then '生态环境部' WHEN jthl_flag = 3 then '能源局' else NULL end AS jthl_flag "
+            +",zjrl,CASE WHEN zjrl_flag = 1 then '水利部' WHEN zjrl_flag = 2 then '生态环境部' WHEN zjrl_flag = 3 then '能源局' else NULL end AS zjrl_flag "
+            +",ztz,CASE WHEN ztz_flag = 1 then '水利部' WHEN ztz_flag = 2 then '生态环境部' WHEN ztz_flag = 3 then '能源局' else NULL end AS ztz_flag "
+            +",sjnfdl,CASE WHEN sjnfdl_flag = 1 then '水利部' WHEN sjnfdl_flag = 2 then '生态环境部' WHEN sjnfdl_flag = 3 then '能源局' else NULL end AS sjnfdl_flag "
+            +",sjnfdl_xz,CASE WHEN sjnfdl_xz_flag = 1 then '水利部' WHEN sjnfdl_xz_flag = 2 then '生态环境部' WHEN sjnfdl_xz_flag = 3 then '能源局' else NULL end AS sjnfdl_xz_flag     "
+            +",tzxz,CASE WHEN tzxz_flag = 1 then '水利部' WHEN tzxz_flag = 2 then '生态环境部' WHEN tzxz_flag = 3 then '能源局' else NULL end AS tzxz_flag "
+            +",tzly,CASE WHEN tzly_flag = 1 then '水利部' WHEN tzly_flag = 2 then '生态环境部' WHEN tzly_flag = 3 then '能源局' else NULL end AS tzly_flag "
+            +",A.name AS bwqk,CASE WHEN bwqk_flag = 1 then '水利部' WHEN bwqk_flag = 2 then '生态环境部' WHEN bwqk_flag = 3 then '能源局' else NULL end AS bwqk_flag "
+            +",AA.name AS kffs,CASE WHEN kffs_flag = 1 then '水利部' WHEN kffs_flag = 2 then '生态环境部' WHEN kffs_flag = 3 then '能源局' else NULL end AS kffs_flag "
+            +",qskhdjl,CASE WHEN qskhdjl_flag = 1 then '水利部' WHEN qskhdjl_flag = 2 then '生态环境部' WHEN qskhdjl_flag = 3 then '能源局' else NULL end AS qskhdjl_flag "
+            +",AAA.name AS jszt,CASE WHEN jszt_flag = 1 then '水利部' WHEN jszt_flag = 2 then '生态环境部' WHEN jszt_flag = 3 then '能源局' else NULL end AS jszt_flag "
+            +",dysj,CASE WHEN dysj_flag = 1 then '水利部' WHEN dysj_flag = 2 then '生态环境部' WHEN dysj_flag = 3 then '能源局' else NULL end AS dysj_flag "
+            +",ccyy,CASE WHEN ccyy_flag = 1 then '水利部' WHEN ccyy_flag = 2 then '生态环境部' WHEN ccyy_flag = 3 then '能源局' else NULL end AS ccyy_flag "
+            +",sfykzstxf,CASE WHEN sfykzstxf_flag = 1 then '水利部' WHEN sfykzstxf_flag = 2 then '生态环境部' WHEN sfykzstxf_flag = 3 then '能源局' else NULL end AS sfykzstxf_flag "
+            +",sjfdl,CASE WHEN sjfdl_flag = 1 then '水利部' WHEN sjfdl_flag = 2 then '生态环境部' WHEN sjfdl_flag = 3 then '能源局' else NULL end AS sjfdl_flag "
+            +",sjfdl_xz,CASE WHEN sjfdl_xz_flag = 1 then '水利部' WHEN sjfdl_xz_flag = 2 then '生态环境部' WHEN sjfdl_xz_flag = 3 then '能源局' else NULL end AS sjfdl_xz_flag "
+            +",sfyxmhz,CASE WHEN sfyxmhz_flag = 1 then '水利部' WHEN sfyxmhz_flag = 2 then '生态环境部' WHEN sfyxmhz_flag = 3 then '能源局' else NULL end AS sfyxmhz_flag "
+            +",hzwjmcjch,CASE WHEN hzwjmcjch_flag = 1 then '水利部' WHEN hzwjmcjch_flag = 2 then '生态环境部' WHEN hzwjmcjch_flag = 3 then '能源局' else NULL end AS hzwjmcjch_flag "
+            +",xmhzdw,CASE WHEN xmhzdw_flag = 1 then '水利部' WHEN xmhzdw_flag = 2 then '生态环境部' WHEN xmhzdw_flag = 3 then '能源局' else NULL end AS xmhzdw_flag "
+            +",sffhgh,CASE WHEN sffhgh_flag = 1 then '水利部' WHEN sffhgh_flag = 2 then '生态环境部' WHEN sffhgh_flag = 3 then '能源局' else NULL end AS sffhgh_flag "
+            +",ghmc,CASE WHEN ghmc_flag = 1 then '水利部' WHEN ghmc_flag = 2 then '生态环境部' WHEN ghmc_flag = 3 then '能源局' else NULL end AS ghmc_flag "
+            +",ghshsj,CASE WHEN ghshsj_flag = 1 then '水利部' WHEN ghshsj_flag = 2 then '生态环境部' WHEN ghshsj_flag = 3 then '能源局' else NULL end AS ghshsj_flag "
+            +",ghspbm,CASE WHEN ghspbm_flag = 1 then '水利部' WHEN ghspbm_flag = 2 then '生态环境部' WHEN ghspbm_flag = 3 then '能源局' else NULL end AS ghspbm_flag "
+            +",sffhghhp,CASE WHEN sffhghhp_flag = 1 then '水利部' WHEN sffhghhp_flag = 2 then '生态环境部' WHEN sffhghhp_flag = 3 then '能源局' else NULL end AS sffhghhp_flag "
+            +",ghhpwj,CASE WHEN ghhpwj_flag = 1 then '水利部' WHEN ghhpwj_flag = 2 then '生态环境部' WHEN ghhpwj_flag = 3 then '能源局' else NULL end AS ghhpwj_flag "
+            +",scwjwh,CASE WHEN scwjwh_flag = 1 then '水利部' WHEN scwjwh_flag = 2 then '生态环境部' WHEN scwjwh_flag = 3 then '能源局' else NULL end AS scwjwh_flag "
+            +",ghhpscbm,CASE WHEN ghhpscbm_flag = 1 then '水利部' WHEN ghhpscbm_flag = 2 then '生态环境部' WHEN ghhpscbm_flag = 3 then '能源局' else NULL end AS ghhpscbm_flag "
+            +",sftgxmhp,CASE WHEN sftgxmhp_flag = 1 then '水利部' WHEN sftgxmhp_flag = 2 then '生态环境部' WHEN sftgxmhp_flag = 3 then '能源局' else NULL end AS sftgxmhp_flag "
+            +",spwjmc,CASE WHEN spwjmc_flag = 1 then '水利部' WHEN spwjmc_flag = 2 then '生态环境部' WHEN spwjmc_flag = 3 then '能源局' else NULL end AS spwjmc_flag "
+            +",spwjwh,CASE WHEN spwjwh_flag = 1 then '水利部' WHEN spwjwh_flag = 2 then '生态环境部' WHEN spwjwh_flag = 3 then '能源局' else NULL end AS spwjwh_flag "
+            +",hpspsj,CASE WHEN hpspsj_flag = 1 then '水利部' WHEN hpspsj_flag = 2 then '生态环境部' WHEN hpspsj_flag = 3 then '能源局' else NULL end AS hpspsj_flag "
+            +",ppbm,CASE WHEN ppbm_flag = 1 then '水利部' WHEN ppbm_flag = 2 then '生态环境部' WHEN ppbm_flag = 3 then '能源局' else NULL end AS ppbm_flag "
+            +",sftgjghbys,CASE WHEN sftgjghbys_flag = 1 then '水利部' WHEN sftgjghbys_flag = 2 then '生态环境部' WHEN sftgjghbys_flag = 3 then '能源局' else NULL end AS sftgjghbys_flag "
+            +",yswjmc,CASE WHEN yswjmc_flag = 1 then '水利部' WHEN yswjmc_flag = 2 then '生态环境部' WHEN yswjmc_flag = 3 then '能源局' else NULL end AS yswjmc_flag "
+            +",yswjwh,CASE WHEN yswjwh_flag = 1 then '水利部' WHEN yswjwh_flag = 2 then '生态环境部' WHEN yswjwh_flag = 3 then '能源局' else NULL end AS yswjwh_flag "
+            +",ysbm,CASE WHEN ysbm_flag = 1 then '水利部' WHEN ysbm_flag = 2 then '生态环境部' WHEN ysbm_flag = 3 then '能源局' else NULL end AS ysbm_flag "
+            +",stllxfcs,CASE WHEN stllxfcs_flag = 1 then '水利部' WHEN stllxfcs_flag = 2 then '生态环境部' WHEN stllxfcs_flag = 3 then '能源局' else NULL end AS stllxfcs_flag "
+            +",stlljkss,CASE WHEN stlljkss_flag = 1 then '水利部' WHEN stlljkss_flag = 2 then '生态环境部' WHEN stlljkss_flag = 3 then '能源局' else NULL end AS stlljkss_flag "
+            +",gycs,CASE WHEN gycs_flag = 1 then '水利部' WHEN gycs_flag = 2 then '生态环境部' WHEN gycs_flag = 3 then '能源局' else NULL end AS gycs_flag "
+            +",zzflcs,CASE WHEN zzflcs_flag = 1 then '水利部' WHEN zzflcs_flag = 2 then '生态环境部' WHEN zzflcs_flag = 3 then '能源局' else NULL end AS zzflcs_flag "
+            +",qthbcs,CASE WHEN qthbcs_flag = 1 then '水利部' WHEN qthbcs_flag = 2 then '生态环境部' WHEN qthbcs_flag = 3 then '能源局' else NULL end AS qthbcs_flag "
+            +",qthbcsms,CASE WHEN qthbcsms_flag = 1 then '水利部' WHEN qthbcsms_flag = 2 then '生态环境部' WHEN qthbcsms_flag = 3 then '能源局' else NULL end AS qthbcsms_flag "
+            +",sfsjzrbhq,CASE WHEN sfsjzrbhq_flag = 1 then '水利部' WHEN sfsjzrbhq_flag = 2 then '生态环境部' WHEN sfsjzrbhq_flag = 3 then '能源局' else NULL end AS sfsjzrbhq_flag "
+            +",zrbhqslyj,CASE WHEN zrbhqslyj_flag = 1 then '水利部' WHEN zrbhqslyj_flag = 2 then '生态环境部' WHEN zrbhqslyj_flag = 3 then '能源局' else NULL end AS zrbhqslyj_flag "
+            +",zrbhqjj,CASE WHEN zrbhqjj_flag = 1 then '水利部' WHEN zrbhqjj_flag = 2 then '生态环境部' WHEN zrbhqjj_flag = 3 then '能源局' else NULL end AS zrbhqjj_flag "
+            +",hxq,CASE WHEN hxq_flag = 1 then '水利部' WHEN hxq_flag = 2 then '生态环境部' WHEN hxq_flag = 3 then '能源局' else NULL end AS hxq_flag "
+            +",hcq,CASE WHEN hcq_flag = 1 then '水利部' WHEN hcq_flag = 2 then '生态环境部' WHEN hcq_flag = 3 then '能源局' else NULL end AS hcq_flag "
+            +",sys,CASE WHEN sys_flag = 1 then '水利部' WHEN sys_flag = 2 then '生态环境部' WHEN sys_flag = 3 then '能源局' else NULL end AS sys_flag "
+            +",wfq,CASE WHEN wfq_flag = 1 then '水利部' WHEN wfq_flag = 2 then '生态环境部' WHEN wfq_flag = 3 then '能源局' else NULL end AS wfq_flag "
+            +",bxsfcztsgk,CASE WHEN bxsfcztsgk_flag = 1 then '水利部' WHEN bxsfcztsgk_flag = 2 then '生态环境部' WHEN bxsfcztsgk_flag = 3 then '能源局' else NULL end AS bxsfcztsgk_flag "
+            +",tshdcd,CASE WHEN tshdcd_flag = 1 then '水利部' WHEN tshdcd_flag = 2 then '生态环境部' WHEN tshdcd_flag = 3 then '能源局' else NULL end AS tshdcd_flag "
+            +",qtsthjwt,CASE WHEN qtsthjwt_flag = 1 then '水利部' WHEN qtsthjwt_flag = 2 then '生态环境部' WHEN qtsthjwt_flag = 3 then '能源局' else NULL end AS qtsthjwt_flag "
+            +",tbr,CASE WHEN tbr_flag = 1 then '水利部' WHEN tbr_flag = 2 then '生态环境部' WHEN tbr_flag = 3 then '能源局' else NULL end AS tbr_flag "
+            +",dh,CASE WHEN dh_flag = 1 then '水利部' WHEN dh_flag = 2 then '生态环境部' WHEN dh_flag = 3 then '能源局' else NULL end AS dh_flag "
+            +",tbsj,CASE WHEN tbsj_flag = 1 then '水利部' WHEN tbsj_flag = 2 then '生态环境部' WHEN tbsj_flag = 3 then '能源局' else NULL end AS tbsj_flag "
+            +",xchcr,CASE WHEN xchcr_flag = 1 then '水利部' WHEN xchcr_flag = 2 then '生态环境部' WHEN xchcr_flag = 3 then '能源局' else NULL end AS xchcr_flag "
+            +",ywjmc,CASE WHEN ywjmc_flag = 1 then '水利部' WHEN ywjmc_flag = 2 then '生态环境部' WHEN ywjmc_flag = 3 then '能源局' else NULL end AS ywjmc_flag "
+            +",dzzs,CASE WHEN dzzs_flag = 1 then '水利部' WHEN dzzs_flag = 2 then '生态环境部' WHEN dzzs_flag = 3 then '能源局' else NULL end AS dzzs_flag "
+            +",tcny,CASE WHEN tcny_flag = 1 then '水利部' WHEN tcny_flag = 2 then '生态环境部' WHEN tcny_flag = 3 then '能源局' else NULL end AS tcny_flag "
+            +",zhltqk,CASE WHEN zhltqk_flag = 1 then '水利部' WHEN zhltqk_flag = 2 then '生态环境部' WHEN zhltqk_flag = 3 then '能源局' else NULL end AS zhltqk_flag "
+            +",zrk,CASE WHEN zrk_flag = 1 then '水利部' WHEN zrk_flag = 2 then '生态环境部' WHEN zrk_flag = 3 then '能源局' else NULL end AS zrk_flag "
+            +",bg,CASE WHEN bg_flag = 1 then '水利部' WHEN bg_flag = 2 then '生态环境部' WHEN bg_flag = 3 then '能源局' else NULL end AS bg_flag "
+            +",swdj,CASE WHEN swdj_flag = 1 then '水利部' WHEN swdj_flag = 2 then '生态环境部' WHEN swdj_flag = 3 then '能源局' else NULL end AS swdj_flag "
+            +",ghspjwh,CASE WHEN ghspjwh_flag = 1 then '水利部' WHEN ghspjwh_flag = 2 then '生态环境部' WHEN ghspjwh_flag = 3 then '能源局' else NULL end AS ghspjwh_flag "
+            +",jsfaspbmjwh,CASE WHEN jsfaspbmjwh_flag = 1 then '水利部' WHEN jsfaspbmjwh_flag = 2 then '生态环境部' WHEN jsfaspbmjwh_flag = 3 then '能源局' else NULL end AS jsfaspbmjwh_flag "
+            +",pzkmbmjwh,CASE WHEN pzkmbmjwh_flag = 1 then '水利部' WHEN pzkmbmjwh_flag = 2 then '生态环境部' WHEN pzkmbmjwh_flag = 3 then '能源局' else NULL end AS pzkmbmjwh_flag "
+            +",hpjhbyswh,CASE WHEN hpjhbyswh_flag = 1 then '水利部' WHEN hpjhbyswh_flag = 2 then '生态环境部' WHEN hpjhbyswh_flag = 3 then '能源局' else NULL end AS hpjhbyswh_flag "
+            +",sbjwh,CASE WHEN sbjwh_flag = 1 then '水利部' WHEN sbjwh_flag = 2 then '生态环境部' WHEN sbjwh_flag = 3 then '能源局' else NULL end AS sbjwh_flag "
+            +",ydpcjwh,CASE WHEN ydpcjwh_flag = 1 then '水利部' WHEN ydpcjwh_flag = 2 then '生态环境部' WHEN ydpcjwh_flag = 3 then '能源局' else NULL end AS ydpcjwh_flag "
+            +",sfjddzzhwxx,CASE WHEN sfjddzzhwxx_flag = 1 then '水利部' WHEN sfjddzzhwxx_flag = 2 then '生态环境部' WHEN sfjddzzhwxx_flag = 3 then '能源局' else NULL end AS sfjddzzhwxx_flag "
+            +",ysbmjwh,CASE WHEN ysbmjwh_flag = 1 then '水利部' WHEN ysbmjwh_flag = 2 then '生态环境部' WHEN ysbmjwh_flag = 3 then '能源局' else NULL end AS ysbmjwh_flag "
+            +",xmfrmc,CASE WHEN xmfrmc_flag = 1 then '水利部' WHEN xmfrmc_flag = 2 then '生态环境部' WHEN xmfrmc_flag = 3 then '能源局' else NULL end AS xmfrmc_flag "
+            +",zytzr,CASE WHEN zytzr_flag = 1 then '水利部' WHEN zytzr_flag = 2 then '生态环境部' WHEN zytzr_flag = 3 then '能源局' else NULL end AS zytzr_flag "
+            +",lxdh,CASE WHEN lxdh_flag = 1 then '水利部' WHEN lxdh_flag = 2 then '生态环境部' WHEN lxdh_flag = 3 then '能源局' else NULL end AS lxdh_flag "
+            +",bz,CASE WHEN bz_flag = 1 then '水利部' WHEN bz_flag = 2 then '生态环境部' WHEN bz_flag = 3 then '能源局' else NULL end AS bz_flag "
+            +"FROM  "
+            +"hps_info_sum1  "
+            +"LEFT JOIN sys_dict A ON bwqk = A.nm AND A.listnm_sys_dict_cate = 'bwqk' "
+            +"LEFT JOIN sys_dict AA ON kffs = AA.nm AND AA.listnm_sys_dict_cate = 'kffs' "
+            +"LEFT JOIN sys_dict AAA ON jszt = AAA.nm AND AAA.listnm_sys_dict_cate = 'jszt' "
+            +"LEFT JOIN sys_dict AAAA ON jszt = AAAA.nm AND AAAA.listnm_sys_dict_cate = 'xmszly' "
+            +" WHERE sheng='新疆维吾尔自治区' ORDER BY sheng,shi,xian,xmmc_a"
+
+        daochu(fileName,tabTitle,sqlTitle,sql)
+    }
+	update = function() {
+        var basePath = '<%=basePath %>'
+		var sql = 'SELECT * FROM hps_info_sum WHERE xmmc_a = \'九井岗\' ORDER BY id';
+        $.ajax({
+            url : basePath + "jcxx/jcxx!updateSum.action",
+            type : "post",
+            dateType : "JSON",
+            async : false,
+            traditional:true,
+            data : {"sql": sql},
+            success : function(response){
+                alert(response);
+            }
+        })
+	}
+
+    function daochu(fileName,tabTitle,sqlTitle,sql){
+        var basePath = '<%=basePath %>'
+        $.ajax({
+            url : basePath + "sjjs/sjjs!comDetails.action",
+            type : "post",
+            dateType : "JSON",
+            async : false,
+            traditional:true,
+            data : {"uploadBean.tabTitle":tabTitle
+                ,"uploadBean.sqlTitle":sqlTitle
+                ,"uploadBean.sql":sql
+                ,"uploadBean.fileName":fileName
+            },
+            success : function(response){
+                window.location.href=basePath + "sjjs/sjjs!comUpload.action"
+            }
+        })
+    }
+
+	function loginCheck(){
+		//validate();
+	 var json={
+			 "mSysUser.userName":$("*[name='mSysUser.userName']").val(),
+	 		"mSysUser.userPwd":$("*[name='mSysUser.userPwd']").val()
+	 }
+	 var url="<%=basePath%>login/system!check.do" ;
+		$.ajax({
+			type:"POST",
+			dataType:"JSON",
+			data:json,
+			url:url,
+			success:function(res){
+				if(res.mark=="error"){//登录失败
+					$("#login_error_font").show();// 提示
+					$("#login_success_font").hide()
+				}else{
+					$("#login_error_font").hide();//隐藏
+					$("#login_success_font").show();// 提示
+					document.getElementById("login_form").submit();//如果正确,提交
+				}
+				
+			}
+		})
+	}
+
+	</script>
+	<!-- 引入jquery.js样式 -->
+	 <!-- 解决ie -->
+		<!--  [if lt IE 9]> -->
+		    <script src="<%=basePath %>common/zui/lib/ieonly/html5shiv.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/respond.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/excanvas.js"></script>
+
+    <!-- 引入zui.js样式 -->
+	<script src="<%=basePath %>common/zui/js/zui.lite.min.js"></script>
+	</html>	

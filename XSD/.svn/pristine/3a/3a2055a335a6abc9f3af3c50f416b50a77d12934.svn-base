@@ -1,0 +1,34 @@
+#header_div{
+	margin-left:0px;/**左边空白宽度*/
+	height:200px;/**header高度*/
+	background:url(../images/ban_bg.png);
+	filter:"progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale')";
+    -moz-background-size:100% 100%;
+    background-size:100% 100%;
+}
+#header_title{
+	float:left;
+	font-size:26px;/**标题字体大小*/
+	color:#ffffff;
+	height:100%;   
+  	line-height:100px;/**这个行高与header_div的高度一样*/   
+  	overflow:hidden;   
+}
+#header_title img{
+	margin-right:10px;
+}
+@media(min-width:1024px){ 
+	#header_title{
+		width:380px;/**header_title宽度百分比*/
+	}
+}
+@media(min-width:1360px){ 
+	#header_title{
+		width:650px;/**header_title宽度百分比*/
+	}
+}
+@media(min-width:1920px){ 
+	#header_title{
+		width:650px;/**header_title宽度百分比*/
+	}
+}

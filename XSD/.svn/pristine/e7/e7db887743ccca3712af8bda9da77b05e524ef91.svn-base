@@ -1,0 +1,516 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+ <%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>水资源管理系统</title>
+<%-- 		 <!-- 引入头部icon图标 -->	
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/favicon.ico">
+		 <!-- 引入icon图标 -->
+		 <link rel="stylesheet" href="<%=basePath%>common/zui/fonts/iconfont.css">
+		 <link rel="stylesheet" href="<%=basePath%>common/js/ztree/css/zTreeStyle/zTreeStyle.css">
+		  <!-- 引入本页面的样式 -->
+		  <link rel="stylesheet" href="<%=basePath%>common/layui/css/layui.css">
+		 <!-- 引入本页面的样式 --> --%>
+		 <link rel="stylesheet" href="<%=basePath%>business/huanbaotongji/huanbaotongji.css">
+	</head>
+<body>	
+	<div class="container-fluid" style="padding-top:6px;">
+	
+	    <div class="row">
+	     	<div class="col-md-2" style="padding-right:6px;">
+		    	<ul id="tree2" class="ztree" style="overflow:auto;border:1px solid #dddddd; border-radius: 6px;"></ul>
+			</div><font style="text-align: right;color: #568fc3;" >（备注：环保统计，只统计在建和运行）</font>
+			<div class="col-md-10  list-group-one list-group-two">
+	              <div class="col-md-6" style="height:300px;padding-left:0px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>生态环境流量泄放设施统计</i><button id="sthj_id" class="btn btn-primary table-icon"  type="button">切换表格</button> <button style="margin-right:5px;" id="sthj_dc_id" class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(1)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj1" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px; ">
+						  </li>
+						    <li class="list-group-item desplay" id="mainonedes_sthj" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header layui-table-body layui-table-main" >
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">有生态流量泄放设施总装机容量（万千瓦）/数量</th>
+									      <th width="20%">无生态流量泄放设施总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知生态流量泄放设施总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								  <tbody id ="sthj_sj" >
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "sthj_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                <div class="col-md-6" style="height:300px;padding-left:0px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>生态流量监控措施统计<button id="stll_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="stll_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(2)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj2" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px; ">
+						  </li>
+						   <li class="list-group-item desplay" id="mainonedes_stll" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header layui-table-body layui-table-main">
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th  width="20%">总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">有生态流量监控总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">无生态流量监控总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">未知生态流量监控总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								  	  <tbody id ="stll_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "stll_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                      <div class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>过鱼设施统计<button id="gycs_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="gycs_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(3)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj3" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						   <li class="list-group-item desplay" id="mainonedes_gycs" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header layui-table-body layui-table-main" >
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">有过鱼设施小水电总装机容量（万千瓦）/数量</th>
+									      <th width="20%">无过鱼设施总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知过鱼设施总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								  	  <tbody id ="gycs_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "gycs_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                      <div class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>增殖放流措施统计<button id="zzfl_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="zzfl_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(4)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj4" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						   <li class="list-group-item desplay" id="mainonedes_zzfl" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header layui-table-body layui-table-main" >
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th  width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">有增殖放流措施总装机容量（万千瓦）/数量</th>
+									      <th width="20%">无增殖放流措施总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知增殖放流措施总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								  	  <tbody id ="zzfl_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "zzfl_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+			               <div  id ="kzxmhpqk_div"class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>开展项目环评情况统计<button id="hpqk_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="hpqk_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(5)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hpqk" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						    <li class="list-group-item desplay" id="mainonedes_hpqk" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>年份</th>
+									      <th>总装机容量（万千瓦）/数量</th>
+									      <th>开展项目小水电总装机容量（万千瓦）/数量</th>
+									      <th>未开展项目小水电总装机容量（万千瓦）/数量</th>
+									      <th>未知开展项目小水电总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:176px;">
+							  <table class="layui-table classtabletwo" lay-size="" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id ="hpqk_sj">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <tbody id = "hpqk_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                 <div  id="show_table2" class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;display:none;">
+	                 		<table class="layui-table classtableone" lay-size="" style="text-align:center;">
+	                 		<thead  >
+	                 			<tr>
+	                 				<th colspan="3"> 小水电环境影响评价相关的法律法规或政策发布日期一览表</th>
+	                 			</tr>
+	                 		</thead>
+	                 		<tbody>
+	                 		<tr> <td>序号</td>	<td>法律法规或政策</td>	<td>发布或实施日期</td>	</tr>
+	                 		<tr><td>1</td>	<td>《建设项目环境保护管理办法》</td><td>1986 / 3 / 26</td>	</tr>
+	                 			<tr><td>2</td>	<td>《中华人民共和国环境保护法》</td><td>1989 / 12 / 26</td>	</tr>
+	                 			<tr><td>3</td>	<td>《建设项目环境保护管理办法》</td><td>1998 / 11 / 29</td>	</tr>
+	                 				<tr><td>4</td>	<td>《中华人民共和国环境影响评价法》</td><td>2003 / 9 / 1</td>	</tr>
+	                 			<tr><td>5</td>	<td>《关于有序开发小水电切实保护生态环境的通知》（环发[2006]93号）</td><td>2006 / 6 / 18</td>	</tr>
+	                 		</tbody>
+	                 		</table>
+	              </div>
+	                   <div id="tcq_div" class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>投产前完成环评审批情况统计<button id="tcqhpqk_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="tcqhpqk_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(6)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="huanpingduibisecond" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						   <li class="list-group-item desplay" id="mainonedes_tcqhpqk" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								    <col width="200">
+								    <col width="200">
+								    <col width="200">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th>年份</th>
+									      <th>总装机容量（万千瓦）/数量</th>
+									      <th>投产前完成环评审批小水电总装机容量（万千瓦）/数量</th>
+									      <th>投产前未完成环评审批小水电总装机容量（万千瓦）/数量</th>
+									        <th>未知完成环评审批小水电总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								    
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:160px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+								  <tbody id ="tcqhpqk_sj">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "tcqhpqk_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	              <div  id="show_table1" class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;display:none;">
+	                 		<table class="layui-table classtableone" lay-size="" style="text-align:center;">
+	                 		<thead>
+	                 			<tr>
+	                 				<th colspan="3"> 小水电环境影响评价相关的法律法规或政策发布日期一览表</th>
+	                 			</tr>
+	                 		</thead>
+	                 		<tbody>
+	                 		<tr> <td>序号</td>	<td>法律法规或政策</td>	<td>发布或实施日期</td>	</tr>
+	                 		<tr><td>1</td>	<td>《建设项目环境保护管理办法》</td><td>1986 / 3 / 26</td>	</tr>
+	                 			<tr><td>2</td>	<td>《中华人民共和国环境保护法》</td><td>1989 / 12 / 26</td>	</tr>
+	                 			<tr><td>3</td>	<td>《建设项目环境保护管理办法》</td><td>1998 / 11 / 29</td>	</tr>
+	                 				<tr><td>4</td>	<td>《中华人民共和国环境影响评价法》</td><td>2003 / 9 / 1</td>	</tr>
+	                 			<tr><td>5</td>	<td>《关于有序开发小水电切实保护生态环境的通知》（环发[2006]93号）</td><td>2006 / 6 / 18</td>	</tr>
+	                 		</tbody>
+	                 		</table>
+	              </div>
+	                          <div class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>是否符合规划<button id="gh_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="gh_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(7)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj5" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						  <li class="list-group-item desplay" id="mainonedes_gh" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header  layui-table-body layui-table-main">
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th  width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">是符合规划总装机容量（万千瓦）/数量</th>
+									      <th width="20%">否符合规划总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知符合规划总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								   <tbody id ="gh_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "gh_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                          <div class="col-md-6" style="height:300px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>是否符合规划环评<button id="ghhp_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="ghhp_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(8)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj6" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						    <li class="list-group-item desplay" id="mainonedes_ghhp" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header  layui-table-body layui-table-main" >
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th width="5%">序号</th>
+									      <th width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">是符合规划环评总装机容量（万千瓦）/数量</th>
+									      <th width="20%">否符合规划环评总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知符合规环评划总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								  <tbody id ="ghhp_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "ghhp_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                 <div class="col-md-6" style="height:290px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one" >
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>是否通过竣工环保验收<button id="jgys_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="jgys_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(9)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj7" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						    <li class="list-group-item desplay" id="mainonedes_jgys" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header  layui-table-body layui-table-main">
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th width="5%">序号</th>
+									      <th  width="15%">地区名称</th>
+									      <th width="20%">总装机容量（万千瓦）/数量</th>
+									      <th width="20%">是符合竣工验收总装机容量（万千瓦）/数量</th>
+									      <th width="20%">否符合竣工验收总装机容量（万千瓦）/数量</th>
+									      <th width="20%">未知符竣工验收划总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								    <tbody id ="jgys_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "jgys_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	                <div class="col-md-6" style="height:290px;padding-left:0px;margin-top:-10px;">
+	                   <ul class="list-group" style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>是否存在坝下脱水干涸情况<button id="bxtsgh_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="bxtsgh_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(10)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="hbtj8" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						     <li class="list-group-item desplay" id="mainonedes_bxtsgh" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header  layui-table-body layui-table-main">
+						   		<table class="layui-table classtableone" lay-size="sm" style="text-align:center;">
+								  <thead>
+								    <tr>
+								          <th  width="5%">序号</th>
+									      <th  width="15%">地区名称</th>
+									      <th  width="20%">总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">是存在坝下脱水干涸总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">否存在坝下脱水干涸总装机容量（万千瓦）/数量</th>
+									      <th  width="20%">未知存在坝下脱水干涸总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								  </thead>
+								    <tbody id ="bxtsgh_sj">
+								  </tbody>
+							  </table>
+							  </div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+								  <tbody id = "bxtsgh_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+	               <div class="col-md-12 list-group-one"  style="height:250px;padding-left:0px;">
+	                 <ul class="list-group " style="position:relative">
+						  <li class="list-group-item" id="item-one">
+						   		<i class="icon icon-safari" style="margin-right:10px"></i><span class="jc_title"></span>涉及自然保护区情况统计<button id="sjzrbhqk_id" class="btn btn-primary table-icon"  type="button">切换表格</button><button id="sjzrbhqk_dc_id"  style="margin-right:5px;"  class="btn btn-primary table-icon desplay"  type="button" onclick = "export_sthj(11)">导出表格</button>
+						  </li>
+						  <li class="list-group-item" id="huanpingduibithree" style="height:250px;border-bottom-left-radius: 5px;border-bottom-right-radius: 5px;">
+						  </li>
+						    <li class="list-group-item desplay" id="mainonedes_sjzrbhqk" style="padding:0px;position:absolute;left:0px;top:32px;width:100%;z-index:333;height:250px;">
+					   		<div class="layui-table-header">
+						   		<table class="layui-table classtableone" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								        <col width="150">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col>
+								  </colgroup>
+								  <thead>
+								    <tr>
+								          <th>序号</th>
+									      <th style='display:inline-block;width: 140px;'>地区名称</th>
+									      <th>总装机容量（万千瓦）/数量</th>
+									      <th>涉及自然保护区总装机容量（万千瓦）/数量</th>
+									      <th>不涉及自然保护区总装机容量（万千瓦）/数量</th>
+									       <th>未知涉及总装机容量（万千瓦）/数量</th>
+									      <th>涉及核心区小水电总装机容量（万千瓦）/数量</th>
+									      <th>涉及缓冲区小水电总装机容量（万千瓦）/数量</th>
+									      <th>涉及试验区小水电总装机容量（万千瓦）/数量</th>
+								    </tr> 
+								    
+								  </thead>
+							  </table>
+							  </div>
+							  <div class="layui-table-body layui-table-main" style="height:176px;">
+							  <table class="layui-table classtabletwo" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								     <col width="150">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col>
+								  </colgroup>
+								  <tbody id ="sjzrbhqk_sj">
+								  </tbody>
+								</table>
+							</div>
+							  <table class="layui-table classtablethird" lay-size="sm" style="margin:0px;">
+					  				<colgroup>
+					  				<col width="80">
+								    <col width="80">
+								    <col width="150">
+								        <col width="150">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col width="230">
+								    <col>
+								  </colgroup>
+								  <tbody id = "sjzrbhqk_zj">
+								  </tbody>
+								</table>
+					  </li>
+					 </ul>
+	              </div>
+			</div>
+	    </div>  
+	</div>
+</body>
+<!-- 不要改变以下引用顺序 -->
+<%-- <%@include file="edit.inc"%>
+<%@include file="flag.jsp"%> --%>
+<!-- 引入jquery.js样式 -->
+	 <!-- 解决ie -->
+		<!--  [if lt IE 9]> -->
+		 <%--    <script src="<%=basePath %>common/zui/lib/ieonly/html5shiv.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/respond.js"></script>
+		    <script src="<%=basePath %>common/zui/lib/ieonly/excanvas.js"></script>
+		<!--   <![endif] -->
+	<script src="<%=basePath%>common/layui/layui.all.js"></script>
+	<script src="<%=basePath %>common/zui/lib/jquery/jquery.js"></script>
+	<script src="<%=basePath%>common/js/ztree/js/jquery.ztree.all.js"></script>
+    <!-- 引入zui.js样式 -->
+	<script src="<%=basePath %>common/eCharts/echarts.min.js"></script>
+	<script src="<%=basePath %>common/zui/js/zui.lite.min.js"></script>
+	<script src="<%=basePath %>common/zui/js/zui.js"></script> --%>
+    <script src="../business/huanbaotongji/list.js"></script>

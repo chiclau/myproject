@@ -1,0 +1,279 @@
+@CHARSET "UTF-8";
+/* 抵消两侧padding值样式 */
+.list-group-one{
+	padding-left:0px!important;
+	
+}
+.list-group-two{
+	padding-right:0px!important;
+}
+#item-one{
+       color:white;
+      
+       border-top-left-radius:5px;
+	   border-top-right-radius:5px; 
+       background: #568fc3;
+      }
+#partant{
+	 text-indent:23px;
+	height:40px;    
+	background: #568fc3;
+}
+#partantsecond{
+	height:30px; 
+	text-indent:30px;
+	line-height:30px;   
+	background: #79a6cf;
+
+}
+.layui-nav-bar{
+	display:none;
+}
+#partantthird{
+	height:30px; 
+	text-align:center;
+	line-height:30px;     
+	background: #75c979;
+}
+.layui-nav-tree{
+	WIDTH:100%;
+}
+ul.ztree{
+	margin-top:0px;
+}
+/* .layui-nav-itemed>.layui-nav-child{
+	height:300px;
+	overflow:auto;
+	overflow-x:hidden;
+	background:white!important;
+} */
+      .col-md-6{
+       height:340px;
+      }
+      .col-md-6:nth-child(2), .col-md-6:nth-child(4){
+       padding-left:0px;
+      }
+      #item-one{
+       color:white;
+       border-top-left-radius:5px;
+	   border-top-right-radius:5px; 
+       background: #568fc3;
+      }
+      .layui-layer-molv .layui-layer-title{
+       background:#0e60aa;
+      }
+      .layui-layer-setwin .layui-layer-close1{
+       color:white;
+      }
+     .table-icon{
+       float:right;
+       padding:0px 8px;
+       border-radius:5px;
+     }
+   .desplay{
+       display:none;
+     }
+     .layui-table-body{
+      height:226px;
+     }
+     .classtableone thead tr th{
+       text-align:center;
+        border:none;
+       
+     }
+     .classtabletwo tbody tr td{
+       text-align:center;
+     }
+      .classtablethird tbody tr td{
+       text-align:center;
+       border:none;
+       background: #e6e6e6;
+      
+     }
+      #mainonedes_sthj  thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_sthj  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_sthj  thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_sthj  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_stll  thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_stll  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_stll thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_stll  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_gycs thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_gycs  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_gycs thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_gycs  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_zzfl thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_zzfl  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_zzfl thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_zzfl  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_gh thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_gh  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_gh thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_gh  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_ghhp thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_ghhp  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_ghhp thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_ghhp  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_jgys thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_jgys  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_jgys thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_jgys  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_bxtsgh thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_bxtsgh  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_bxtsgh thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_bxtsgh  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_hpqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_hpqk  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_hpqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_hpqk  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_tcqhpqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_tcqhpqk .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_tcqhpqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_tcqhpqk  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
+      #mainonedes_sjzrbhqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+    
+     #mainonedes_sjzrbhqk .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+       white-space:nowrap;
+     }
+        #mainonedes_sjzrbhqk thead th{
+       padding: 3px 0px;
+       white-space:normal;
+     }
+     #mainonedes_sjzrbhqk  .layui-table[lay-size=sm] td, .layui-table[lay-size=sm] th{
+       padding: 3px 0px;
+        white-space:nowrap;
+     }
