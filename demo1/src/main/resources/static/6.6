@@ -1,0 +1,58 @@
+1.项目中用了什么技术，解决了什么问题，亮点
+2.行内元素、块级元素、有什么区别
+行内元素只占据内容撑起来的区域，而块级元素占据了一整行的区域
+行内元素不会以新的一行开始，而块级元素会新起一行
+块级元素可以设置 width, height属性,  行级元素设置width,height无效
+块级元素可以包含行内元素和块级元素。行内元素不能包含块级元素
+块级元素可以设置margin 和 padding
+
+3.html.xhtml和xml的区别
+HTML：超文本标记语言
+XML：可扩展标记语言
+
+
+XHTML 要求正确嵌套
+XHTML 所有元素必须关闭
+XHTML 区分大小写
+XHTML 属性值要用双引号
+XHTML 用 id 属性代替 name 属性
+XHTML 特殊字符的处理
+
+Html使用固有的标记；而xml没有固有的标记。
+Html标签是预定义的；XML标签是免费的、自定义的、可扩展的。
+
+
+4.斯奈克斯布局
+5.选择器的优先级 :  css : 1. 内联样式（Inline styles）通过在HTML元素的style属性中直接定义样式
+				2. ID选择器（ID selectors）  #id
+				3. 类选择器（Class selectors）.class
+				4. 属性选择器（Attribute selectors）：input[type="text"]
+				5. 伪类选择器（Pseudo-class selectors）： a:hover  通过元素的特殊状态选择。
+				6. 标签选择器（Element selectors）：h1 通过元素的标签名进行选择
+6.js基础类型和复杂类型
+基础数据类型： string、number、boolean、undefined、null
+复杂数据类型：Object 、Array、Date
+
+7.v-show和v-if的区别
+控制手段：v-show隐藏则是为该元素添加css--display:none，dom元素依旧还在。v-if显示隐藏是将dom元素整个添加或删除
+编译过程：v-if切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件；v-show只是简单的基于css切换
+如果需要非常频繁地切换，则使用 v-show 较好
+如果在运行时条件很少改变，则使用 v-if 较好
+
+8.闭包的理解，最常见的形式
+闭包是指有权访问另一个函数作用域中的变量的函数
+
+9.闭包的内存泄漏，如何解决
+
+
+10.vue熟悉哪些组件库
+
+
+11.vue的生命周期
+12.vue组件之间的通讯方式
+13.mvvm模式理解
+14.jvm内存模型
+15.java方法里面new一个对象放在堆还是栈？
+16.java类的生命周期
+17.内存溢出的几种原因
+18.响应式布局
